@@ -107,6 +107,15 @@ function CheckoutInner() {
   const [selectedBillingId, setSelectedBillingId] = useState("");
   const [selectedShippingId, setSelectedShippingId] = useState("");
 
+  const selectedBillingProfile = useMemo(
+    () => savedBillingProfiles.find((p) => String(p.id) === String(selectedBillingId)),
+    [savedBillingProfiles, selectedBillingId]
+  );
+  const selectedShippingAddress = useMemo(
+    () => savedAddresses.find((a) => String(a.id) === String(selectedShippingId)),
+    [savedAddresses, selectedShippingId]
+  );
+
   // Stabilizare afișaj TVA (fără flicker „Calcul…”)
   const lastVatAmountRef = useRef(0);
   const lastVatRateRef = useRef(0);
@@ -562,7 +571,7 @@ function CheckoutInner() {
             <form onSubmit={nextFromBilling} className="space-y-5">
               <CardBox title="Informations de facturation">
                 {/* Profil de facturation salvat */}
-                {savedBillingProfiles.length > 0 && (
+                {user && savedBillingProfiles.length > 0 && (
                   <div className="mb-3">
                     <label className="block text-sm mb-1">Profil de facturation enregistré</label>
                     <select
@@ -680,7 +689,7 @@ function CheckoutInner() {
             <form onSubmit={nextFromShipping} className="space-y-5">
               <CardBox title="Adresse de livraison">
                 {/* Adresă salvată */}
-                {savedAddresses.length > 0 && (
+                {user && savedAddresses.length > 0 && (
                   <div className="mb-3">
                     <label className="block text-sm mb-1">Adresse enregistrée</label>
                     <select
@@ -805,11 +814,11 @@ function CheckoutInner() {
         {/* Summary */}
         <div className="bg-gray-50 rounded-xl p-6 h-fit lg:sticky lg:top-10">
           <h3 className="text-lg font-semibold mb-4">Récapitulatif</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Sous-total ({items.length} articles)</span>
-              <span>€{subtotal.toFixed(2)}</span>
-            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Sous-total ({items.length} articles)</span>
+                <span>€{subtotal.toFixed(2)}</span>
+              </div>
             <div className="flex justify-between items-center">
               <span>TVA</span>
               <span>€{tax.toFixed(2)}</span>
@@ -827,6 +836,19 @@ function CheckoutInner() {
               <span>Total TTC</span>
               <span>€{total.toFixed(2)}</span>
             </div>
+            <div className="text-xs text-gray-500 mt-1">
+              TVA: {displayedVat.rate}% ({displayedVat.country}) – {displayedVat.rule || '—'}
+            </div>
+            {selectedBillingProfile && (
+              <div className="text-xs text-gray-500">
+                Profil de facturation: {selectedBillingProfile.firstName || ''} {selectedBillingProfile.lastName || ''}
+              </div>
+            )}
+            {selectedShippingAddress && (
+              <div className="text-xs text-gray-500">
+                Adresse de livraison: {selectedShippingAddress.line1 || selectedShippingAddress.address || ''} {selectedShippingAddress.city ? `• ${selectedShippingAddress.city}` : ''}
+              </div>
+            )}
           </div>
         </div>
       </div>
