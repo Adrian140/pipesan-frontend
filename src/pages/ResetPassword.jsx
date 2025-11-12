@@ -49,6 +49,7 @@ export default function ResetPassword() {
     }
     setStatus(Status.saving);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
+    await supabase.auth.signOut();
     if (error) {
       setStatus(Status.error);
       setMessage('Link invalid sau expirat.');
@@ -56,7 +57,7 @@ export default function ResetPassword() {
     }
     setStatus(Status.success);
     setMessage('Parola a fost schimbată cu succes.');
-    setTimeout(() => navigate('/login'), 2500);
+    setTimeout(() => navigate('/login'), 3000);
   };
 
   return (
