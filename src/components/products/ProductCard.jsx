@@ -110,7 +110,7 @@ export default function ProductCard({ product }) {
         className="block"
         state={{ prefill }}                                 // ⬅️ trimite prefill
       >
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-[5/4] overflow-hidden">
           <img
             src={mainImage}
             alt={p.name}
@@ -169,7 +169,7 @@ export default function ProductCard({ product }) {
           </div>
         </div>
 
-        <div className="p-2 relative space-y-1">
+        <div className="p-1.5 relative space-y-1">
           <p className="text-[10px] text-gray-500 tracking-wide uppercase">SKU: {p.sku || ""}</p>
           <h3 className="text-sm font-semibold text-text-primary leading-tight line-clamp-2">
             {p.name || "Product Name"}
