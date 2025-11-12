@@ -39,6 +39,7 @@ const T = {
     sortLabel: 'Trier par',
     sort: {
       name: 'Nom A–Z',
+      category: 'Catégorie',
       priceLow: 'Prix : croissant',
       priceHigh: 'Prix : décroissant',
       rating: 'Mieux noté',
@@ -72,6 +73,7 @@ const T = {
     sortLabel: 'Sort by',
     sort: {
       name: 'Name A–Z',
+      category: 'Category',
       priceLow: 'Price: Low to High',
       priceHigh: 'Price: High to Low',
       rating: 'Highest Rated',
@@ -104,6 +106,7 @@ const T = {
     allCategories: 'Tutte le categorie',
     sortLabel: 'Ordina per',
     sort: {
+      category: 'Categoria',
       name: 'Nome A–Z',
       priceLow: 'Prezzo: dal più basso',
       priceHigh: 'Prezzo: dal più alto',
@@ -137,6 +140,7 @@ const T = {
     allCategories: 'Alle Kategorien',
     sortLabel: 'Sortieren nach',
     sort: {
+      category: 'Kategorie',
       name: 'Name A–Z',
       priceLow: 'Preis: aufsteigend',
       priceHigh: 'Preis: absteigend',
@@ -170,6 +174,7 @@ const T = {
     allCategories: 'Todas las categorías',
     sortLabel: 'Ordenar por',
     sort: {
+      category: 'Categoría',
       name: 'Nombre A–Z',
       priceLow: 'Precio: de menor a mayor',
       priceHigh: 'Precio: de mayor a menor',
@@ -203,6 +208,7 @@ const T = {
     allCategories: 'Toate categoriile',
     sortLabel: 'Sortează după',
     sort: {
+      category: 'Categorie',
       name: 'Nume A–Z',
       priceLow: 'Preț: crescător',
       priceHigh: 'Preț: descrescător',
@@ -252,12 +258,13 @@ const [filters, setFilters] = useState({
   category: ALL,
   priceRange: [0, 1000],
   inStock: false,
-  sortBy: 'name',
+  sortBy: 'category',
 });
 const [showFilters, setShowFilters] = useState(false);
 
   const sortOptions = useMemo(
     () => [
+      { value: 'category', label: t.sort.category },
       { value: 'name', label: t.sort.name },
       { value: 'price-low', label: t.sort.priceLow },
       { value: 'price-high', label: t.sort.priceHigh },
@@ -376,6 +383,9 @@ const sortedProducts = useMemo(() => {
       break;
     case 'newest':
       arr.sort((a, b) => new Date(b.created_at ?? 0) - new Date(a.created_at ?? 0));
+      break;
+    case 'category':
+      arr.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
       break;
     default:
       arr.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
