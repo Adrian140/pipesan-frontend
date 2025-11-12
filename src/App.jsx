@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { VATProvider } from './contexts/VATContext';
 import OrderDetail from "./components/admin/tabs/OrderDetail";
+import ResetPassword from './pages/ResetPassword';
 // Layout
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -96,6 +97,7 @@ function AppContent() {
           <Route path="/email-verified" element={<EmailVerificationSuccess />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/admin/orders/:id" element={<RequireAdmin><OrderDetail /></RequireAdmin>} />
