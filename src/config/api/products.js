@@ -20,6 +20,21 @@ const writeCache = (key, val) => {
   } catch {}
 };
 
+const TABLE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let tableCheckCache = { ok: true, ts: 0 };
+
+const ensureTablesExist = async () => {
+  const now = Date.now();
+  if (tableCheckCache.ts && now - tableCheckCache.ts < TABLE_TTL_MS) {
+    return tableCheckCache.ok;
+  }
+
+  const checks = await checkTablesExist();
+  const ok = Object.values(checks).every(Boolean);
+  tableCheckCache = { ok, ts: now };
+  return ok;
+};
+
 export const productsApi = {
   /**
    * Get all products.
@@ -48,9 +63,9 @@ export const productsApi = {
     let retries = 2;
     while (retries >= 0) {
       try {
-        const tablesCheck = await checkTablesExist();
-        if (!tablesCheck.products) {
-          throw new Error('Products table does not exist. Please run database migrations.');
+        const tablesReady = await ensureTablesExist();
+        if (!tablesReady) {
+          throw new Error('Products table does not exist or is unavailable. Please run database migrations.');
         }
 
         // Choose a light projection for listings if requested
