@@ -19,6 +19,7 @@ const resetTranslations = {
     mismatch: 'Les mots de passe ne correspondent pas.',
     invalid: 'Lien invalide ou expiré.',
     success: 'Le mot de passe a été mis à jour.',
+    reuse: 'Veuillez choisir un mot de passe différent de l’ancien.',
     submit: 'Modifier le mot de passe',
     loading: 'En cours...',
   },
@@ -30,6 +31,7 @@ const resetTranslations = {
     mismatch: 'Passwords do not match.',
     invalid: 'Invalid or expired link.',
     success: 'Your password has been updated.',
+    reuse: 'Please choose a password that is different from the current one.',
     submit: 'Update password',
     loading: 'Saving...',
   },
@@ -41,6 +43,7 @@ const resetTranslations = {
     mismatch: 'Le password non corrispondono.',
     invalid: 'Link non valido o scaduto.',
     success: 'La password è stata aggiornata.',
+    reuse: 'Scegli una password diversa da quella attuale.',
     submit: 'Aggiorna password',
     loading: 'Salvataggio...',
   },
@@ -52,6 +55,7 @@ const resetTranslations = {
     mismatch: 'Passwörter stimmen nicht überein.',
     invalid: 'Ungültiger oder abgelaufener Link.',
     success: 'Das Passwort wurde aktualisiert.',
+    reuse: 'Bitte wähle ein anderes Passwort als das aktuelle.',
     submit: 'Passwort aktualisieren',
     loading: 'Speichern...',
   },
@@ -63,6 +67,7 @@ const resetTranslations = {
     mismatch: 'Las contraseñas no coinciden.',
     invalid: 'Enlace inválido o caducado.',
     success: 'Tu contraseña se ha actualizado.',
+    reuse: 'Elige una contraseña distinta de la actual.',
     submit: 'Actualizar contraseña',
     loading: 'Guardando...',
   },
@@ -74,6 +79,7 @@ const resetTranslations = {
     mismatch: 'Parolele nu coincid.',
     invalid: 'Link invalid sau expirat.',
     success: 'Parola a fost actualizată.',
+    reuse: 'Te rugăm să alegi o parolă diferită de cea actuală.',
     submit: 'Actualizează parola',
     loading: 'Se încarcă...',
   },
@@ -90,40 +96,113 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState(Status.idle);
   const [message, setMessage] = useState('');
+  const [ready, setReady] = useState(false);
 
-  const token = useMemo(
-    () => new URLSearchParams(location.search).get('access_token'),
-    [location.search]
-  );
+  const recoveryParams = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const hashParams = new URLSearchParams(
+      location.hash.startsWith('#') ? location.hash.slice(1) : location.hash
+    );
+
+    return {
+      accessToken: hashParams.get('access_token') || searchParams.get('access_token'),
+      code: searchParams.get('code'),
+    };
+  }, [location.search, location.hash]);
 
   useEffect(() => {
-    if (!token) {
+    if (typeof window === 'undefined') return;
+
+    let isCancelled = false;
+
+    const hydrateSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session) {
+          if (!isCancelled) {
+            setStatus(Status.idle);
+            setMessage('');
+            setReady(true);
+          }
+          return;
+        }
+
+        if (recoveryParams.code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          if (error) throw error;
+        } else if (recoveryParams.accessToken) {
+          const { error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+          if (error) throw error;
+        } else {
+          throw new Error('No recovery params');
+        }
+
+        if (!isCancelled) {
+          setStatus(Status.idle);
+          setMessage('');
+          setReady(true);
+        }
+      } catch (err) {
+        console.error('Failed to hydrate Supabase session from URL:', err);
+        if (!isCancelled) {
+          setStatus(Status.error);
+          setMessage(text.invalid);
+          setReady(true);
+        }
+      }
+    };
+
+    hydrateSession();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [recoveryParams.accessToken, recoveryParams.code, text.invalid, location.key]);
+
+  const isSameAsCurrentPassword = async (password) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user?.email) return false;
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password,
+      });
+
+      return !error;
+    } catch (err) {
+      console.warn('Could not verify password reuse:', err);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!ready) {
       setStatus(Status.error);
       setMessage(text.invalid);
       return;
     }
-    supabase.auth
-      .getSessionFromUrl({ storeSession: true })
-      .then(({ error }) => {
-        if (error) {
-          setStatus(Status.error);
-          setMessage(text.invalid);
-        }
-      })
-      .catch(() => {
-        setStatus(Status.error);
-        setMessage(text.invalid);
-      });
-  }, [token, text.invalid]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
     if (!newPassword || newPassword !== confirmPassword) {
       setStatus(Status.error);
       setMessage(text.mismatch);
       return;
     }
+
     setStatus(Status.saving);
+
+    const reuseDetected = await isSameAsCurrentPassword(newPassword);
+    if (reuseDetected) {
+      setStatus(Status.error);
+      setMessage(text.reuse);
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       setStatus(Status.error);
@@ -176,7 +255,7 @@ export default function ResetPassword() {
             </div>
             <button
               type="submit"
-              disabled={status === Status.saving}
+              disabled={status === Status.saving || !ready}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
             >
               {status === Status.saving ? text.loading : text.submit}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { apiClient } from '../config/api';
 import { supabase } from '../config/supabase';
@@ -34,6 +34,7 @@ const CartProviderComponent = ({ children }) => {
   const [addingItems, setAddingItems] = useState(new Set());
   const [initialized, setInitialized] = useState(false);
   const { user } = useAuth();
+  const syncedAuthIdRef = useRef(null);
 
   // ✅ FIXED: Initialize cart when provider mounts
   useEffect(() => {
@@ -66,23 +67,36 @@ const CartProviderComponent = ({ children }) => {
     if (!user || !Array.isArray(localItems) || localItems.length === 0) return;
     
     try {
-      console.log('🔄 Syncing guest cart to database:', localItems.length, 'items');
+      console.log('🔄 Reconciling guest cart with database:', localItems.length, 'items');
       
-      // Clear existing cart to avoid conflicts
-      await apiClient.cart.clearCart();
-      
-      // Add each item individually to handle duplicates correctly
+      const remoteItems = await apiClient.cart.getItems();
+      const remoteMap = new Map(
+        remoteItems.map((item) => [makeLocalItemId(item.productId, item.variant?.id), item])
+      );
+
       for (const item of localItems) {
-        await apiClient.cart.addItem(
-          item.productId,
-          item.variant?.id || null,
-          item.quantity
-        );
+        const key = makeLocalItemId(item.productId, item.variant?.id);
+        const remoteItem = remoteMap.get(key);
+        const targetQty = Math.max(1, Number(item.quantity) || 1);
+
+        if (remoteItem) {
+          const currentQty = Math.max(1, Number(remoteItem.quantity) || 1);
+          if (currentQty !== targetQty) {
+            await apiClient.cart.updateQuantity(remoteItem.id, targetQty);
+          }
+          remoteMap.delete(key);
+        } else {
+          await apiClient.cart.addItem(
+            item.productId,
+            item.variant?.id || null,
+            targetQty
+          );
+        }
       }
       
       await loadCartFromDatabase();
       localStorage.removeItem('cart');
-      console.log('✅ Guest cart synced to database successfully');
+      console.log('✅ Guest cart reconciled with database');
     } catch (error) {
       console.error('Error syncing cart to database:', error);
     }
@@ -159,20 +173,40 @@ const CartProviderComponent = ({ children }) => {
 
   // ✅ IMPROVED: Sync guest cart to database after login
   useEffect(() => {
-    if (user && initialized && !loading) {
-      const localCart = localStorage.getItem('cart');
-      if (localCart) {
-        try {
-          const localItems = JSON.parse(localCart);
-          if (Array.isArray(localItems) && localItems.length > 0) {
-            console.log('🔄 User logged in, syncing guest cart:', localItems.length, 'items');
-            syncCartToDatabase(localItems);
-          }
-        } catch (error) {
-          console.error('Error parsing local cart:', error);
-        }
-      }
+    if (!user) {
+      syncedAuthIdRef.current = null;
+      return;
     }
+    if (!initialized || loading) return;
+
+    const authId = user.auth_id || user.id;
+    if (!authId) return;
+    if (syncedAuthIdRef.current === authId) return;
+
+    const reconcile = async () => {
+      const localCart = localStorage.getItem('cart');
+      if (!localCart) {
+        syncedAuthIdRef.current = authId;
+        return;
+      }
+
+      try {
+        const localItems = JSON.parse(localCart);
+        if (Array.isArray(localItems) && localItems.length > 0) {
+          console.log('🔄 User logged in, syncing guest cart:', localItems.length, 'items');
+          await syncCartToDatabase(localItems);
+        } else {
+          localStorage.removeItem('cart');
+        }
+      } catch (error) {
+        console.error('Error parsing local cart:', error);
+        localStorage.removeItem('cart');
+      } finally {
+        syncedAuthIdRef.current = authId;
+      }
+    };
+
+    reconcile();
   }, [user, initialized, loading]);
 
   const addItem = async (product, quantity = 1, variant = null) => {
