@@ -69,7 +69,21 @@ const dictionaries = {
   },
 
   en: {
-    nav: { /* …cum ai deja… */ },
+    nav: {
+      home: 'Home',
+      products: 'Products',
+      contact: 'Contact',
+      support: 'Support',
+      login: 'Login',
+      register: 'Register',
+      dashboard: 'Dashboard',
+      logout: 'Logout',
+      admin: 'Admin',
+      services: 'Services',
+      about: 'About',
+      blog: 'Blog',
+      supportTechnique: 'Technical Support',
+    },
 
     contact: {
       title: 'Contact',
@@ -120,7 +134,21 @@ const dictionaries = {
   },
 
   it: {
-    nav: { /* … */ },
+    nav: {
+      home: 'Home',
+      products: 'Prodotti',
+      contact: 'Contatto',
+      support: 'Supporto',
+      login: 'Accedi',
+      register: 'Registrati',
+      dashboard: 'Dashboard',
+      logout: 'Esci',
+      admin: 'Admin',
+      services: 'Servizi',
+      about: 'Chi Siamo',
+      blog: 'Blog',
+      supportTechnique: 'Supporto Tecnico',
+    },
     contact: {
       title: 'Contatto',
       subtitle: 'Parlaci del tuo progetto. Il nostro team tecnico ti risponderà a breve.',
@@ -160,7 +188,21 @@ const dictionaries = {
   },
 
   de: {
-    nav: { /* … */ },
+    nav: {
+      home: 'Startseite',
+      products: 'Produkte',
+      contact: 'Kontakt',
+      support: 'Support',
+      login: 'Anmelden',
+      register: 'Registrieren',
+      dashboard: 'Dashboard',
+      logout: 'Abmelden',
+      admin: 'Admin',
+      services: 'Dienstleistungen',
+      about: 'Über Uns',
+      blog: 'Blog',
+      supportTechnique: 'Technischer Support',
+    },
     contact: {
       title: 'Kontakt',
       subtitle: 'Erzählen Sie uns von Ihrem Projekt. Unser Technikteam meldet sich zeitnah.',
@@ -200,7 +242,21 @@ const dictionaries = {
   },
 
   es: {
-    nav: { /* … */ },
+    nav: {
+      home: 'Inicio',
+      products: 'Productos',
+      contact: 'Contacto',
+      support: 'Soporte',
+      login: 'Iniciar sesión',
+      register: 'Registrarse',
+      dashboard: 'Panel',
+      logout: 'Cerrar sesión',
+      admin: 'Admin',
+      services: 'Servicios',
+      about: 'Acerca de',
+      blog: 'Blog',
+      supportTechnique: 'Soporte Técnico',
+    },
     contact: {
       title: 'Contacto',
       subtitle: 'Cuéntanos tu proyecto. Nuestro equipo técnico te contactará pronto.',
@@ -240,7 +296,21 @@ const dictionaries = {
   },
 
   ro: {
-    nav: { /* …cum ai deja… */ },
+    nav: {
+      home: 'Acasă',
+      products: 'Produse',
+      contact: 'Contact',
+      support: 'Suport',
+      login: 'Conectare',
+      register: 'Înregistrare',
+      dashboard: 'Panou',
+      logout: 'Ieșire',
+      admin: 'Admin',
+      services: 'Servicii',
+      about: 'Despre',
+      blog: 'Blog',
+      supportTechnique: 'Suport Tehnic',
+    },
 
     contact: {
       title: 'Contact',

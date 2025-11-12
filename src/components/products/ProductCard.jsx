@@ -169,9 +169,9 @@ export default function ProductCard({ product }) {
           </div>
         </div>
 
-        <div className="p-4 relative">
-          <p className="text-xs text-gray-500 mb-1">SKU: {p.sku || ""}</p>
-          <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
+        <div className="p-3 relative space-y-1">
+          <p className="text-[11px] text-gray-500 tracking-wide uppercase">SKU: {p.sku || ""}</p>
+          <h3 className="text-base font-semibold text-text-primary leading-tight line-clamp-2">
             {p.name || "Product Name"}
           </h3>
 
@@ -193,7 +193,7 @@ export default function ProductCard({ product }) {
 
           {!isOutOfStock && (
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-primary">
+              <span className="text-lg font-bold text-primary">
                 {displayPrice.toFixed(2)} {p.currency}
               </span>
               {hasDiscount && base > 0 && (
