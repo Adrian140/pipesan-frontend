@@ -35,6 +35,7 @@ import EmailVerificationSuccess from './components/auth/EmailVerificationSuccess
 // Dashboard / Admin
 import Dashboard from './components/dashboard/Dashboard';
 import AdminPanel from './components/admin/AdminPanel';
+import RequireAdmin from './components/admin/RequireAdmin';
 
 // Legal
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -94,10 +95,10 @@ function AppContent() {
           <Route path="/forgot-password" element={<ForgotPasswordForm />} />
           <Route path="/email-verified" element={<EmailVerificationSuccess />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/admin/orders/:id" element={<OrderDetail />} />
+          <Route path="/admin/orders/:id" element={<RequireAdmin><OrderDetail /></RequireAdmin>} />
         </Routes>
       </main>
       <Footer />
