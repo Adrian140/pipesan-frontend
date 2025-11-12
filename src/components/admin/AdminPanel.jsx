@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Settings, Package, FileText, Users, Truck, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../config/api';
@@ -7,13 +7,12 @@ import SettingsTab from './tabs/SettingsTab';
 import WeightBasedShippingTab from './tabs/WeightBasedShippingTab';
 import UsersTab from './tabs/UsersTab';
 import ReviewsTab from './tabs/ReviewsTab';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import OrdersTab from './tabs/OrdersTab';
 import { BarChart3 } from 'lucide-react';
 import AnalyticsTab from './tabs/AnalyticsTab';
 
 function AdminPanel() {
-  const navigate = useNavigate();
   const location = useLocation();
 
   // Persist last active tab
@@ -48,64 +47,7 @@ function AdminPanel() {
     });
     return user.role === 'admin' || adminEmails.includes(user.email?.toLowerCase());
   }, [user]);
-
-  const tabs = [
-    { id: 'products', label: 'Produse', icon: Package },
-    { id: 'shipping', label: 'Tarife Livrare', icon: Truck },
-    { id: 'reviews', label: 'Recenzii', icon: MessageSquare },
-    { id: 'users', label: 'Utilizatori', icon: Users },
-    { id: 'orders', label: 'Comenzi', icon: FileText },
-    { id: 'settings', label: 'Setări', icon: Settings },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  ];
-
-  const fetchData = useCallback(async () => {
-    setPageLoading(true);
-    setMessage('');
-    try {
-      switch (activeTab) {
-        case 'products': {
-          const productsData = await apiClient.admin.getProducts();
-          setProducts(productsData || []);
-          break;
-        }
-        case 'users':
-        case 'reviews':
-        case 'shipping':
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setMessage('Eroare la încărcarea datelor');
-    } finally {
-      setPageLoading(false);
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!user || !isAdmin) return;
-    fetchData();
-  }, [fetchData, user, isAdmin]);
   
-  const redirectTarget = useMemo(() => {
-    if (!user && sessionChecked) {
-      const currentPath = location.pathname + location.search;
-      return `/login?redirect=${encodeURIComponent(currentPath)}`;
-    }
-    if (user && !isAdmin) {
-      return '/dashboard';
-    }
-    return null;
-  }, [user, sessionChecked, isAdmin, location.pathname, location.search]);
-
-  useEffect(() => {
-    if (redirectTarget) {
-      console.log('➡️ AdminPanel redirect to', redirectTarget);
-      navigate(redirectTarget);
-    }
-  }, [redirectTarget, navigate]);
-
   // Show loading only briefly during initial session check
   if (loading && !sessionChecked) {
     return (
@@ -118,18 +60,76 @@ function AdminPanel() {
     );
   }
 
-  if (redirectTarget) {
+  // If session is checked but no user, redirect to login
+  if (sessionChecked && !user) {
+    console.log('❌ No user found in AdminPanel, redirecting to login...');
+    const currentPath = location.pathname + location.search;
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-          <div className="text-text-secondary">Redirecționare...</div>
-        </div>
-      </div>
+      <Navigate
+        to={`/login?redirect=${encodeURIComponent(currentPath)}`}
+        replace
+      />
     );
   }
 
+  // If user exists but is not admin, redirect to dashboard
+  if (sessionChecked && user && !isAdmin) {
+    console.log('🚫 User is not admin, redirecting to dashboard. User:', {
+      email: user.email,
+      role: user.role,
+      isAdmin
+    });
+    return <Navigate to="/dashboard" replace />;
+  }
+
   console.log('✅ Admin access confirmed for:', user.email, 'with role:', user.role);
+  
+  const tabs = [
+    { id: 'products', label: 'Produse', icon: Package },
+    { id: 'shipping', label: 'Tarife Livrare', icon: Truck },
+    { id: 'reviews', label: 'Recenzii', icon: MessageSquare },
+    { id: 'users', label: 'Utilizatori', icon: Users },
+    { id: 'orders', label: 'Comenzi', icon: FileText }, // importă FileText din lucide-react
+    { id: 'settings', label: 'Setări', icon: Settings },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  ];
+
+  // Fetch data when tab changes or component mounts
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+    fetchData();
+  }, [activeTab, user, isAdmin]);
+  
+  const fetchData = async () => {
+    setPageLoading(true);
+    setMessage('');
+    try {
+      switch (activeTab) {
+        case 'products': {
+          const productsData = await apiClient.admin.getProducts();
+          setProducts(productsData || []);
+          break;
+        }
+        case 'users': {
+          // UsersTab își ia singur datele
+          break;
+        }
+        case 'reviews':
+          // ReviewsTab își ia singur datele
+          break;
+        case 'shipping':
+          // ShippingTab își ia singur datele
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setMessage('Eroare la încărcarea datelor');
+    } finally {
+      setPageLoading(false);
+    }
+  };
 
   const handleSave = async (item, type) => {
     setActionLoading(true);
