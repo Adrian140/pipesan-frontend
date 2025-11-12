@@ -110,7 +110,7 @@ export default function ProductCard({ product }) {
         className="block"
         state={{ prefill }}                                 // ⬅️ trimite prefill
       >
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-[4/3] overflow-hidden">
           <img
             src={mainImage}
             alt={p.name}
@@ -169,35 +169,35 @@ export default function ProductCard({ product }) {
           </div>
         </div>
 
-        <div className="p-3 relative space-y-1">
-          <p className="text-[11px] text-gray-500 tracking-wide uppercase">SKU: {p.sku || ""}</p>
-          <h3 className="text-base font-semibold text-text-primary leading-tight line-clamp-2">
+        <div className="p-2 relative space-y-1">
+          <p className="text-[10px] text-gray-500 tracking-wide uppercase">SKU: {p.sku || ""}</p>
+          <h3 className="text-sm font-semibold text-text-primary leading-tight line-clamp-2">
             {p.name || "Product Name"}
           </h3>
 
           {Number(p.rating) > 0 && (
-            <div className="flex items-center gap-1 mb-2">
+            <div className="flex items-center gap-1 mb-1">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${
+                  className={`w-3 h-3 ${
                     i < Math.floor(Number(p.rating))
                       ? "text-yellow-400 fill-current"
                       : "text-gray-300"
                   }`}
                 />
               ))}
-              <span className="text-xs text-gray-500">({p.review_count || 0})</span>
+              <span className="text-[11px] text-gray-500">({p.review_count || 0})</span>
             </div>
           )}
 
           {!isOutOfStock && (
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-primary">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg font-bold text-primary leading-none">
                 {displayPrice.toFixed(2)} {p.currency}
               </span>
               {hasDiscount && base > 0 && (
-                <span className="text-sm text-gray-500 line-through absolute bottom-4 right-4">
+                <span className="text-xs text-gray-500 line-through absolute bottom-2 right-2">
                   {base.toFixed(2)} {p.currency}
                 </span>
               )}
