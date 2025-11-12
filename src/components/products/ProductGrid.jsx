@@ -4,7 +4,7 @@ import ProductCard from "./ProductCard";
 function ProductGrid({ products = [], loading = false }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
         {[...Array(8)].map((_, index) => (
           <div key={index} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
             <div className="aspect-square bg-gray-200" />
@@ -33,8 +33,8 @@ function ProductGrid({ products = [], loading = false }) {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
       {products.map((product, idx) => (
         <ProductCard key={product?.id ?? `p-${idx}`} product={product} />
       ))}

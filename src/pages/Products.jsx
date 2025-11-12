@@ -383,25 +383,36 @@ const sortedProducts = useMemo(() => {
   return arr;
 }, [filteredProducts, filters.sortBy]);
 
- const categoryOptions = [
-  { label: t.allCategories, value: ALL },
-  ...categories.map((c) => ({ label: c.name, value: c.slug })),
-];
+const sortedCategories = useMemo(
+  () =>
+    [...(categories || [])].sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '')
+    ),
+  [categories]
+);
+
+const categoryOptions = useMemo(
+  () => [
+    { label: t.allCategories, value: ALL },
+    ...sortedCategories.map((c) => ({ label: c.name, value: c.slug })),
+  ],
+  [sortedCategories, t.allCategories]
+);
 
 const selectedCategoryLabel =
   categoryOptions.find((o) => o.value === filters.category)?.label || t.allCategories;
 
   return (
-    <div className="min-h-screen py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text-primary mb-4">{t.title}</h1>
-          <p className="text-text-secondary">{t.subtitle}</p>
+        <div className="mb-6 space-y-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{t.title}</h1>
+          <p className="text-text-secondary text-base md:text-lg">{t.subtitle}</p>
         </div>
 
         {/* Search and Filters Bar */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-8">
+        <div className="bg-white rounded-2xl border border-gray-200 px-4 py-3 mb-6 shadow-sm">
           <div className="flex flex-col lg:flex-row gap-3 items-center">
             {/* Search */}
             <div className="flex-1 relative w-full">
@@ -411,7 +422,7 @@ const selectedCategoryLabel =
                 placeholder={t.searchPh}
                 value={filters.search}
                 onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -427,12 +438,12 @@ const selectedCategoryLabel =
                 onChange={(e) =>
                   setFilters((prev) => ({ ...prev, category: e.target.value }))
                 }
-                className="w-full lg:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent min-w-[180px]"
-                >
-                  {categoryOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
+                className="w-full lg:w-auto px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent min-w-[180px]"
+              >
+                {categoryOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                   ))}
                 </select>
               )}
@@ -442,7 +453,7 @@ const selectedCategoryLabel =
             <select
               value={filters.sortBy}
               onChange={(e) => setFilters((prev) => ({ ...prev, sortBy: e.target.value }))}
-              className="w-full lg:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent min-w-[180px]"
+              className="w-full lg:w-auto px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent min-w-[180px]"
               aria-label={t.sortLabel}
             >
               {sortOptions.map((option) => (
@@ -490,9 +501,8 @@ const selectedCategoryLabel =
 
           {/* Advanced Filters */}
           {showFilters && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Price Range */}
+          <div className="mt-5 pt-5 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
                     {t.priceRange}
