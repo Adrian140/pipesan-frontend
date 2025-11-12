@@ -471,7 +471,7 @@ const register = async (userData) => {
   const forgotPassword = async (email) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: 'https://pipesan.eu/reset-password',
       });
 
       if (error) {
