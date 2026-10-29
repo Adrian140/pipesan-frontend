@@ -39,14 +39,7 @@ function AdminPanel() {
   // Check admin status more reliably
   const isAdmin = useMemo(() => {
     if (!user) return false;
-    const adminEmails = ['contact@pipesan.eu', 'ioan.adrian.bucur@gmail.com'];
-    console.log('🔍 Checking admin status for user:', {
-      email: user.email,
-      role: user.role,
-      isAdminEmail: adminEmails.includes(user.email?.toLowerCase()),
-      isAdminRole: user.role === 'admin'
-    });
-    return user.role === 'admin' || adminEmails.includes(user.email?.toLowerCase());
+    return user.role === 'admin';
   }, [user]);
   
   // Show loading only briefly during initial session check

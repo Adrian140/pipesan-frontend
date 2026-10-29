@@ -1,0 +1,52 @@
+[
+  {
+    "table": "products",
+    "status": 206,
+    "visible_range": "*/40"
+  },
+  {
+    "table": "categories",
+    "status": 206,
+    "visible_range": "*/12"
+  },
+  {
+    "table": "users",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "orders",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "addresses",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "billing_profiles",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "invoices",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "product_variants",
+    "status": 200,
+    "visible_range": "*/0"
+  },
+  {
+    "table": "content",
+    "status": 206,
+    "visible_range": "*/2"
+  },
+  {
+    "table": "documents",
+    "status": 200,
+    "visible_range": "*/0"
+  }
+]

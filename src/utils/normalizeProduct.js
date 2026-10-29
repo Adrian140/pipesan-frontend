@@ -1,9 +1,9 @@
+import {normalizeProduct as secureProduct} from '../domain/catalog';
 // src/utils/normalizeProduct.js
 // Normalizator unic pt. toate sursele de produse (DB/Admin/API)
 
 const SUPABASE_URL =
   import.meta?.env?.VITE_SUPABASE_URL ||
-  process.env.VITE_SUPABASE_URL ||
   ""; // trebuie setat în .env
 
 function safeJsonParse(maybeJson) {
@@ -65,7 +65,6 @@ export function normalizeProduct(raw) {
     images,
     image: primaryImage,        // ✅ important: prima poză reală pentru coș/carduri
     bullet_points,
-    amazon_links,
     manage_stock: !!p.manage_stock,
     stock_quantity: Number(p.stock_quantity ?? 0),
 
@@ -77,5 +76,7 @@ export function normalizeProduct(raw) {
     manufacturer: p.manufacturer ?? "",
     dimensions: p.dimensions ?? "",
     description: p.description ?? "",
+    ...secureProduct({...p,images}),
+    amazon_links: secureProduct(p).amazonLinks,
   };
 }

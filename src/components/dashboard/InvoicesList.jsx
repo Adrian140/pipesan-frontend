@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Eye, Calendar, FileText, Search, Filter } from 'lucide-react';
-import { useDashboardTranslation } from '../../hooks/useDashboardTranslation';
 import { apiClient } from '../../config/api';
 
 function InvoicesList() {
-  const { dt } = useDashboardTranslation();
   const [invoices, setInvoices] = useState([]);
+  const [errorMessage,setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -20,7 +19,7 @@ function InvoicesList() {
       const data = await apiClient.invoices.getAll();
       setInvoices(data);
     } catch (error) {
-      console.error('Error fetching invoices:', error);
+      setErrorMessage(error.message || 'Facturile nu au putut fi încărcate.');
     } finally {
       setLoading(false);
     }
@@ -36,19 +35,26 @@ function InvoicesList() {
       a.download = `invoice-${invoiceId}.pdf`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     } catch (error) {
-      console.error('Error downloading invoice:', error);
+      setErrorMessage(error.message || 'Descărcarea a eșuat.');
     }
   };
 
   const viewInvoice = async (invoiceId) => {
+    const preview = window.open('', '_blank');
+    if (!preview) { setErrorMessage('Permite deschiderea unei ferestre pentru a vedea factura.'); return; }
+    preview.opener = null;
     try {
+      setErrorMessage('');
       const blob = await apiClient.invoices.view(invoiceId);
       const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      preview.location.href = url;
+      setTimeout(() => window.URL.revokeObjectURL(url), 60000);
     } catch (error) {
-      console.error('Error viewing invoice:', error);
+      preview.close();
+      setErrorMessage(error.message || 'Vizualizarea a eșuat.');
     }
   };
 
@@ -70,28 +76,28 @@ function InvoicesList() {
   const getStatusText = (status) => {
     switch (status) {
       case 'paid':
-        return dt('paid');
+        return 'Plătită';
       case 'pending':
-        return dt('pending');
+        return 'În așteptare';
       case 'overdue':
-        return dt('overdue');
+        return 'Întârziată';
       case 'cancelled':
-        return dt('cancelled');
+        return 'Anulată';
       default:
         return status;
     }
   };
 
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = String(invoice.number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          invoice.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-    
+
     let matchesDate = true;
     if (dateFilter !== 'all') {
       const invoiceDate = new Date(invoice.date);
       const now = new Date();
-      
+
       switch (dateFilter) {
         case 'last30':
           matchesDate = (now - invoiceDate) <= (30 * 24 * 60 * 60 * 1000);
@@ -104,7 +110,7 @@ function InvoicesList() {
           break;
       }
     }
-    
+
     return matchesSearch && matchesStatus && matchesDate;
   });
 
@@ -119,18 +125,19 @@ function InvoicesList() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-text-primary">{dt('myInvoices')}</h2>
+        <h2 className="text-xl font-bold text-text-primary">Facturile mele</h2>
         <div className="text-sm text-text-secondary">
-          Total: {filteredInvoices.length} {dt('totalInvoices')}
+          Total: {filteredInvoices.length} facturi
         </div>
       </div>
 
+      {errorMessage && <p role="alert" className="mb-4 text-red-700">{errorMessage}</p>}
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="search" className="block text-sm font-medium text-text-primary mb-2">
-              {dt('search')}
+              Caută
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-4 h-4" />
@@ -144,10 +151,10 @@ function InvoicesList() {
               />
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-text-primary mb-2">
-              {dt('status')}
+              Status
             </label>
             <select
               id="status"
@@ -155,17 +162,17 @@ function InvoicesList() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="all">{dt('all')}</option>
-              <option value="paid">{dt('paid')}</option>
-              <option value="pending">{dt('pending')}</option>
-              <option value="overdue">{dt('overdue')}</option>
-              <option value="cancelled">{dt('cancelled')}</option>
+              <option value="all">Toate</option>
+              <option value="paid">Plătite</option>
+              <option value="pending">În așteptare</option>
+              <option value="overdue">Întârziate</option>
+              <option value="cancelled">Anulate</option>
             </select>
           </div>
-          
+
           <div>
             <label htmlFor="date" className="block text-sm font-medium text-text-primary mb-2">
-              {dt('period')}
+              Perioada
             </label>
             <select
               id="date"
@@ -173,10 +180,10 @@ function InvoicesList() {
               onChange={(e) => setDateFilter(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="all">{dt('all')}</option>
-              <option value="last30">{dt('last30Days')}</option>
-              <option value="last90">{dt('last90Days')}</option>
-              <option value="thisYear">{dt('currentYear')}</option>
+              <option value="all">Toate</option>
+              <option value="last30">Ultimele 30 zile</option>
+              <option value="last90">Ultimele 90 zile</option>
+              <option value="thisYear">Anul curent</option>
             </select>
           </div>
         </div>
@@ -191,7 +198,7 @@ function InvoicesList() {
                 <div className="flex items-center mb-2">
                   <FileText className="w-5 h-5 text-text-secondary mr-2" />
                   <h3 className="text-lg font-semibold text-text-primary">
-                    {dt('invoiceNumber')} {invoice.number}
+                    Factura #{invoice.number}
                   </h3>
                   <span className={`ml-3 px-2 py-1 text-xs rounded-full ${getStatusColor(invoice.status)}`}>
                     {getStatusText(invoice.status)}
@@ -200,12 +207,12 @@ function InvoicesList() {
                 <div className="text-text-secondary space-y-1">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span>{dt('date')}: {new Date(invoice.date).toLocaleDateString('ro-RO')}</span>
+                    <span>Data: {new Date(invoice.date).toLocaleDateString('ro-RO')}</span>
                   </div>
                   {invoice.dueDate && (
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      <span>{dt('dueDate')}: {new Date(invoice.dueDate).toLocaleDateString('ro-RO')}</span>
+                      <span>Scadență: {new Date(invoice.dueDate).toLocaleDateString('ro-RO')}</span>
                     </div>
                   )}
                   {invoice.description && (
@@ -213,7 +220,7 @@ function InvoicesList() {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
                 <div className="text-right">
                   <p className="text-2xl font-bold text-text-primary">
@@ -221,25 +228,25 @@ function InvoicesList() {
                   </p>
                   {invoice.vatAmount && (
                     <p className="text-sm text-text-secondary">
-                      {dt('vat')}: €{invoice.vatAmount.toFixed(2)}
+                      TVA: €{invoice.vatAmount.toFixed(2)}
                     </p>
                   )}
                 </div>
-                
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => viewInvoice(invoice.id)}
                     className="flex items-center px-3 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                   >
                     <Eye className="w-4 h-4 mr-1" />
-                    {dt('view')}
+                    Vizualizează
                   </button>
                   <button
                     onClick={() => downloadInvoice(invoice.id)}
                     className="flex items-center px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                   >
                     <Download className="w-4 h-4 mr-1" />
-                    {dt('download')}
+                    Descarcă
                   </button>
                 </div>
               </div>
@@ -252,15 +259,15 @@ function InvoicesList() {
         <div className="text-center py-12">
           <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-text-secondary mb-2">
-            {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' 
-              ? dt('noInvoicesFound')
-              : dt('noInvoicesAvailable')
+            {searchTerm || statusFilter !== 'all' || dateFilter !== 'all'
+              ? 'Nicio factură găsită'
+              : 'Nicio factură disponibilă'
             }
           </h3>
           <p className="text-text-light">
             {searchTerm || statusFilter !== 'all' || dateFilter !== 'all'
-              ? dt('modifySearchFilters')
-              : dt('invoicesWillAppear')
+              ? 'Încearcă să modifici filtrele de căutare.'
+              : 'Facturile tale vor apărea aici după prima comandă.'
             }
           </p>
         </div>

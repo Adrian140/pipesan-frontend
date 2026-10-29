@@ -60,12 +60,11 @@ export const reviewsApi = {
             rating: reviewData.rating,
             title: reviewData.title,
             comment: reviewData.comment,
-            is_verified_purchase: reviewData.isVerifiedPurchase || false,
-            purchase_date: reviewData.purchaseDate || null,
-            created_by_admin: reviewData.createdByAdmin || false
+            is_verified_purchase: false,
+            purchase_date: null,
+            created_by_admin: false, is_approved: false, is_featured: false
           })
-          .select()
-          .single();
+;
         
         if (error) {
           await handleDatabaseError(error, 'create review', retries);
@@ -135,8 +134,7 @@ export const reviewsApi = {
             updated_at: new Date().toISOString()
           })
           .eq('id', reviewId)
-          .select()
-          .single();
+;
         
         if (error) {
           await handleDatabaseError(error, 'update review', retries);

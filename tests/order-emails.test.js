@@ -1,0 +1,13 @@
+import { describe,it,expect,vi } from 'vitest';
+import { createEmailWorker } from '../supabase/functions/send-order-emails/worker';
+const config={SUPABASE_SERVICE_ROLE_KEY:'test-service',SUPABASE_URL:'https://db.example',RESEND_API_KEY:'test-provider',ORDER_EMAIL_FROM:'PipeSan <orders@example.com>'};
+const req=()=>new Request('https://worker.example',{method:'POST',headers:{authorization:'Bearer test-service'}});
+const job={id:'test-id',recipient_email:'contact@prep-center.eu',reply_to:'contact@prep-center.eu',subject:'Order received',message:'Not a payment confirmation',event_key:'order:test:internal',attempts:1};
+function setup(response){const calls=[];const fetch=vi.fn(async(url,options)=>{calls.push({url,options});if(url.includes('/rpc/'))return Response.json([job]);if(url.includes('resend.com'))return response();return new Response(null,{status:204});});return {calls,fetch,worker:createEmailWorker({env:n=>config[n],fetch})};}
+describe('server order notifications',()=>{
+ it('rejects public calls before accessing data',async()=>{const {worker,fetch}=setup();const r=await worker(new Request('https://worker.example',{method:'POST'}));expect(r.status).toBe(401);expect(fetch).not.toHaveBeenCalled();});
+ it('does not claim mail when provider configuration is absent',async()=>{const fetch=vi.fn();const worker=createEmailWorker({env:n=>n==='SUPABASE_SERVICE_ROLE_KEY'?'test-service':undefined,fetch});expect((await worker(req())).status).toBe(503);expect(fetch).not.toHaveBeenCalled();});
+ it('sends to the queued address with Reply-To and idempotency; records provider acceptance',async()=>{const {worker,calls}=setup(()=>Response.json({id:'provider-id'}));expect((await worker(req())).status).toBe(200);const payload=JSON.parse(calls[1].options.body);expect(payload.to).toEqual(['contact@prep-center.eu']);expect(payload.reply_to).toBe('contact@prep-center.eu');expect(calls[1].options.headers['Idempotency-Key']).toBe('pipesan-test-id');expect(JSON.parse(calls[2].options.body)).toMatchObject({status:'sent',provider_id:'provider-id'});});
+ it('does not mark rejected delivery as sent',async()=>{const {worker,calls}=setup(()=>Response.json({error:'invalid'},{status:422}));await worker(req());expect(JSON.parse(calls[2].options.body)).toMatchObject({status:'failed'});expect(JSON.parse(calls[2].options.body).sent_at).toBeUndefined();});
+ it('requeues transient failure with no false delivery timestamp',async()=>{const {worker,calls}=setup(()=>Response.json({error:'busy'},{status:429}));await worker(req());expect(JSON.parse(calls[2].options.body)).toMatchObject({status:'queued'});});
+});

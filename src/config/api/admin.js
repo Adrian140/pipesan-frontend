@@ -108,6 +108,11 @@ getOrderById: async (id) => {
 },
 
 updateOrder: async (id, patch) => {
+  const {data:current,error:readError}=await supabase.from('orders').select('status,payment_status').eq('id',id).single();
+  if(readError)throw readError;
+  if(patch.payment_status && patch.payment_status!==current.payment_status)throw new Error('Payment status is managed by the payment provider.');
+  if(patch.status && patch.status!==current.status && (current.payment_status!=='paid'||!['packed','shipped','delivered','completed'].includes(patch.status)))throw new Error('Only paid orders can progress to delivery. Cancellations/refunds require payment reconciliation.');
+
   const allowed = [
     'status',
     'admin_comment',
@@ -115,7 +120,6 @@ updateOrder: async (id, patch) => {
     'tracking_number',
     'tracking_url',
     'invoice_id',
-    'payment_status',
     'shipping_method',
   ];
 

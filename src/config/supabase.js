@@ -17,11 +17,6 @@ const isValidUrl = (u) => {
   }
 };
 
-console.log("Supabase Config Check:", {
-  hasUrl: !!supabaseUrl,
-  hasKey: !!supabaseAnonKey,
-  urlPrefix: supabaseUrl ? `${supabaseUrl.substring(0, 30)}…` : "MISSING",
-});
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
@@ -245,8 +240,3 @@ export async function uploadDocument(file, documentId, bucket = DOCUMENTS_BUCKET
 /* =========================
    DevTools (optional)
    ========================= */
-if (typeof window !== "undefined") {
-  window.supabase = supabase;
-  window.testDatabaseConnection = testDatabaseConnection;
-  window.checkTablesExist = checkTablesExist;
-}

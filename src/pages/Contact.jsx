@@ -29,7 +29,7 @@ function Contact() {
 
   const fetchContactData = async () => {
     try {
-      const data = await apiClient.admin.getContent();
+      const data = await apiClient.content.getPublic();
       setContent(data || {});
     } catch (error) {
       console.error('Error fetching contact data:', error);
@@ -44,44 +44,11 @@ function Contact() {
     setBannerText('');
 
     try {
-      const response = await fetch('https://formspree.io/f/xandwogl', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          company: formData.company,
-          subject: formData.subject,
-          message: formData.message,
-          _subject: `New contact from ${formData.name} - PipeSan Technical Inquiry`,
-        }),
-      });
-
-      if (response.ok || response.status === 200) {
-        setBannerOk(true);
-        setBannerText(t('sentOk'));
-        setFormData({ name: '', email: '', company: '', subject: '', message: '' });
-      } else {
-        const responseText = await response.text();
-        if (/ok|success/i.test(responseText)) {
-          setBannerOk(true);
-          setBannerText(t('sentOk'));
-          setFormData({ name: '', email: '', company: '', subject: '', message: '' });
-        } else {
-          throw new Error('Failed to send message');
-        }
-      }
-    } catch (error) {
-      // In case of transient network errors, still show success to avoid false negatives
-      if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-        setBannerOk(true);
-        setBannerText(t('sentOk'));
-        setFormData({ name: '', email: '', company: '', subject: '', message: '' });
-      } else {
-        setBannerOk(false);
-        setBannerText(t('sentErr'));
-      }
-      console.error('Contact form error:', error);
+      await apiClient.contact.send(formData);
+      setBannerOk(true);setBannerText(t('sentOk'));
+      setFormData({name:'',email:'',company:'',subject:'',message:''});
+    } catch(error){
+      setBannerOk(false);setBannerText(error.message || t('sentErr'));
     } finally {
       setLoading(false);
     }

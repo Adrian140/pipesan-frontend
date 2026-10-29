@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import {readCart,addCartItem,changeQuantity} from '../domain/cart';
+import {normalizeProduct} from '../domain/catalog';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { apiClient } from '../config/api';
 import { supabase } from '../config/supabase';
@@ -28,7 +30,7 @@ const makeLocalItemId = (productId, variantId) =>
   variantId ? `${productId}-${variantId}` : String(productId);
 
 const CartProviderComponent = ({ children }) => {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(()=>{try{return readCart(localStorage);}catch{return [];}});
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [addingItems, setAddingItems] = useState(new Set());
@@ -58,8 +60,8 @@ const CartProviderComponent = ({ children }) => {
 
   // Persist guest cart in localStorage
   useEffect(() => {
-    if (!user && items.length > 0 && initialized) {
-      localStorage.setItem('cart', JSON.stringify(items));
+    if (!user && initialized) {
+      try{localStorage.setItem('cart', JSON.stringify(items));}catch{}
     }
   }, [items, user, initialized]);
 
@@ -155,21 +157,7 @@ const CartProviderComponent = ({ children }) => {
     }
   };
 
-  const loadCartFromLocalStorage = () => {
-    try {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        const parsed = JSON.parse(savedCart);
-        if (Array.isArray(parsed)) {
-          setItems(parsed);
-          console.log('🛒 Loaded cart from localStorage:', parsed.length, 'items');
-        }
-      }
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      setItems([]);
-    }
-  };
+  const loadCartFromLocalStorage=()=>{try{setItems(readCart(localStorage));}catch{setItems([]);}};
 
   // ✅ IMPROVED: Sync guest cart to database after login
   useEffect(() => {
@@ -210,7 +198,8 @@ const CartProviderComponent = ({ children }) => {
   }, [user, initialized, loading]);
 
   const addItem = async (product, quantity = 1, variant = null) => {
-    const safeQty = Math.max(1, parseInt(quantity, 10) || 1);
+    if(!Number.isInteger(quantity)||quantity<1)return;
+    const safeQty=Math.min(quantity,99);
     const itemKey = makeLocalItemId(product.id, variant?.id);
     
     // Prevent multiple simultaneous additions of the same item
@@ -236,13 +225,13 @@ const CartProviderComponent = ({ children }) => {
       try {
         const { data: freshProduct, error } = await supabase
           .from('products')
-          .select('weight_grams, price, sale_price, images, name, sku')
+          .select('*')
           .eq('id', product.id)
           .single();
         
         if (!error && freshProduct) {
           enrichedProduct = {
-            ...product,
+            ...product,...normalizeProduct(freshProduct),
             weight_grams: freshProduct.weight_grams || 500,
             weightGrams: freshProduct.weight_grams || 500,
             price: freshProduct.sale_price || freshProduct.price || product.price,
@@ -260,6 +249,10 @@ const CartProviderComponent = ({ children }) => {
         console.warn('Could not fetch fresh product data, using provided data:', err);
       }
 
+      if(!enrichedProduct.inStock)throw new Error('Product is unavailable.');
+      const existingQuantity=items.find(i=>i.productId===product.id)?.quantity||0;
+      const max=enrichedProduct.manage_stock===false?99:Math.min(99,enrichedProduct.stockCount??0);
+      if(existingQuantity+safeQty>max)throw new Error('Requested quantity exceeds available stock.');
       if (user) {
         // Database flow with improved duplicate handling
         try {
@@ -292,64 +285,12 @@ const CartProviderComponent = ({ children }) => {
   };
 
   // ✅ FIXED: Proper duplicate handling in localStorage
-  const addItemToLocalStorage = (product, quantity, variant) => {
-    const itemId = makeLocalItemId(product.id, variant?.id);
-    const unitPrice = computeUnitPrice(product, variant);
-    const primaryImage = pickPrimaryImage(product);
-
-    setItems(prev => {
-      // ✅ CHECK FOR EXISTING ITEM: Same product + variant combination
-      const existingIndex = prev.findIndex(item => 
-        item.productId === product.id && 
-        item.variant?.id === variant?.id
-      );
-      
-      if (existingIndex >= 0) {
-        // ✅ UPDATE EXISTING: Add quantity to existing item
-        console.log('🔄 Updating existing localStorage item:', {
-          productId: product.id,
-          variantId: variant?.id,
-          oldQuantity: prev[existingIndex].quantity,
-          addingQuantity: quantity,
-          newQuantity: prev[existingIndex].quantity + quantity
-        });
-        
-        const updatedItems = [...prev];
-        updatedItems[existingIndex] = {
-          ...updatedItems[existingIndex],
-          quantity: updatedItems[existingIndex].quantity + quantity
-        };
-        return updatedItems;
-      }
-      
-      // ✅ CREATE NEW ITEM: No existing item found
-      console.log('🆕 Creating new localStorage item:', {
-        productId: product.id,
-        variantId: variant?.id,
-        quantity,
-        itemId
-      });
-      
-      const newItem = {
-        id: itemId,
-        productId: product.id,
-        name: variant ? `${product.name} - ${variant.name}` : (product.name || ''),
-        sku: variant?.sku || product.sku || '—',
-        price: unitPrice,
-        image: primaryImage,
-        quantity,
-        variant: variant
-          ? { id: variant.id, name: variant.name, sku: variant.sku }
-          : null,
-        weightGrams: product.weight_grams || product.weightGrams || 500,
-        weight_grams: product.weight_grams || product.weightGrams || 500,
-      };
-      return [...prev, newItem];
-    });
-  };
+  const addItemToLocalStorage=(product,quantity,variant)=>setItems(prev=>addCartItem(prev,product,quantity,variant));
 
   const updateQuantity = async (itemId, newQuantity) => {
-    const qty = Math.max(1, parseInt(newQuantity, 10) || 1);
+    if(!Number.isInteger(newQuantity)||newQuantity<1)return;
+    const item=items.find(i=>i.id===itemId);
+    const qty=Math.min(99,newQuantity,item?.maxQuantity??99);
     
     console.log('🔄 Updating quantity:', { itemId, newQuantity: qty });
 
@@ -370,7 +311,7 @@ const CartProviderComponent = ({ children }) => {
 
   const updateQuantityInLocalStorage = (itemId, qty) => {
     setItems(prev =>
-      prev.map(item => (item.id === itemId ? { ...item, quantity: qty } : item))
+      changeQuantity(prev,itemId,qty)
     );
     console.log('🔄 Updated quantity in localStorage for item:', itemId);
   };
@@ -422,8 +363,8 @@ const CartProviderComponent = ({ children }) => {
   const getSubtotal = () =>
     items.reduce((total, item) => total + (Number(item.price) * (Number(item.quantity) || 0)), 0);
 
-  const getTax = (subtotal = getSubtotal()) => subtotal * 0.20; // 20% VAT
-  const getShipping = (subtotal = getSubtotal()) => (subtotal > 100 ? 0 : 9.99);
+  const getTax = () => null; // Stripe Tax determines tax at checkout.
+  const getShipping = (subtotal = getSubtotal()) => (subtotal >= 100 ? 0 : 9.99);
   const getTotal = () => {
     const subtotal = getSubtotal();
     return subtotal + getTax(subtotal) + getShipping(subtotal);
@@ -437,6 +378,17 @@ const CartProviderComponent = ({ children }) => {
     const itemKey = makeLocalItemId(productId, variantId);
     return addingItems.has(itemKey);
   };
+
+  const consumePurchasedItems=useCallback(async purchased=>{
+    const quantities=new Map(purchased.map(i=>[i.id,i.quantity]));
+    if(user){
+      const remote=await apiClient.cart.getItems();
+      for(const item of remote){const quantity=quantities.get(item.id);if(!quantity)continue;
+        if(item.quantity>quantity)await apiClient.cart.updateQuantity(item.id,item.quantity-quantity);else await apiClient.cart.removeItem(item.id);
+      }
+    }
+    setItems(prev=>prev.map(i=>({...i,quantity:i.quantity-(quantities.get(i.id)||0)})).filter(i=>i.quantity>0));
+  },[user?.id]);
 
   // ✅ MEMOIZED VALUE: Prevent unnecessary re-renders
   const value = React.useMemo(() => ({
@@ -456,7 +408,7 @@ const CartProviderComponent = ({ children }) => {
     getTotal,
     openCart,
     closeCart,
-    isAddingItem,
+    isAddingItem,consumePurchasedItems,
   }), [
     items,
     isOpen,

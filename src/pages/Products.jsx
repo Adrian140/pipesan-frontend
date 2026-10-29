@@ -1,4 +1,5 @@
 // FILE: src/pages/Products.jsx
+import {useSearchParams} from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Grid, List, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/products/ProductGrid';
@@ -246,6 +247,8 @@ const ALL = '__all__';
 
 function Products() {
   const t = useT();
+  const [params]=useSearchParams();
+  const [error,setError]=useState('');
 
  const [products, setProducts] = useState([]);
 const [categories, setCategories] = useState([]);
@@ -255,7 +258,7 @@ const [categoriesLoading, setCategoriesLoading] = useState(true);
 const [viewMode, setViewMode] = useState('grid');
 const [filters, setFilters] = useState({
   search: '',
-  category: ALL,
+  category: params.get('category')||ALL,
   priceRange: [0, 1000],
   inStock: false,
   sortBy: 'category',
@@ -276,7 +279,6 @@ const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
  const fetchInitialData = async () => {
@@ -297,7 +299,7 @@ const [showFilters, setShowFilters] = useState(false);
       apiClient.categories.getAll(),
     ]);
 
-    setProducts(productsData || []);
+    setError('');setProducts(productsData || []);
     setCategories(categoriesData || []);
 
     memCache.list = productsData || [];
@@ -306,7 +308,7 @@ const [showFilters, setShowFilters] = useState(false);
     writeListCache(memCache.list);
     writeCatsCache(memCache.cats);
   } catch (error) {
-    console.error('Error fetching initial data:', error);
+    setError(error.message);
   } finally {
     setInitialLoading(false);
     setCategoriesLoading(false);
@@ -318,7 +320,6 @@ const [showFilters, setShowFilters] = useState(false);
     fetchProducts();
   }, 250); // puțin mai scurt
   return () => clearTimeout(timeoutId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [filters.search, filters.category, filters.sortBy]);
 
 const fetchProducts = async () => {
@@ -334,14 +335,14 @@ const fetchProducts = async () => {
       sortBy: filters.sortBy,
     });
 
-    setProducts(data || []);
+    setError('');setProducts(data || []);
 
     // actualizează cache-ul cu ultima listă (opțional)
     memCache.list = data || [];
     memCache.ts = Date.now();
     writeListCache(memCache.list);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    setError(error.message);
   } finally {
     setRefreshing(false);
   }
@@ -364,9 +365,9 @@ const filteredProducts = useMemo(() => {
     const matchesPrice = price >= minP && price <= maxP;
     const matchesStock = !filters.inStock || !!product.inStock;
 
-    return matchesSearch && matchesPrice && matchesStock;
+    return matchesSearch && matchesPrice && matchesStock && (filters.category===ALL || product.categorySlug===filters.category || product.category_id===filters.category);
   });
-}, [products, filters.search, filters.priceRange, filters.inStock]);
+}, [products, filters.search, filters.priceRange, filters.inStock, filters.category]);
 
 // MEMO: sortare
 const sortedProducts = useMemo(() => {
@@ -415,7 +416,8 @@ const selectedCategoryLabel =
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {error&&<p role="alert" className="p-4 text-red-700">{error}</p>}
+      {/* Header */}
         <div className="mb-6 space-y-2">
           <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{t.title}</h1>
           <p className="text-text-secondary text-base md:text-lg">{t.subtitle}</p>

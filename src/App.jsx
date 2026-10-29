@@ -1,5 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+import {SiteContentProvider} from './contexts/SiteContentContext';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -95,10 +97,12 @@ function AppContent() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/forgot-password" element={<ForgotPasswordForm />} />
           <Route path="/email-verified" element={<EmailVerificationSuccess />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
+          <Route path="*" element={<div className="p-12"><h1>Page not found</h1><Link to="/products">Browse products</Link></div>} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/admin/orders/:id" element={<RequireAdmin><OrderDetail /></RequireAdmin>} />
         </Routes>
@@ -116,11 +120,11 @@ export default function App() {
         <AuthProvider>
           <LanguageProvider>
             <VATProvider>
-              <CartProvider>
+              <SiteContentProvider><CartProvider>
                 <div className="min-h-screen bg-white">
                   <AppContent />
                 </div>
-              </CartProvider>
+              </CartProvider></SiteContentProvider>
             </VATProvider>
           </LanguageProvider>
         </AuthProvider>

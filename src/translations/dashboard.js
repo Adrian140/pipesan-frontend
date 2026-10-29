@@ -5,15 +5,15 @@ export const dashboardTranslations = {
     hello: 'Bonjour',
     manageAccount: 'Gérez votre compte et vos préférences',
     logout: 'Déconnexion',
-    
+
     // Navigation Tabs
     personalData: 'Données Personnelles',
-    myOrders: 'Mes Commandes',
-    addresses: 'Adresses',
-    billingData: 'Données de Facturation',
+
+
+
     myInvoices: 'Mes Factures',
-    security: 'Sécurité',
-    
+
+
     // Personal Profile
     personalProfile: 'Profil Personnel',
     edit: 'Modifier',
@@ -28,8 +28,8 @@ export const dashboardTranslations = {
     country: 'Pays',
     preferredLanguage: 'Langue préférée',
     emailCannotBeChanged: 'L\'email ne peut pas être modifié. Pour le changer, contactez le support.',
-    profileUpdatedSuccess: 'Profil mis à jour avec succès',
-    
+
+
     // Countries
     romania: 'Roumanie',
     france: 'France',
@@ -38,7 +38,7 @@ export const dashboardTranslations = {
     spain: 'Espagne',
     poland: 'Pologne',
     netherlands: 'Pays-Bas',
-    
+
     // Languages
     romanian: 'Roumain',
     english: 'Anglais',
@@ -46,7 +46,7 @@ export const dashboardTranslations = {
     german: 'Allemand',
     italian: 'Italien',
     spanish: 'Espagnol',
-    
+
     // Addresses
     addresses: 'Adresses',
     addAddress: 'Ajouter une adresse',
@@ -55,7 +55,7 @@ export const dashboardTranslations = {
     addressType: 'Type d\'adresse',
     label: 'Étiquette',
     optional: 'optionnel',
-    shippingAddress: 'Adresse de livraison',
+
     billingAddress: 'Adresse de facturation',
     bothAddresses: 'Livraison et facturation',
     company: 'Entreprise',
@@ -70,7 +70,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Adresse mise à jour avec succès',
     addressDeletedSuccess: 'Adresse supprimée avec succès',
     confirmDeleteAddress: 'Êtes-vous sûr de vouloir supprimer cette adresse ?',
-    
+
     // Billing Profiles
     billingProfiles: 'Profils de Facturation',
     billingData: 'Données de Facturation',
@@ -90,7 +90,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Profil mis à jour avec succès',
     profileDeletedSuccess: 'Profil supprimé avec succès',
     confirmDeleteProfile: 'Êtes-vous sûr de vouloir supprimer ce profil de facturation ?',
-    
+
     // Orders
     myOrders: 'Mes Commandes',
     totalOrders: 'commandes au total',
@@ -103,17 +103,17 @@ export const dashboardTranslations = {
     delivered: 'Livré',
     shipped: 'Expédié',
     processing: 'En cours',
-    pending: 'En attente',
-    cancelled: 'Annulé',
-    paid: 'Payé',
+
+
+
     paymentPending: 'Paiement en attente',
     quantity: 'Quantité',
-    writeReview: 'Écrire un avis',
+
     noOrdersYet: 'Aucune commande encore',
     ordersWillAppear: 'Vos commandes apparaîtront ici après votre premier achat.',
     browseProducts: 'Parcourir les produits',
     reviewSubmittedSuccess: 'Avis soumis avec succès ! Il apparaîtra sur la page du produit.',
-    
+
     // Review Modal
     writeReview: 'Écrire un Avis',
     rating: 'Note',
@@ -125,7 +125,7 @@ export const dashboardTranslations = {
     submitting: 'Soumission...',
     stars: 'étoiles',
     star: 'étoile',
-    
+
     // Invoices
     invoices: 'Factures',
     totalInvoices: 'factures au total',
@@ -150,7 +150,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'Aucune facture disponible',
     modifySearchFilters: 'Essayez de modifier les filtres de recherche.',
     invoicesWillAppear: 'Vos factures apparaîtront ici après la première commande.',
-    
+
     // Security
     security: 'Sécurité',
     changePassword: 'Changer le mot de passe',
@@ -183,7 +183,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'Le mot de passe doit contenir au moins 8 caractères',
     twoFactorEnabledSuccess: '2FA activée avec succès',
     twoFactorDisabled: '2FA désactivée',
-    
+
     // Common
     required: 'obligatoire',
     default: 'par défaut',
@@ -204,22 +204,22 @@ export const dashboardTranslations = {
     select: 'Sélectionner',
     choose: 'Choisir',
   },
-  
+
   en: {
     // Dashboard Main
     dashboard: 'Dashboard',
     hello: 'Hello',
     manageAccount: 'Manage your account and preferences',
     logout: 'Logout',
-    
+
     // Navigation Tabs
     personalData: 'Personal Data',
-    myOrders: 'My Orders',
-    addresses: 'Addresses',
-    billingData: 'Billing Data',
+
+
+
     myInvoices: 'My Invoices',
-    security: 'Security',
-    
+
+
     // Personal Profile
     personalProfile: 'Personal Profile',
     edit: 'Edit',
@@ -234,8 +234,8 @@ export const dashboardTranslations = {
     country: 'Country',
     preferredLanguage: 'Preferred Language',
     emailCannotBeChanged: 'Email cannot be changed. To change it, contact support.',
-    profileUpdatedSuccess: 'Profile updated successfully',
-    
+
+
     // Countries
     romania: 'Romania',
     france: 'France',
@@ -244,7 +244,7 @@ export const dashboardTranslations = {
     spain: 'Spain',
     poland: 'Poland',
     netherlands: 'Netherlands',
-    
+
     // Languages
     romanian: 'Romanian',
     english: 'English',
@@ -252,7 +252,7 @@ export const dashboardTranslations = {
     german: 'German',
     italian: 'Italian',
     spanish: 'Spanish',
-    
+
     // Addresses
     addresses: 'Addresses',
     addAddress: 'Add Address',
@@ -261,7 +261,7 @@ export const dashboardTranslations = {
     addressType: 'Address Type',
     label: 'Label',
     optional: 'optional',
-    shippingAddress: 'Shipping Address',
+
     billingAddress: 'Billing Address',
     bothAddresses: 'Shipping and Billing',
     company: 'Company',
@@ -276,7 +276,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Address updated successfully',
     addressDeletedSuccess: 'Address deleted successfully',
     confirmDeleteAddress: 'Are you sure you want to delete this address?',
-    
+
     // Billing Profiles
     billingProfiles: 'Billing Profiles',
     billingData: 'Billing Data',
@@ -296,7 +296,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Profile updated successfully',
     profileDeletedSuccess: 'Profile deleted successfully',
     confirmDeleteProfile: 'Are you sure you want to delete this billing profile?',
-    
+
     // Orders
     myOrders: 'My Orders',
     totalOrders: 'total orders',
@@ -309,17 +309,17 @@ export const dashboardTranslations = {
     delivered: 'Delivered',
     shipped: 'Shipped',
     processing: 'Processing',
-    pending: 'Pending',
-    cancelled: 'Cancelled',
-    paid: 'Paid',
+
+
+
     paymentPending: 'Payment pending',
     quantity: 'Quantity',
-    writeReview: 'Write Review',
+
     noOrdersYet: 'No Orders Yet',
     ordersWillAppear: 'Your orders will appear here after you make your first purchase.',
     browseProducts: 'Browse Products',
     reviewSubmittedSuccess: 'Review submitted successfully! It will appear on the product page.',
-    
+
     // Review Modal
     writeReview: 'Write Review',
     rating: 'Rating',
@@ -331,7 +331,7 @@ export const dashboardTranslations = {
     submitting: 'Submitting...',
     stars: 'stars',
     star: 'star',
-    
+
     // Invoices
     invoices: 'Invoices',
     totalInvoices: 'total invoices',
@@ -356,7 +356,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'No invoices available',
     modifySearchFilters: 'Try modifying search filters.',
     invoicesWillAppear: 'Your invoices will appear here after the first order.',
-    
+
     // Security
     security: 'Security',
     changePassword: 'Change Password',
@@ -389,7 +389,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'Password must be at least 8 characters',
     twoFactorEnabledSuccess: '2FA enabled successfully',
     twoFactorDisabled: '2FA disabled',
-    
+
     // Common
     required: 'required',
     default: 'default',
@@ -410,22 +410,22 @@ export const dashboardTranslations = {
     select: 'Select',
     choose: 'Choose',
   },
-  
+
   it: {
     // Dashboard Main
     dashboard: 'Dashboard',
     hello: 'Ciao',
     manageAccount: 'Gestisci il tuo account e le preferenze',
     logout: 'Disconnetti',
-    
+
     // Navigation Tabs
     personalData: 'Dati Personali',
-    myOrders: 'I Miei Ordini',
-    addresses: 'Indirizzi',
-    billingData: 'Dati di Fatturazione',
+
+
+
     myInvoices: 'Le Mie Fatture',
-    security: 'Sicurezza',
-    
+
+
     // Personal Profile
     personalProfile: 'Profilo Personale',
     edit: 'Modifica',
@@ -440,8 +440,8 @@ export const dashboardTranslations = {
     country: 'Paese',
     preferredLanguage: 'Lingua Preferita',
     emailCannotBeChanged: 'L\'email non può essere modificata. Per cambiarla, contatta il supporto.',
-    profileUpdatedSuccess: 'Profilo aggiornato con successo',
-    
+
+
     // Countries
     romania: 'Romania',
     france: 'Francia',
@@ -450,7 +450,7 @@ export const dashboardTranslations = {
     spain: 'Spagna',
     poland: 'Polonia',
     netherlands: 'Paesi Bassi',
-    
+
     // Languages
     romanian: 'Rumeno',
     english: 'Inglese',
@@ -458,7 +458,7 @@ export const dashboardTranslations = {
     german: 'Tedesco',
     italian: 'Italiano',
     spanish: 'Spagnolo',
-    
+
     // Addresses
     addresses: 'Indirizzi',
     addAddress: 'Aggiungi Indirizzo',
@@ -467,7 +467,7 @@ export const dashboardTranslations = {
     addressType: 'Tipo di Indirizzo',
     label: 'Etichetta',
     optional: 'opzionale',
-    shippingAddress: 'Indirizzo di Spedizione',
+
     billingAddress: 'Indirizzo di Fatturazione',
     bothAddresses: 'Spedizione e Fatturazione',
     company: 'Azienda',
@@ -482,7 +482,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Indirizzo aggiornato con successo',
     addressDeletedSuccess: 'Indirizzo eliminato con successo',
     confirmDeleteAddress: 'Sei sicuro di voler eliminare questo indirizzo?',
-    
+
     // Billing Profiles
     billingProfiles: 'Profili di Fatturazione',
     billingData: 'Dati di Fatturazione',
@@ -502,7 +502,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Profilo aggiornato con successo',
     profileDeletedSuccess: 'Profilo eliminato con successo',
     confirmDeleteProfile: 'Sei sicuro di voler eliminare questo profilo di fatturazione?',
-    
+
     // Orders
     myOrders: 'I Miei Ordini',
     totalOrders: 'ordini totali',
@@ -515,17 +515,17 @@ export const dashboardTranslations = {
     delivered: 'Consegnato',
     shipped: 'Spedito',
     processing: 'In Elaborazione',
-    pending: 'In Attesa',
-    cancelled: 'Annullato',
-    paid: 'Pagato',
+
+
+
     paymentPending: 'Pagamento in sospeso',
     quantity: 'Quantità',
-    writeReview: 'Scrivi Recensione',
+
     noOrdersYet: 'Nessun Ordine Ancora',
     ordersWillAppear: 'I tuoi ordini appariranno qui dopo il primo acquisto.',
     browseProducts: 'Sfoglia Prodotti',
     reviewSubmittedSuccess: 'Recensione inviata con successo! Apparirà sulla pagina del prodotto.',
-    
+
     // Review Modal
     writeReview: 'Scrivi Recensione',
     rating: 'Valutazione',
@@ -537,7 +537,7 @@ export const dashboardTranslations = {
     submitting: 'Invio...',
     stars: 'stelle',
     star: 'stella',
-    
+
     // Invoices
     invoices: 'Fatture',
     totalInvoices: 'fatture totali',
@@ -562,7 +562,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'Nessuna fattura disponibile',
     modifySearchFilters: 'Prova a modificare i filtri di ricerca.',
     invoicesWillAppear: 'Le tue fatture appariranno qui dopo il primo ordine.',
-    
+
     // Security
     security: 'Sicurezza',
     changePassword: 'Cambia Password',
@@ -595,7 +595,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'La password deve essere di almeno 8 caratteri',
     twoFactorEnabledSuccess: '2FA abilitata con successo',
     twoFactorDisabled: '2FA disabilitata',
-    
+
     // Common
     required: 'richiesto',
     default: 'predefinito',
@@ -616,22 +616,22 @@ export const dashboardTranslations = {
     select: 'Seleziona',
     choose: 'Scegli',
   },
-  
+
   de: {
     // Dashboard Main
     dashboard: 'Dashboard',
     hello: 'Hallo',
     manageAccount: 'Verwalten Sie Ihr Konto und Ihre Einstellungen',
     logout: 'Abmelden',
-    
+
     // Navigation Tabs
     personalData: 'Persönliche Daten',
-    myOrders: 'Meine Bestellungen',
-    addresses: 'Adressen',
-    billingData: 'Rechnungsdaten',
+
+
+
     myInvoices: 'Meine Rechnungen',
-    security: 'Sicherheit',
-    
+
+
     // Personal Profile
     personalProfile: 'Persönliches Profil',
     edit: 'Bearbeiten',
@@ -646,8 +646,8 @@ export const dashboardTranslations = {
     country: 'Land',
     preferredLanguage: 'Bevorzugte Sprache',
     emailCannotBeChanged: 'E-Mail kann nicht geändert werden. Um sie zu ändern, kontaktieren Sie den Support.',
-    profileUpdatedSuccess: 'Profil erfolgreich aktualisiert',
-    
+
+
     // Countries
     romania: 'Rumänien',
     france: 'Frankreich',
@@ -656,7 +656,7 @@ export const dashboardTranslations = {
     spain: 'Spanien',
     poland: 'Polen',
     netherlands: 'Niederlande',
-    
+
     // Languages
     romanian: 'Rumänisch',
     english: 'Englisch',
@@ -664,7 +664,7 @@ export const dashboardTranslations = {
     german: 'Deutsch',
     italian: 'Italienisch',
     spanish: 'Spanisch',
-    
+
     // Addresses
     addresses: 'Adressen',
     addAddress: 'Adresse hinzufügen',
@@ -673,7 +673,7 @@ export const dashboardTranslations = {
     addressType: 'Adresstyp',
     label: 'Label',
     optional: 'optional',
-    shippingAddress: 'Lieferadresse',
+
     billingAddress: 'Rechnungsadresse',
     bothAddresses: 'Liefer- und Rechnungsadresse',
     company: 'Unternehmen',
@@ -688,7 +688,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Adresse erfolgreich aktualisiert',
     addressDeletedSuccess: 'Adresse erfolgreich gelöscht',
     confirmDeleteAddress: 'Sind Sie sicher, dass Sie diese Adresse löschen möchten?',
-    
+
     // Billing Profiles
     billingProfiles: 'Rechnungsprofile',
     billingData: 'Rechnungsdaten',
@@ -708,7 +708,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Profil erfolgreich aktualisiert',
     profileDeletedSuccess: 'Profil erfolgreich gelöscht',
     confirmDeleteProfile: 'Sind Sie sicher, dass Sie dieses Rechnungsprofil löschen möchten?',
-    
+
     // Orders
     myOrders: 'Meine Bestellungen',
     totalOrders: 'Bestellungen insgesamt',
@@ -721,17 +721,17 @@ export const dashboardTranslations = {
     delivered: 'Geliefert',
     shipped: 'Versendet',
     processing: 'In Bearbeitung',
-    pending: 'Ausstehend',
-    cancelled: 'Storniert',
-    paid: 'Bezahlt',
+
+
+
     paymentPending: 'Zahlung ausstehend',
     quantity: 'Menge',
-    writeReview: 'Bewertung schreiben',
+
     noOrdersYet: 'Noch keine Bestellungen',
     ordersWillAppear: 'Ihre Bestellungen werden hier nach Ihrem ersten Kauf angezeigt.',
     browseProducts: 'Produkte durchsuchen',
     reviewSubmittedSuccess: 'Bewertung erfolgreich eingereicht! Sie wird auf der Produktseite angezeigt.',
-    
+
     // Review Modal
     writeReview: 'Bewertung Schreiben',
     rating: 'Bewertung',
@@ -743,7 +743,7 @@ export const dashboardTranslations = {
     submitting: 'Senden...',
     stars: 'Sterne',
     star: 'Stern',
-    
+
     // Invoices
     invoices: 'Rechnungen',
     totalInvoices: 'Rechnungen insgesamt',
@@ -768,7 +768,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'Keine Rechnungen verfügbar',
     modifySearchFilters: 'Versuchen Sie, die Suchfilter zu ändern.',
     invoicesWillAppear: 'Ihre Rechnungen werden hier nach der ersten Bestellung angezeigt.',
-    
+
     // Security
     security: 'Sicherheit',
     changePassword: 'Passwort ändern',
@@ -801,7 +801,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'Passwort muss mindestens 8 Zeichen lang sein',
     twoFactorEnabledSuccess: '2FA erfolgreich aktiviert',
     twoFactorDisabled: '2FA deaktiviert',
-    
+
     // Common
     required: 'erforderlich',
     default: 'Standard',
@@ -822,22 +822,22 @@ export const dashboardTranslations = {
     select: 'Auswählen',
     choose: 'Wählen',
   },
-  
+
   es: {
     // Dashboard Main
     dashboard: 'Panel de Control',
     hello: 'Hola',
     manageAccount: 'Gestiona tu cuenta y preferencias',
     logout: 'Cerrar Sesión',
-    
+
     // Navigation Tabs
     personalData: 'Datos Personales',
-    myOrders: 'Mis Pedidos',
-    addresses: 'Direcciones',
-    billingData: 'Datos de Facturación',
+
+
+
     myInvoices: 'Mis Facturas',
-    security: 'Seguridad',
-    
+
+
     // Personal Profile
     personalProfile: 'Perfil Personal',
     edit: 'Editar',
@@ -852,8 +852,8 @@ export const dashboardTranslations = {
     country: 'País',
     preferredLanguage: 'Idioma Preferido',
     emailCannotBeChanged: 'El email no se puede cambiar. Para cambiarlo, contacta al soporte.',
-    profileUpdatedSuccess: 'Perfil actualizado con éxito',
-    
+
+
     // Countries
     romania: 'Rumania',
     france: 'Francia',
@@ -862,7 +862,7 @@ export const dashboardTranslations = {
     spain: 'España',
     poland: 'Polonia',
     netherlands: 'Países Bajos',
-    
+
     // Languages
     romanian: 'Rumano',
     english: 'Inglés',
@@ -870,7 +870,7 @@ export const dashboardTranslations = {
     german: 'Alemán',
     italian: 'Italiano',
     spanish: 'Español',
-    
+
     // Addresses
     addresses: 'Direcciones',
     addAddress: 'Añadir Dirección',
@@ -879,7 +879,7 @@ export const dashboardTranslations = {
     addressType: 'Tipo de Dirección',
     label: 'Etiqueta',
     optional: 'opcional',
-    shippingAddress: 'Dirección de Envío',
+
     billingAddress: 'Dirección de Facturación',
     bothAddresses: 'Envío y Facturación',
     company: 'Empresa',
@@ -894,7 +894,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Dirección actualizada con éxito',
     addressDeletedSuccess: 'Dirección eliminada con éxito',
     confirmDeleteAddress: '¿Estás seguro de que quieres eliminar esta dirección?',
-    
+
     // Billing Profiles
     billingProfiles: 'Perfiles de Facturación',
     billingData: 'Datos de Facturación',
@@ -914,7 +914,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Perfil actualizado con éxito',
     profileDeletedSuccess: 'Perfil eliminado con éxito',
     confirmDeleteProfile: '¿Estás seguro de que quieres eliminar este perfil de facturación?',
-    
+
     // Orders
     myOrders: 'Mis Pedidos',
     totalOrders: 'pedidos en total',
@@ -927,17 +927,17 @@ export const dashboardTranslations = {
     delivered: 'Entregado',
     shipped: 'Enviado',
     processing: 'Procesando',
-    pending: 'Pendiente',
-    cancelled: 'Cancelado',
-    paid: 'Pagado',
+
+
+
     paymentPending: 'Pago pendiente',
     quantity: 'Cantidad',
-    writeReview: 'Escribir Reseña',
+
     noOrdersYet: 'Aún No Hay Pedidos',
     ordersWillAppear: 'Tus pedidos aparecerán aquí después de tu primera compra.',
     browseProducts: 'Explorar Productos',
     reviewSubmittedSuccess: '¡Reseña enviada con éxito! Aparecerá en la página del producto.',
-    
+
     // Review Modal
     writeReview: 'Escribir Reseña',
     rating: 'Calificación',
@@ -949,7 +949,7 @@ export const dashboardTranslations = {
     submitting: 'Enviando...',
     stars: 'estrellas',
     star: 'estrella',
-    
+
     // Invoices
     invoices: 'Facturas',
     totalInvoices: 'facturas en total',
@@ -974,7 +974,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'No hay facturas disponibles',
     modifySearchFilters: 'Intenta modificar los filtros de búsqueda.',
     invoicesWillAppear: 'Tus facturas aparecerán aquí después del primer pedido.',
-    
+
     // Security
     security: 'Seguridad',
     changePassword: 'Cambiar Contraseña',
@@ -1007,7 +1007,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'La contraseña debe tener al menos 8 caracteres',
     twoFactorEnabledSuccess: '2FA habilitada con éxito',
     twoFactorDisabled: '2FA deshabilitada',
-    
+
     // Common
     required: 'requerido',
     default: 'predeterminado',
@@ -1028,22 +1028,22 @@ export const dashboardTranslations = {
     select: 'Seleccionar',
     choose: 'Elegir',
   },
-  
+
   ro: {
     // Dashboard Main
     dashboard: 'Panou de Control',
     hello: 'Salut',
     manageAccount: 'Gestionează-ți contul și preferințele',
     logout: 'Deconectare',
-    
+
     // Navigation Tabs
     personalData: 'Date Personale',
-    myOrders: 'Comenzile Mele',
-    addresses: 'Adrese',
-    billingData: 'Date de Facturare',
+
+
+
     myInvoices: 'Facturile Mele',
-    security: 'Securitate',
-    
+
+
     // Personal Profile
     personalProfile: 'Profil Personal',
     edit: 'Editează',
@@ -1058,8 +1058,8 @@ export const dashboardTranslations = {
     country: 'Țară',
     preferredLanguage: 'Limba Preferată',
     emailCannotBeChanged: 'Email-ul nu poate fi modificat. Pentru schimbare, contactează suportul.',
-    profileUpdatedSuccess: 'Profilul a fost actualizat cu succes',
-    
+
+
     // Countries
     romania: 'România',
     france: 'Franța',
@@ -1068,7 +1068,7 @@ export const dashboardTranslations = {
     spain: 'Spania',
     poland: 'Polonia',
     netherlands: 'Olanda',
-    
+
     // Languages
     romanian: 'Română',
     english: 'Engleză',
@@ -1076,7 +1076,7 @@ export const dashboardTranslations = {
     german: 'Germană',
     italian: 'Italiană',
     spanish: 'Spaniolă',
-    
+
     // Addresses
     addresses: 'Adrese',
     addAddress: 'Adaugă Adresă',
@@ -1085,7 +1085,7 @@ export const dashboardTranslations = {
     addressType: 'Tip Adresă',
     label: 'Etichetă',
     optional: 'opțional',
-    shippingAddress: 'Adresă de Livrare',
+
     billingAddress: 'Adresă de Facturare',
     bothAddresses: 'Livrare și Facturare',
     company: 'Companie',
@@ -1100,7 +1100,7 @@ export const dashboardTranslations = {
     addressUpdatedSuccess: 'Adresa a fost actualizată cu succes',
     addressDeletedSuccess: 'Adresa a fost ștearsă cu succes',
     confirmDeleteAddress: 'Ești sigur că vrei să ștergi această adresă?',
-    
+
     // Billing Profiles
     billingProfiles: 'Profile de Facturare',
     billingData: 'Date de Facturare',
@@ -1120,7 +1120,7 @@ export const dashboardTranslations = {
     profileUpdatedSuccess: 'Profilul a fost actualizat cu succes',
     profileDeletedSuccess: 'Profilul a fost șters cu succes',
     confirmDeleteProfile: 'Ești sigur că vrei să ștergi acest profil de facturare?',
-    
+
     // Orders
     myOrders: 'Comenzile Mele',
     totalOrders: 'comenzi în total',
@@ -1133,17 +1133,17 @@ export const dashboardTranslations = {
     delivered: 'Livrat',
     shipped: 'Expediat',
     processing: 'În Procesare',
-    pending: 'În Așteptare',
-    cancelled: 'Anulat',
-    paid: 'Plătit',
+
+
+
     paymentPending: 'Plată în așteptare',
     quantity: 'Cantitate',
-    writeReview: 'Scrie Recenzie',
+
     noOrdersYet: 'Încă Nu Ai Comenzi',
     ordersWillAppear: 'Comenzile tale vor apărea aici după prima cumpărătură.',
     browseProducts: 'Răsfoiește Produsele',
     reviewSubmittedSuccess: 'Recenzia a fost trimisă cu succes! Va apărea pe pagina produsului.',
-    
+
     // Review Modal
     writeReview: 'Scrie Recenzie',
     rating: 'Evaluare',
@@ -1155,7 +1155,7 @@ export const dashboardTranslations = {
     submitting: 'Se trimite...',
     stars: 'stele',
     star: 'stea',
-    
+
     // Invoices
     invoices: 'Facturi',
     totalInvoices: 'facturi în total',
@@ -1180,7 +1180,7 @@ export const dashboardTranslations = {
     noInvoicesAvailable: 'Nicio factură disponibilă',
     modifySearchFilters: 'Încearcă să modifici filtrele de căutare.',
     invoicesWillAppear: 'Facturile tale vor apărea aici după prima comandă.',
-    
+
     // Security
     security: 'Securitate',
     changePassword: 'Schimbă Parola',
@@ -1213,7 +1213,7 @@ export const dashboardTranslations = {
     passwordMinLength: 'Parola trebuie să aibă minim 8 caractere',
     twoFactorEnabledSuccess: '2FA activată cu succes',
     twoFactorDisabled: '2FA dezactivată',
-    
+
     // Common
     required: 'obligatoriu',
     default: 'implicit',

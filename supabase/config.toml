@@ -1,0 +1,9 @@
+[functions.create-checkout]
+verify_jwt = true
+
+# Stripe signs the raw request body; the handler verifies that signature before any DB access.
+[functions.checkout-webhook]
+verify_jwt = false
+
+[functions.send-order-emails]
+verify_jwt = true

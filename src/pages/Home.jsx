@@ -368,7 +368,7 @@ function Home() {
     (async () => {
       try {
         const [contentData, servicesData] = await Promise.all([
-          apiClient.admin.getContent(),
+          apiClient.content.getPublic(),
           apiClient.admin.getServices(),
         ]);
         setContent(contentData || {});

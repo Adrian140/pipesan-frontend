@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -16,7 +16,9 @@ function LoginForm() {
   const { login, user, sessionChecked } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || null;
+  const location=useLocation();
+  const requested=location.state?.from || searchParams.get('redirect');
+  const redirectPath=typeof requested==='string'&&requested.startsWith('/')&&!requested.startsWith('//')&&!requested.includes('\\')?requested:null;
   const message = searchParams.get('message') || null;
 
   // Handle URL messages

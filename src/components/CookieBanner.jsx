@@ -5,19 +5,20 @@ function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const cookieConsent = localStorage.getItem('cookieConsent');
+    let cookieConsent;
+    try { cookieConsent = localStorage.getItem('cookieConsent'); } catch { cookieConsent = null; }
     if (!cookieConsent) {
       setIsVisible(true);
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem('cookieConsent', 'accepted');
+    try { localStorage.setItem('cookieConsent', 'accepted'); } catch {}
     setIsVisible(false);
   };
 
   const rejectCookies = () => {
-    localStorage.setItem('cookieConsent', 'rejected');
+    try { localStorage.setItem('cookieConsent', 'rejected'); } catch {}
     setIsVisible(false);
   };
 
@@ -29,8 +30,8 @@ function CookieBanner() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
             <p className="text-sm text-text-secondary">
-              We use cookies to improve your experience and analyze site usage. By continuing to browse, you agree to our use of cookies.{' '}
-              <a href="#" className="text-primary hover:text-primary-dark underline">
+              We use local storage to keep your cart and sign-in session.{' '}
+              <a href="/privacy-policy" className="text-primary hover:text-primary-dark underline">
                 Learn more
               </a>
             </p>

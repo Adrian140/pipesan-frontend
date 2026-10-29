@@ -66,15 +66,7 @@ function BillingProfiles() {
     setLoading(true);
     setMessage('');
 
-    // VAT validation for companies
-    if (formData.type === 'company' && formData.vatNumber) {
-      const vatValidation = await validateVAT(formData.vatNumber, formData.country);
-      if (!vatValidation.valid) {
-        setMessage(`VAT validation failed: ${vatValidation.error || 'Invalid VAT number'}`);
-        setLoading(false);
-        return;
-      }
-    }
+    // Saving a billing profile does not validate its VAT number.
 
     try {
       console.log('💾 Saving billing profile data:', formData);

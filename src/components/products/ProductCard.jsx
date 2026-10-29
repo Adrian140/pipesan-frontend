@@ -43,7 +43,7 @@ export default function ProductCard({ product }) {
     (u) => typeof u === "string" && u.trim()
   );
 
-  const isOutOfStock = !!p.manage_stock && Number(p.stock_quantity) <= 0;
+  const isOutOfStock = !p.inStock;
   const isAdding = isAddingItem(p.id);
 
   const handleAddToCart = async (e) => {
@@ -54,6 +54,7 @@ export default function ProductCard({ product }) {
     try {
       await addItem(
         {
+          ...p,
           id: p.id,
           name: p.name || "",
           sku: p.sku || "",
@@ -194,7 +195,7 @@ export default function ProductCard({ product }) {
           {!isOutOfStock && (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-lg font-bold text-primary leading-none">
-                {displayPrice.toFixed(2)} {p.currency}
+                {displayPrice.toFixed(2)} {p.currency} <span className="text-xs font-normal">excl. VAT</span>
               </span>
               {hasDiscount && base > 0 && (
                 <span className="text-xs text-gray-500 line-through absolute bottom-2 right-2">

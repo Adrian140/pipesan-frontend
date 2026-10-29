@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { CheckCircle, Home, ArrowRight } from 'lucide-react';
+import { Info, CheckCircle, Home, ArrowRight } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 

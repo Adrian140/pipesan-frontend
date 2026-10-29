@@ -88,7 +88,7 @@ const writeCache = (p) => {
           if (wait) await sleep(wait);
           const raw = await apiClient.products.getById(id);
           if (cancel) break;
-          const p = normalizeProduct(raw);
+          const p = raw ? normalizeProduct(raw) : null;
           setProduct(p);
           writeCache(p);
           setSelectedImage(0);
@@ -188,7 +188,7 @@ const writeCache = (p) => {
     sale_price < price;
 
   const displayPrice = hasDiscount ? sale_price : price;
-  const inStock = manage_stock ? (stock_quantity || 0) > 0 : true;
+  const inStock = product?.inStock === true;
 
   const mainImage = images[selectedImage] || image || PH;
 
@@ -198,6 +198,7 @@ const writeCache = (p) => {
     try {
       await addItem(
         {
+          ...product,
           id: product.id,
           name: product.name || "",
           sku: product.sku || "—",
@@ -361,7 +362,7 @@ const writeCache = (p) => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600">Price incl. VAT</p>
+              <p className="text-sm text-gray-600">Price excl. VAT — tax calculated at checkout</p>
             </div>
 
             {/* Key Features Section */}
