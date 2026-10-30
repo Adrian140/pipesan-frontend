@@ -41,8 +41,15 @@ export function createCheckoutHandler({env,fetch:request=fetch}) {
    }
    // Stripe expires idempotency keys after 24h; never recreate an uncertain old session.
    if(Date.now()-Date.parse(checkout.created_at)>23*3600000)return json({error:'This checkout needs reconciliation. Please contact support.'},409);
-   const customer=await stripe('customers',customerPayload(order),`pipesan-customer-${checkout.id}`);
-   const session=await stripe('checkout/sessions',stripeSessionPayload(reservation,customer.id,origin,body.locale,guest&&body.createAccount===true),`pipesan-checkout-${checkout.id}`);
+   let session;
+   try{
+    const customer=await stripe('customers',customerPayload(order),`pipesan-customer-${checkout.id}`);
+    session=await stripe('checkout/sessions',stripeSessionPayload(reservation,customer.id,origin,body.locale,guest&&body.createAccount===true),`pipesan-checkout-${checkout.id}`);
+   }catch(error){
+    // No Stripe session exists, so nothing can be paid: give the stock back and cancel the pending order.
+    try{await db('rpc/pipesan_release_unopened_checkout',{checkout:checkout.id});}catch{/* Reservation stays for manual review. */}
+    throw error;
+   }
    await db(`pipesan_checkout_sessions?id=eq.${checkout.id}`,{stripe_session_id:session.id,stripe_url:session.url},'PATCH');
    return json({url:session.url,orderId:order.id});
   }catch(error){return json({error:error.message || 'Checkout could not be prepared. Your cart is saved.'},400);}

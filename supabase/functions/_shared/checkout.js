@@ -47,7 +47,9 @@ export function backend(env,request=fetch){
  }
  async function stripe(path,body,idempotencyKey){
   const response=await request(`https://api.stripe.com/v1/${path}`,{method:body?'POST':'GET',headers:{authorization:`Bearer ${stripeKey}`,'Content-Type':'application/x-www-form-urlencoded',...(idempotencyKey?{'Idempotency-Key':idempotencyKey}:{})},body:body?formEncode(body):undefined,signal:AbortSignal.timeout(20000)});
-  const data=await response.json();if(!response.ok)throw new Error('Stripe could not prepare the payment. Please try again or contact support.');return data;
+  const data=await response.json();
+  // Stripe's own reason (e.g. account restricted, tax not activated) is safe to show and needed to fix it.
+  if(!response.ok)throw new Error(`Stripe could not prepare the payment${data?.error?.message?`: ${data.error.message}`:'.'} Please try again or contact support.`);return data;
  }
  // Auth admin calls (service role) for accounts created from a guest order.
  async function auth(path,body){

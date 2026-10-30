@@ -67,7 +67,11 @@ export default function Checkout(){
    if(url.protocol!=='https:'||url.hostname!=='checkout.stripe.com')throw new Error(t.unexpected);
    sessionStorage.setItem(`pipesan-order-cart:${response.orderId}`,JSON.stringify(items.map(i=>({id:i.id,quantity:i.quantity}))));
    window.location.assign(url.href);
-  }catch(e){setError(e.message);setBusy(false);}
+  }catch(e){
+   // A refused or ended checkout is released on the server; the next attempt needs a new request id.
+   if(/^Stripe could not|checkout has ended/.test(e.message))sessionStorage.removeItem('pipesan-checkout');
+   setError(e.message);setBusy(false);
+  }
  };
  const summary=<aside className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 lg:sticky lg:top-24">
   <h2 className="text-lg font-semibold text-text-primary mb-4">{t.summaryTitle}</h2>
