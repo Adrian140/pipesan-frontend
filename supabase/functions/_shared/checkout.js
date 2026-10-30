@@ -7,13 +7,14 @@ export function formEncode(value,prefix='',out=new URLSearchParams()) {
   }
   return out;
 }
-export function stripeSessionPayload({checkout,order},customer,origin) {
+const STRIPE_LOCALES=['fr','en','it','de','es','ro'];
+export function stripeSessionPayload({checkout,order},customer,origin,locale) {
   return {
-    mode:'payment',customer,client_reference_id:order.id,
+    mode:'payment',customer,client_reference_id:order.id,locale:STRIPE_LOCALES.includes(locale)?locale:'auto',
     payment_method_types:['card'],automatic_tax:{enabled:true},billing_address_collection:'required',
     customer_update:{address:'auto',name:'auto'},tax_id_collection:{enabled:true},
     line_items:checkout.items.map(item=>({quantity:item.quantity,price_data:{currency:'eur',unit_amount:Math.round(item.unitPrice*100),tax_behavior:'exclusive',product_data:{name:item.name.slice(0,250),metadata:{sku:item.sku}}}})),
-    shipping_options:[{shipping_rate_data:{display_name:'Standard delivery',type:'fixed_amount',fixed_amount:{amount:Math.round(order.shipping_amount*100),currency:'eur'},tax_behavior:'exclusive',tax_code:'txcd_92010001'}}],
+    shipping_options:[{shipping_rate_data:{display_name:'Chronopost',type:'fixed_amount',fixed_amount:{amount:Math.round(order.shipping_amount*100),currency:'eur'},tax_behavior:'exclusive',tax_code:'txcd_92010001'}}],
     metadata:{pipesan_order_id:order.id,pipesan_checkout_id:checkout.id},
     payment_intent_data:{metadata:{pipesan_order_id:order.id}},
     success_url:`${origin}/order-success?order_id=${encodeURIComponent(order.id)}`,

@@ -1,3 +1,4 @@
+vi.mock('../src/contexts/LanguageContext',()=>({useLanguage:()=>({currentLanguage:'en'})}));
 vi.mock('../src/contexts/AuthContext',()=>({useAuth:()=>({user:null,loading:false})}));
 import React, { StrictMode } from 'react';
 import { describe,it,expect,vi } from 'vitest';
