@@ -1,7 +1,8 @@
 import React from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import {SiteContentProvider} from './contexts/SiteContentContext';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from './config/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -72,9 +73,34 @@ function SafeShoppingCart() {
   );
 }
 
+// Dacă Supabase ne trimite pe altă pagină cu sesiunea de recuperare, mergem la formularul de resetare
+function PasswordRecoveryRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const hash = window.location.hash || '';
+    if (location.pathname !== '/reset-password' && /type=recovery/.test(hash)) {
+      navigate(`/reset-password${hash}`, { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
+  React.useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' && window.location.pathname !== '/reset-password') {
+        navigate('/reset-password', { replace: true });
+      }
+    });
+    return () => data?.subscription?.unsubscribe();
+  }, [navigate]);
+
+  return null;
+}
+
 function AppContent() {
   return (
     <>
+      <PasswordRecoveryRedirect />
       <Header />
       <SafeShoppingCart />
       <main>
