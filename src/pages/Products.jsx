@@ -3,6 +3,7 @@ import {useSearchParams} from 'react-router-dom';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/products/ProductGrid';
+import PipeSanWordmark from '../components/brand/PipeSanWordmark';
 import { apiClient } from '../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 // --- lightweight cache (per tab) ---
@@ -440,8 +441,10 @@ const selectedCategoryLabel =
   return (
     <div className="min-h-screen bg-paper">
       {/* Page header */}
-      <div className="bg-blueprint text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
+      <div className="relative overflow-hidden bg-blueprint text-white">
+        <div className="pointer-events-none absolute -right-24 top-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-brass/10 blur-3xl" />
+        <PipeSanWordmark className="pointer-events-none hidden md:block absolute right-6 lg:right-[max(2rem,calc((100vw-80rem)/2+2rem))] top-1/2 -translate-y-[78%] w-[280px] lg:w-[340px]" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-brass-light mb-3">
             PipeSan · Catalogue
           </p>
