@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link, useSearchParams} from 'react-router-dom';
 import {useCart} from '../contexts/CartContext';
 import {useAuth} from '../contexts/AuthContext';
@@ -7,20 +7,38 @@ import {apiClient} from '../config/api';
 import {checkoutText,countryName} from '../translations/checkout';
 import {useShippingCountry} from '../domain/shippingCountry';
 import OrderEstimate from '../components/cart/OrderEstimate';
+import {SHIPPING_COUNTRIES} from '../data/chronopostRates';
 const FIELDS=['firstName','lastName','company','address','city','postalCode','phone'];
 const OPTIONAL=['company','phone'];
+const EMPTY={firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',phone:''};
+const isServed=code=>SHIPPING_COUNTRIES.some(c=>c.code===code);
+const fromSaved=a=>({firstName:a.first_name||'',lastName:a.last_name||'',company:a.company||'',address:a.address||'',city:a.city||'',postalCode:a.postal_code||'',phone:a.phone||''});
 export default function Checkout(){
  const {items}=useCart();const {user,loading}=useAuth();
  const {currentLanguage}=useLanguage();const t=checkoutText(currentLanguage);
  const [params]=useSearchParams();
  const [country,setCountry]=useShippingCountry();
- const [address,setAddress]=useState({firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',phone:''});
+ const [address,setAddress]=useState(EMPTY);
+ const [saved,setSaved]=useState([]),[savedId,setSavedId]=useState('');
+ const [email,setEmail]=useState(''),[createAccount,setCreateAccount]=useState(true);
+ // Signed-in buyers start from their default (or newest) saved address.
+ useEffect(()=>{
+  if(!user){setSaved([]);return;}
+  let current=true;
+  apiClient.addresses.getAll().then(list=>{
+   if(!current)return;const usable=(list||[]).filter(a=>a.type!=='billing');setSaved(usable);
+   const first=usable.find(a=>a.is_default&&isServed(a.country))||usable.find(a=>isServed(a.country));
+   if(first)chooseSaved(first);
+  }).catch(()=>{});
+  return()=>{current=false;};
+ },[user?.id]);
+ const chooseSaved=a=>{setSavedId(a?a.id:'');setAddress(a?fromSaved(a):EMPTY);if(a&&isServed(a.country))setCountry(a.country);};
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  const enabled=import.meta.env.VITE_CHECKOUT_ENABLED==='true';
  const submit=async e=>{
   e.preventDefault();if(busy)return;setBusy(true);setError('');
   try{
-   const payload={items:items.map(i=>({productId:i.productId,quantity:i.quantity})),address:{...address,country},locale:currentLanguage};
+   const payload={items:items.map(i=>({productId:i.productId,quantity:i.quantity})),address:{...address,country},locale:currentLanguage,...(user?{}:{email:email.trim(),createAccount})};
    const fingerprint=JSON.stringify(payload);
    let saved;try{saved=JSON.parse(sessionStorage.getItem('pipesan-checkout')||'null');}catch{/* Invalid saved request is replaced. */}
    if(!saved || saved.fingerprint!==fingerprint){saved={requestId:crypto.randomUUID(),fingerprint};sessionStorage.setItem('pipesan-checkout',JSON.stringify(saved));}
@@ -37,8 +55,20 @@ export default function Checkout(){
   {!items.length?<p>{t.empty}</p>:<>
    <ul className="space-y-2 mb-6">{items.map(i=><li key={i.id}>{i.name} × {i.quantity}</li>)}</ul>
    <div className="mb-6"><OrderEstimate items={items} country={country} onCountryChange={setCountry} t={t} language={currentLanguage}/></div>
-   {!enabled?<p role="status">{t.disabled} <a href="mailto:contact@pipesan.eu" className="text-primary underline">contact@pipesan.eu</a> {t.disabledEnd}</p>:loading?<p>{t.loadingAccount}</p>:!user?<p><Link to="/login" state={{from:'/checkout'}} className="text-primary underline">{t.signIn}</Link>. {t.signInEnd}</p>:<form onSubmit={submit} className="space-y-4">
-    <p className="text-sm text-gray-600">{t.accountNote(user.email)}</p>
+   {!enabled?<p role="status">{t.disabled} <a href="mailto:contact@pipesan.eu" className="text-primary underline">contact@pipesan.eu</a> {t.disabledEnd}</p>:loading?<p>{t.loadingAccount}</p>:<form onSubmit={submit} className="space-y-4">
+    {user?<>
+     <p className="text-sm text-gray-600">{t.accountNote(user.email)}</p>
+     {saved.length>0&&<fieldset className="space-y-2"><legend className="font-semibold mb-1">{t.savedAddresses}</legend>
+      {saved.map(a=><label key={a.id} className={`flex gap-3 p-3 border rounded ${isServed(a.country)?'':'opacity-50'}`}><input type="radio" name="saved-address" checked={savedId===a.id} disabled={!isServed(a.country)} onChange={()=>chooseSaved(a)}/><span>{[a.label,`${a.first_name} ${a.last_name}`,a.address,`${a.postal_code} ${a.city}`,countryName(a.country,currentLanguage)].filter(Boolean).join(' · ')}{!isServed(a.country)&&<span className="block text-xs">{t.notServed}</span>}</span></label>)}
+      <label className="flex gap-3 p-3 border rounded"><input type="radio" name="saved-address" checked={savedId===''} onChange={()=>chooseSaved(null)}/><span>{t.newAddress}</span></label>
+     </fieldset>}
+    </>:<div className="space-y-3 p-4 border rounded">
+     <h2 className="text-xl font-semibold">{t.guestTitle}</h2>
+     <p className="text-sm">{t.haveAccount} <Link to="/login" state={{from:'/checkout'}} className="text-primary underline">{t.signInLink}</Link></p>
+     <label className="block">{t.email}<input type="email" name="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="block w-full border rounded p-3"/></label>
+     <label className="flex gap-2 items-start text-sm"><input type="checkbox" checked={createAccount} onChange={e=>setCreateAccount(e.target.checked)} className="mt-1"/><span>{t.createAccount}</span></label>
+     <p className="text-xs text-gray-500">{t.guestNote(email.trim())}</p>
+    </div>}
     <h2 className="text-xl font-semibold">{t.addressTitle}</h2>
     <p className="text-sm">{t.addressNote}</p>
     <div className="grid sm:grid-cols-2 gap-4">{FIELDS.map(name=><label key={name} className="block">{t.fields[name]}<input name={name} required={!OPTIONAL.includes(name)} maxLength={250} value={address[name]} onChange={e=>setAddress({...address,[name]:e.target.value})} className="block w-full border rounded p-3"/></label>)}

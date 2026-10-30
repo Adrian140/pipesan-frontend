@@ -1,3 +1,4 @@
+vi.mock('../src/contexts/LanguageContext',()=>({useLanguage:()=>({currentLanguage:'en'})}));
 import React from 'react';
 import {it,expect,vi,beforeEach} from 'vitest';
 import {render,screen,waitFor} from '@testing-library/react';

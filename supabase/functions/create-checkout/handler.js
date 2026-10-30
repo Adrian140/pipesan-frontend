@@ -18,15 +18,20 @@ export function createCheckoutHandler({env,fetch:request=fetch}) {
   if(env('CHECKOUT_ENABLED')!=='true')return json({error:'Online payment is not enabled yet. Please contact contact@pipesan.eu.'},503);
   if(!env('STRIPE_SECRET_KEY')||!env('SUPABASE_SERVICE_ROLE_KEY'))return json({error:'Payment configuration is incomplete'},503);
   try {
-   const auth=req.headers.get('authorization');if(!auth?.startsWith('Bearer '))return json({error:'Please sign in'},401);
-   const who=await request(`${env('SUPABASE_URL')}/auth/v1/user`,{headers:{authorization:auth,apikey:env('SUPABASE_ANON_KEY')},signal:AbortSignal.timeout(15000)});
-   if(!who.ok)return json({error:'Please sign in again'},401);
-   const user=await who.json();if(!user.id||!user.email_confirmed_at)return json({error:'Confirm your email before placing an order'},403);
    const raw=await req.text();if(raw.length>20000)return json({error:'Request too large'},413);
    const body=JSON.parse(raw);
    if(!/^[a-f0-9-]{36}$/i.test(body.requestId||'')||!Array.isArray(body.items))return json({error:'Invalid checkout request'},400);
+   // Signed-in buyers order on their account; guests (anon key only) order with an email address.
+   const auth=req.headers.get('authorization');let user=null;
+   if(auth?.startsWith('Bearer ')){
+    const who=await request(`${env('SUPABASE_URL')}/auth/v1/user`,{headers:{authorization:auth,apikey:env('SUPABASE_ANON_KEY')},signal:AbortSignal.timeout(15000)});
+    if(who.ok)user=await who.json();
+   }
+   const guest=!user?.id;
+   if(guest&&typeof body.email!=='string')return json({error:'Please sign in or enter your email address'},401);
+   if(!guest&&!user.email_confirmed_at)return json({error:'Confirm your email before placing an order'},403);
    const {db,stripe}=backend(env,request);
-   const reservation=await db('rpc/pipesan_reserve_checkout',{account_id:user.id,request_id:body.requestId,cart:body.items.map(i=>({productId:i.productId,quantity:i.quantity})),address:body.address});
+   const reservation=await db('rpc/pipesan_reserve_checkout',{account_id:guest?null:user.id,request_id:body.requestId,cart:body.items.map(i=>({productId:i.productId,quantity:i.quantity})),address:body.address,guest_email:guest?body.email:null});
    const {checkout,order}=reservation;
    if(checkout.state!=='reserved')return json({error:'This checkout has ended. Start a new checkout.'},409);
    if(checkout.stripe_session_id){
@@ -37,7 +42,7 @@ export function createCheckoutHandler({env,fetch:request=fetch}) {
    // Stripe expires idempotency keys after 24h; never recreate an uncertain old session.
    if(Date.now()-Date.parse(checkout.created_at)>23*3600000)return json({error:'This checkout needs reconciliation. Please contact support.'},409);
    const customer=await stripe('customers',customerPayload(order),`pipesan-customer-${checkout.id}`);
-   const session=await stripe('checkout/sessions',stripeSessionPayload(reservation,customer.id,origin,body.locale),`pipesan-checkout-${checkout.id}`);
+   const session=await stripe('checkout/sessions',stripeSessionPayload(reservation,customer.id,origin,body.locale,guest&&body.createAccount===true),`pipesan-checkout-${checkout.id}`);
    await db(`pipesan_checkout_sessions?id=eq.${checkout.id}`,{stripe_session_id:session.id,stripe_url:session.url},'PATCH');
    return json({url:session.url,orderId:order.id});
   }catch(error){return json({error:error.message || 'Checkout could not be prepared. Your cart is saved.'},400);}
