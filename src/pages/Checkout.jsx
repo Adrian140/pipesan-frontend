@@ -9,7 +9,7 @@ import {useShippingCountry} from '../domain/shippingCountry';
 import OrderEstimate from '../components/cart/OrderEstimate';
 import {SHIPPING_COUNTRIES} from '../data/chronopostRates';
 const FIELDS=['firstName','lastName','company','address','city','postalCode','phone'];
-const OPTIONAL=['company','phone'];
+const OPTIONAL=['company'];
 const EMPTY={firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',phone:''};
 const isServed=code=>SHIPPING_COUNTRIES.some(c=>c.code===code);
 const fromSaved=a=>({firstName:a.first_name||'',lastName:a.last_name||'',company:a.company||'',address:a.address||'',city:a.city||'',postalCode:a.postal_code||'',phone:a.phone||''});
@@ -22,6 +22,7 @@ export default function Checkout(){
  const [saved,setSaved]=useState([]),[savedId,setSavedId]=useState('');
  const [email,setEmail]=useState(''),[createAccount,setCreateAccount]=useState(true);
  // Signed-in buyers start from their default (or newest) saved address.
+ useEffect(()=>{if(user?.email)setEmail(e=>e||user.email);},[user?.email]);
  useEffect(()=>{
   if(!user){setSaved([]);return;}
   let current=true;
@@ -38,7 +39,7 @@ export default function Checkout(){
  const submit=async e=>{
   e.preventDefault();if(busy)return;setBusy(true);setError('');
   try{
-   const payload={items:items.map(i=>({productId:i.productId,quantity:i.quantity})),address:{...address,country},locale:currentLanguage,...(user?{}:{email:email.trim(),createAccount})};
+   const payload={items:items.map(i=>({productId:i.productId,quantity:i.quantity})),address:{...address,country},locale:currentLanguage,email:email.trim(),...(user?{}:{createAccount})};
    const fingerprint=JSON.stringify(payload);
    let saved;try{saved=JSON.parse(sessionStorage.getItem('pipesan-checkout')||'null');}catch{/* Invalid saved request is replaced. */}
    if(!saved || saved.fingerprint!==fingerprint){saved={requestId:crypto.randomUUID(),fingerprint};sessionStorage.setItem('pipesan-checkout',JSON.stringify(saved));}
@@ -65,13 +66,13 @@ export default function Checkout(){
     </>:<div className="space-y-3 p-4 border rounded">
      <h2 className="text-xl font-semibold">{t.guestTitle}</h2>
      <p className="text-sm">{t.haveAccount} <Link to="/login" state={{from:'/checkout'}} className="text-primary underline">{t.signInLink}</Link></p>
-     <label className="block">{t.email}<input type="email" name="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="block w-full border rounded p-3"/></label>
      <label className="flex gap-2 items-start text-sm"><input type="checkbox" checked={createAccount} onChange={e=>setCreateAccount(e.target.checked)} className="mt-1"/><span>{t.createAccount}</span></label>
-     <p className="text-xs text-gray-500">{t.guestNote(email.trim())}</p>
     </div>}
+    <label className="block">{t.email}<input type="email" name="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="block w-full border rounded p-3"/></label>
+    <p className="text-xs text-gray-500">{t.guestNote(email.trim())}</p>
     <h2 className="text-xl font-semibold">{t.addressTitle}</h2>
     <p className="text-sm">{t.addressNote}</p>
-    <div className="grid sm:grid-cols-2 gap-4">{FIELDS.map(name=><label key={name} className="block">{t.fields[name]}<input name={name} required={!OPTIONAL.includes(name)} maxLength={250} value={address[name]} onChange={e=>setAddress({...address,[name]:e.target.value})} className="block w-full border rounded p-3"/></label>)}
+    <div className="grid sm:grid-cols-2 gap-4">{FIELDS.map(name=><label key={name} className="block">{t.fields[name]}<input name={name} type={name==='phone'?'tel':'text'} autoComplete={name==='phone'?'tel':undefined} required={!OPTIONAL.includes(name)} maxLength={250} value={address[name]} onChange={e=>setAddress({...address,[name]:e.target.value})} className="block w-full border rounded p-3"/></label>)}
     <p className="block">{t.country}<span className="block w-full border rounded p-3 bg-gray-50">{countryName(country,currentLanguage)}</span></p></div>
     {error&&<p role="alert" className="text-red-700">{error}</p>}
     <p className="text-sm">{t.stripeNote}</p>
