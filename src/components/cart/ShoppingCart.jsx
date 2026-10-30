@@ -6,8 +6,6 @@ function ShoppingCart({ isOpen, onClose, items = [], onUpdateQuantity, onRemoveI
   const [isUpdating, setIsUpdating] = useState({});
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal === 0 || subtotal >= 100 ? 0 : 9.99;
-  const total = subtotal + shipping;
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -123,11 +121,11 @@ function ShoppingCart({ isOpen, onClose, items = [], onUpdateQuantity, onRemoveI
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : `€${shipping.toFixed(2)}`}</span>
+                  <span>By weight and country at checkout</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between font-semibold">
-                  <span>Total before VAT</span>
-                  <span>€{total.toFixed(2)}</span>
+                  <span>Total before shipping and VAT</span>
+                  <span>€{subtotal.toFixed(2)}</span>
                 </div>
               </div>
 

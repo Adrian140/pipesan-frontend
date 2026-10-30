@@ -194,7 +194,8 @@ function ShippingRates() {
       <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-text-secondary">
         <p>
           Prices per parcel, excl. VAT. United Kingdom and Switzerland add the surcharge shown above. France home delivery
-          up to 30 kg, pickup point up to 20 kg; Europe up to {CLASSIC_MAX_KG} kg.
+          up to 30 kg, pickup point up to 20 kg; Europe up to {CLASSIC_MAX_KG} kg. Online checkout ships to the address
+          (home delivery in France) for orders up to 30 kg; contact us for pickup point delivery or heavier orders.
         </p>
         <button
           type="button"

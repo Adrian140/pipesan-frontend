@@ -364,7 +364,7 @@ const CartProviderComponent = ({ children }) => {
     items.reduce((total, item) => total + (Number(item.price) * (Number(item.quantity) || 0)), 0);
 
   const getTax = () => null; // Stripe Tax determines tax at checkout.
-  const getShipping = (subtotal = getSubtotal()) => (subtotal >= 100 ? 0 : 9.99);
+  const getShipping = () => null; // Checkout prices delivery by parcel weight and country.
   const getTotal = () => {
     const subtotal = getSubtotal();
     return subtotal + getTax(subtotal) + getShipping(subtotal);

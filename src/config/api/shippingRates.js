@@ -166,6 +166,26 @@ update: async (id, rateData) => {
 },
 
 
+  // Checkout preview: same weight and band rules as pipesan_reserve_checkout.
+  quoteCheckout: async (cartItems, countryCode) => {
+    const ids = [...new Set(cartItems.map((item) => item.productId))];
+    const [{ data: products, error: productError }, { data: rates, error: rateError }] = await Promise.all([
+      supabase.from('products').select('id, weight_grams').in('id', ids),
+      supabase
+        .from('shipping_rates')
+        .select('weight_min_grams, weight_max_grams, shipping_cost')
+        .eq('country_code', countryCode)
+        .eq('is_active', true)
+        .order('weight_min_grams', { ascending: true })
+    ]);
+    if (productError || rateError) throw new Error((productError || rateError).message);
+    const weights = new Map((products || []).map((p) => [p.id, Number(p.weight_grams) || 500]));
+    const weightGrams = cartItems.reduce((sum, item) => sum + (weights.get(item.productId) || 500) * item.quantity, 0);
+    const rate = (rates || []).find((r) => Number(r.weight_min_grams) <= weightGrams
+      && (r.weight_max_grams == null || Number(r.weight_max_grams) >= weightGrams));
+    return { weightGrams, shippingCost: rate ? Number(rate.shipping_cost) : null };
+  },
+
   // Calculate shipping cost for cart based on total weight - IMPROVED VERSION
   calculateShippingByWeight: async (totalWeightGrams, countryCode) => {
     try {

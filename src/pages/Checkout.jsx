@@ -1,14 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {useCart} from '../contexts/CartContext';
 import {useAuth} from '../contexts/AuthContext';
 import {apiClient} from '../config/api';
-const countries={FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',NL:'Netherlands',BE:'Belgium',PL:'Poland',RO:'Romania'};
+import {SHIPPING_COUNTRIES} from '../data/chronopostRates';
 export default function Checkout(){
  const {items}=useCart();const {user,loading}=useAuth();
  const [address,setAddress]=useState({firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',country:'FR',phone:''});
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  const enabled=import.meta.env.VITE_CHECKOUT_ENABLED==='true';
+ const [quote,setQuote]=useState(null);
+ const cartKey=items.map(i=>`${i.productId}:${i.quantity}`).join(',');
+ useEffect(()=>{
+  if(!items.length)return;
+  let current=true;setQuote(null);
+  apiClient.shippingRates.quoteCheckout(items,address.country).then(q=>{if(current)setQuote(q);}).catch(()=>{if(current)setQuote({failed:true});});
+  return()=>{current=false;};
+ },[cartKey,address.country]);
+ const subtotal=items.reduce((sum,i)=>sum+Number(i.price)*i.quantity,0);
  const submit=async e=>{
   e.preventDefault();if(busy)return;setBusy(true);setError('');
   try{
@@ -27,12 +36,16 @@ export default function Checkout(){
   <h1 className="text-3xl font-bold mb-4">Checkout</h1>
   {!items.length?<p>Your cart is empty.</p>:<>
    <ul className="space-y-2 mb-6">{items.map(i=><li key={i.id}>{i.name} × {i.quantity}</li>)}</ul>
-   <p className="mb-4">Prices exclude VAT. Delivery is €9.99, or free from €100 before VAT. Stripe calculates the applicable tax before you confirm payment.</p>
+   <dl className="mb-4 space-y-1">
+    <div className="flex justify-between"><dt>Products</dt><dd>€{subtotal.toFixed(2)}</dd></div>
+    <div className="flex justify-between"><dt>Chronopost delivery{quote?.weightGrams?` (${(quote.weightGrams/1000).toFixed(2).replace('.',',')} kg)`:''}</dt><dd data-testid="checkout-shipping">{!quote?'Calculating…':quote.failed?'Calculated on payment':quote.shippingCost==null?'Contact us for a quote':`€${quote.shippingCost.toFixed(2)}`}</dd></div>
+   </dl>
+   <p className="mb-4">Prices exclude VAT. Delivery is priced by parcel weight and destination country. Stripe calculates the applicable tax before you confirm payment.</p>
    {!enabled?<p role="status">Online payment is temporarily unavailable. Your cart has been saved. No order has been placed and no payment has been taken. Contact <a href="mailto:contact@pipesan.eu" className="text-primary underline">contact@pipesan.eu</a> for assistance.</p>:loading?<p>Loading account…</p>:!user?<p><Link to="/login" state={{from:'/checkout'}} className="text-primary underline">Sign in to pay securely</Link>. Your cart is saved.</p>:<form onSubmit={submit} className="space-y-4">
     <h2 className="text-xl font-semibold">Billing and delivery address</h2>
     <p className="text-sm">The same address will be used for billing and delivery. Check it before continuing.</p>
     <div className="grid sm:grid-cols-2 gap-4">{Object.entries({firstName:'First name',lastName:'Last name',company:'Company (optional)',address:'Street address',city:'City',postalCode:'Postal code',phone:'Phone (optional)'}).map(([name,label])=><label key={name} className="block">{label}<input name={name} required={!['company','phone'].includes(name)} maxLength={250} value={address[name]} onChange={e=>setAddress({...address,[name]:e.target.value})} className="block w-full border rounded p-3"/></label>)}
-    <label>Country<select className="block w-full border rounded p-3" value={address.country} onChange={e=>setAddress({...address,country:e.target.value})}>{Object.entries(countries).map(([code,name])=><option key={code} value={code}>{name}</option>)}</select></label></div>
+    <label>Country<select className="block w-full border rounded p-3" value={address.country} onChange={e=>setAddress({...address,country:e.target.value})}>{SHIPPING_COUNTRIES.map(({code,name})=><option key={code} value={code}>{name}</option>)}</select></label></div>
     {error&&<p role="alert" className="text-red-700">{error}</p>}
     <p className="text-sm">You will review the final total and enter payment details on Stripe. Continuing creates a pending order and reserves available stock.</p>
     <button disabled={busy} className="bg-primary text-white rounded px-6 py-3 disabled:opacity-50">{busy?'Preparing payment…':'Continue to Stripe'}</button>
