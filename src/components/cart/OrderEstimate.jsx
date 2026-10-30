@@ -7,7 +7,7 @@ import { countryName } from '../../translations/checkout';
 const euro = (value) => `€${value.toFixed(2)}`;
 
 // Shipping from the same shipping_rates the server charges; VAT is an estimate for a private customer.
-export default function OrderEstimate({ items, country, onCountryChange, t, language }) {
+export default function OrderEstimate({ items, country, onCountryChange, t, language, showCountry = true }) {
   const [quote, setQuote] = useState(null);
   const cartKey = items.map((i) => `${i.productId}:${i.quantity}`).join(',');
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function OrderEstimate({ items, country, onCountryChange, t, lang
 
   return (
     <div className="space-y-2 text-sm">
-      <label className="flex items-center justify-between gap-3">
+      {showCountry && <label className="flex items-center justify-between gap-3">
         <span>{t.deliverTo}</span>
         <select
           value={country}
@@ -38,7 +38,7 @@ export default function OrderEstimate({ items, country, onCountryChange, t, lang
         >
           {countries.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
         </select>
-      </label>
+      </label>}
       <div className="flex justify-between"><span>{t.subtotal}</span><span>{euro(subtotal)}</span></div>
       <div className="flex justify-between">
         <span>{t.shipping}{quote?.weightGrams ? ` (${(quote.weightGrams / 1000).toFixed(2).replace('.', ',')} kg)` : ''}</span>

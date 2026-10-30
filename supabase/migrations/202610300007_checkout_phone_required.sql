@@ -1,10 +1,10 @@
 -- Every address field except the company is required at checkout, including the phone;
--- signed-in buyers can also set the order's contact email.
+-- signed-in buyers can also set the order's contact email, and any buyer can give a separate billing address.
 CREATE OR REPLACE FUNCTION public.pipesan_reserve_checkout(account_id uuid, request_id uuid, cart jsonb, address jsonb, guest_email text DEFAULT NULL)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,pg_temp AS $$
 DECLARE existing public.pipesan_checkout_sessions; profile public.users; email text;
  p public.products; item record; qty integer; unit numeric; subtotal numeric:=0; shipping numeric; parcel_grams numeric:=0;
- snapshot jsonb:='[]'; order_id_new uuid:=gen_random_uuid(); checkout_id uuid; field text;
+ snapshot jsonb:='[]'; bill jsonb; order_id_new uuid:=gen_random_uuid(); checkout_id uuid; field text;
 BEGIN
  -- Serialize retries for this account/request pair before checking for an existing reservation.
  IF account_id IS NULL THEN
@@ -31,6 +31,12 @@ BEGIN
  FOREACH field IN ARRAY ARRAY['firstName','lastName','address','city','postalCode','country','phone'] LOOP
   IF length(trim(coalesce(address->>field,''))) NOT BETWEEN 1 AND 250 THEN RAISE EXCEPTION 'Complete the billing and shipping address, including the phone number'; END IF;
  END LOOP;
+ -- Billing defaults to the delivery address; a separate one is validated the same way (any country).
+ bill:=CASE WHEN jsonb_typeof(address->'billing')='object' THEN address->'billing' ELSE address END;
+ FOREACH field IN ARRAY ARRAY['firstName','lastName','address','city','postalCode','country'] LOOP
+  IF length(trim(coalesce(bill->>field,''))) NOT BETWEEN 1 AND 250 THEN RAISE EXCEPTION 'Complete the billing address'; END IF;
+ END LOOP;
+ IF bill->>'country'!~'^[A-Z]{2}$' THEN RAISE EXCEPTION 'Complete the billing address'; END IF;
  IF address->>'country'='OTHER' OR NOT EXISTS(SELECT 1 FROM public.shipping_rates WHERE country_code=address->>'country' AND is_active) THEN RAISE EXCEPTION 'Delivery country is not supported'; END IF;
  IF (SELECT count(*)<>count(DISTINCT value->>'productId') FROM jsonb_array_elements(cart)) THEN RAISE EXCEPTION 'Duplicate product'; END IF;
  FOR item IN SELECT value FROM jsonb_array_elements(cart) ORDER BY value->>'productId' LOOP
@@ -58,7 +64,7 @@ BEGIN
  shipping_first_name,shipping_last_name,shipping_company,shipping_address,shipping_city,shipping_postal_code,shipping_country,
  subtotal,tax_amount,shipping_amount,total_amount,currency)
  VALUES(order_id_new,profile.id,'PS-'||to_char(now(),'YYYYMMDD')||'-'||upper(substr(order_id_new::text,1,8)),'pending','pending',email,coalesce(address->>'phone',''),
- address->>'firstName',address->>'lastName',coalesce(address->>'company',''),address->>'address',address->>'city',address->>'postalCode',address->>'country',
+ bill->>'firstName',bill->>'lastName',coalesce(bill->>'company',''),bill->>'address',bill->>'city',bill->>'postalCode',bill->>'country',
  address->>'firstName',address->>'lastName',coalesce(address->>'company',''),address->>'address',address->>'city',address->>'postalCode',address->>'country',subtotal,0,shipping,subtotal+shipping,'EUR');
  INSERT INTO public.order_items(order_id,product_id,product_name,product_sku,quantity,unit_price,price,total_price)
  SELECT order_id_new,(v->>'productId')::uuid,v->>'name',v->>'sku',(v->>'quantity')::integer,(v->>'unitPrice')::numeric,(v->>'unitPrice')::numeric,(v->>'unitPrice')::numeric*(v->>'quantity')::integer FROM jsonb_array_elements(snapshot) v;

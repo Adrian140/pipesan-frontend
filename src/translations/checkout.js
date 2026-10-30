@@ -1,6 +1,7 @@
 // Cart and checkout copy for every site language.
 export const CHECKOUT_T = {
   fr: {
+    contactTitle: 'Contact', deliveryTitle: 'Adresse de livraison', billingTitle: 'Facturation', billingDifferent: 'Adresse de facturation différente de l’adresse de livraison', billingSame: 'La facture utilisera l’adresse de livraison.', summaryTitle: 'Récapitulatif', qty: (n) => `Qté ${n}`, secure: 'Paiement sécurisé par Stripe',
     paidTitle: 'Paiement confirmé', statusTitle: 'Statut de la commande', noOrder: "Statut indisponible. Cette page ne confirme ni commande ni paiement.",
     checking: 'Vérification de votre commande…', orderLabel: (n) => `Commande ${n}`, paidText: (a) => `Paiement reçu : ${a}.`, notPaid: "Le paiement n'a pas abouti.",
     waiting: 'En attente de la confirmation du paiement. Vous pouvez revenir plus tard ; ne payez pas une seconde fois.',
@@ -27,6 +28,7 @@ export const CHECKOUT_T = {
     unexpected: 'Destination de paiement inattendue. Contactez le support.',
   },
   en: {
+    contactTitle: 'Contact', deliveryTitle: 'Delivery address', billingTitle: 'Billing', billingDifferent: 'Billing address is different from the delivery address', billingSame: 'The invoice will use the delivery address.', summaryTitle: 'Order summary', qty: (n) => `Qty ${n}`, secure: 'Secure payment by Stripe',
     paidTitle: 'Payment confirmed', statusTitle: 'Order status', noOrder: 'Order status unavailable. This page does not confirm an order or payment.',
     checking: 'Checking your order…', orderLabel: (n) => `Order ${n}`, paidText: (a) => `Payment received: ${a}.`, notPaid: 'Payment was not completed.',
     waiting: 'Waiting for payment confirmation. You can return to this page later; do not pay again while confirmation is pending.',
@@ -53,6 +55,7 @@ export const CHECKOUT_T = {
     unexpected: 'Unexpected payment destination. Please contact support.',
   },
   it: {
+    contactTitle: 'Contatto', deliveryTitle: 'Indirizzo di consegna', billingTitle: 'Fatturazione', billingDifferent: 'Indirizzo di fatturazione diverso da quello di consegna', billingSame: 'La fattura userà l’indirizzo di consegna.', summaryTitle: 'Riepilogo', qty: (n) => `Qtà ${n}`, secure: 'Pagamento sicuro con Stripe',
     paidTitle: 'Pagamento confermato', statusTitle: 'Stato dell’ordine', noOrder: 'Stato non disponibile. Questa pagina non conferma ordini o pagamenti.',
     checking: 'Verifica dell’ordine…', orderLabel: (n) => `Ordine ${n}`, paidText: (a) => `Pagamento ricevuto: ${a}.`, notPaid: 'Il pagamento non è andato a buon fine.',
     waiting: 'In attesa della conferma del pagamento. Puoi tornare più tardi; non pagare di nuovo.',
@@ -79,6 +82,7 @@ export const CHECKOUT_T = {
     unexpected: 'Destinazione di pagamento inattesa. Contatta l’assistenza.',
   },
   de: {
+    contactTitle: 'Kontakt', deliveryTitle: 'Lieferadresse', billingTitle: 'Rechnung', billingDifferent: 'Rechnungsadresse weicht von der Lieferadresse ab', billingSame: 'Die Rechnung verwendet die Lieferadresse.', summaryTitle: 'Bestellübersicht', qty: (n) => `Menge ${n}`, secure: 'Sichere Zahlung über Stripe',
     paidTitle: 'Zahlung bestätigt', statusTitle: 'Bestellstatus', noOrder: 'Status nicht verfügbar. Diese Seite bestätigt keine Bestellung oder Zahlung.',
     checking: 'Bestellung wird geprüft…', orderLabel: (n) => `Bestellung ${n}`, paidText: (a) => `Zahlung erhalten: ${a}.`, notPaid: 'Die Zahlung wurde nicht abgeschlossen.',
     waiting: 'Warten auf die Zahlungsbestätigung. Sie können später zurückkehren; bitte nicht erneut bezahlen.',
@@ -105,6 +109,7 @@ export const CHECKOUT_T = {
     unexpected: 'Unerwartetes Zahlungsziel. Bitte kontaktieren Sie den Support.',
   },
   es: {
+    contactTitle: 'Contacto', deliveryTitle: 'Dirección de envío', billingTitle: 'Facturación', billingDifferent: 'La dirección de facturación es distinta de la de envío', billingSame: 'La factura usará la dirección de envío.', summaryTitle: 'Resumen del pedido', qty: (n) => `Cant. ${n}`, secure: 'Pago seguro con Stripe',
     paidTitle: 'Pago confirmado', statusTitle: 'Estado del pedido', noOrder: 'Estado no disponible. Esta página no confirma pedidos ni pagos.',
     checking: 'Comprobando tu pedido…', orderLabel: (n) => `Pedido ${n}`, paidText: (a) => `Pago recibido: ${a}.`, notPaid: 'El pago no se completó.',
     waiting: 'Esperando la confirmación del pago. Puedes volver más tarde; no pagues de nuevo.',
@@ -131,6 +136,7 @@ export const CHECKOUT_T = {
     unexpected: 'Destino de pago inesperado. Contacta con soporte.',
   },
   ro: {
+    contactTitle: 'Contact', deliveryTitle: 'Adresă de livrare', billingTitle: 'Facturare', billingDifferent: 'Adresa de facturare este diferită de cea de livrare', billingSame: 'Factura va folosi adresa de livrare.', summaryTitle: 'Rezumatul comenzii', qty: (n) => `Cant. ${n}`, secure: 'Plată securizată prin Stripe',
     paidTitle: 'Plată confirmată', statusTitle: 'Starea comenzii', noOrder: 'Starea comenzii nu e disponibilă. Această pagină nu confirmă o comandă sau o plată.',
     checking: 'Se verifică comanda…', orderLabel: (n) => `Comanda ${n}`, paidText: (a) => `Plată primită: ${a}.`, notPaid: 'Plata nu a fost finalizată.',
     waiting: 'Se așteaptă confirmarea plății. Poți reveni mai târziu; nu plăti din nou.',
