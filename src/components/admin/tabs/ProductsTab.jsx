@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Plus, Trash2, X, CheckCircle, FileImage, Upload } from "lucide-react";
 import { uploadProductImage, deleteImage } from "../../../config/supabase";
 import { apiClient } from "../../../config/api";
+import PrepCenterSyncPanel from "../PrepCenterSyncPanel";
 
 const COUNTRY_KEYS = ["FR","DE","IT","ES","BE","NL","PL","SE","UK","OTHER"];
 // Limbi pentru editor (FR = baza)
@@ -35,8 +36,6 @@ const emptyForm = {
   bullet_points: ["", "", "", "", ""], // compat: FR
   translations: {},  
   amazon_links: COUNTRY_KEYS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}),
-  local_stock: false,
-  stock_qty: 0,
   images: [],
 };
 
@@ -237,8 +236,6 @@ const setT = (code, patch) => {
     bullet_points: frSeed.bullets,
     translations: { FR: frSeed, ...normalizeTranslations(p.translations || {}) },
     amazon_links: { ...COUNTRY_KEYS.reduce((a,k)=>({ ...a, [k]: "" }), {}), ...(p.amazon_links || {}) },
-    local_stock: Boolean(p.manage_stock),
-    stock_qty: p.stock_quantity ?? 0,
     images: Array.isArray(p.images) ? p.images : [],
   });
     setSelectedFiles([]);
@@ -493,8 +490,6 @@ const payload = {
   dimensions: frT.dimensions || "",
   weight_grams: parseInt(form.weightGrams) || 500,
   category_id: form.categoryId || null,
-  manage_stock: !!form.local_stock,
-  stock_quantity: Number(form.stock_qty || 0),
   bullet_points: (frT.bullets || []).map(s => (s || '').trim()).filter(Boolean),
   amazon_links: Object.fromEntries(
     Object.entries(form.amazon_links).filter(([_, url]) => url && url.trim())
@@ -548,8 +543,6 @@ const publishProduct = async () => {
       dimensions: frT.dimensions || "",
       weight_grams: parseInt(form.weightGrams) || 500,
       category_id: form.categoryId || null,
-      manage_stock: !!form.local_stock,
-      stock_quantity: Number(form.stock_qty || 0),
       bullet_points: (frT.bullets || []).map(s => (s || '').trim()).filter(Boolean),
       amazon_links: Object.fromEntries(
         Object.entries(form.amazon_links).filter(([_, url]) => url && url.trim())
@@ -596,6 +589,8 @@ const publishProduct = async () => {
         </button>
       </div>
 
+      <PrepCenterSyncPanel onSynced={() => window.dispatchEvent(new Event("pipesan:products-changed"))} />
+
       {/* Table */}
       {pageLoading ? (
         <div className="bg-white rounded-xl border p-6 text-gray-500">
@@ -613,7 +608,7 @@ const publishProduct = async () => {
                 <th className="px-4 py-3 text-left">Category</th>
                 <th className="px-4 py-3 text-left">Price</th>
                 <th className="px-4 py-3 text-left">Weight (g)</th>
-                <th className="px-4 py-3 text-left">Stock</th>
+                <th className="px-4 py-3 text-left">Stoc depozit</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -621,10 +616,8 @@ const publishProduct = async () => {
               {products.map((p) => {
                 const img =
                   Array.isArray(p.images) && p.images.length ? p.images[0] : tablePlaceholder;
-                const stock =
-                  p.manage_stock && (p.stock_quantity ?? 0) > 0
-                    ? `${p.stock_quantity}`
-                    : "—";
+                const stock = Number(p.stock_quantity ?? 0);
+                const inWarehouse = p.warehouse_quantity != null && p.warehouse_quantity > 0;
                 const categoryName = categories.find(c => c.id === p.category_id)?.name || "—";
                 const isDraftProduct = p.is_draft || (!p.is_active && p.created_by_admin);
                 
@@ -655,7 +648,15 @@ const publishProduct = async () => {
                       {Number(p.price).toFixed(2)} {p.currency || "EUR"}
                     </td>
                     <td className="px-4 py-3">{p.weight_grams || 0}g</td>
-                    <td className="px-4 py-3">{stock}</td>
+                    <td className="px-4 py-3">
+                      <span className={`font-semibold ${stock > 0 ? "text-emerald-700" : "text-gray-400"}`}>{stock}</span>
+                      {inWarehouse && p.warehouse_quantity !== stock && (
+                        <span className="block text-xs text-gray-500">depozit: {p.warehouse_quantity}</span>
+                      )}
+                      {Array.isArray(p.prepcenter_skus) && p.prepcenter_skus.length > 0 && (
+                        <span className="block text-[11px] text-gray-400 font-mono">{p.prepcenter_skus.join(", ")}</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <button
                         onClick={() => startEdit(p)}
@@ -1046,32 +1047,27 @@ const publishProduct = async () => {
                 </div>
               </div>
 
-              {/* Stock */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2">
-                  <input
-                    id="local_stock"
-                    type="checkbox"
-                    checked={form.local_stock}
-                    onChange={(e) => onChange("local_stock", e.target.checked)}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="local_stock" className="text-sm font-medium">
-                    Manage local stock
-                  </label>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stock quantity</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.stock_qty}
-                    onChange={(e) => onChange("stock_qty", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    placeholder="0"
-                    disabled={!form.local_stock}
-                  />
-                </div>
+              {/* Stock (read-only, din Prep Center) */}
+              <div className="rounded-lg border bg-gray-50 p-3 text-sm text-gray-600">
+                {(() => {
+                  const current = products.find((x) => x.id === editingId);
+                  return current ? (
+                    <>
+                      <p>
+                        Stoc disponibil: <strong className="text-gray-900">{Number(current.stock_quantity ?? 0)}</strong>
+                        {current.warehouse_quantity != null && <> · în depozit: {current.warehouse_quantity}</>}
+                      </p>
+                      {Array.isArray(current.prepcenter_skus) && current.prepcenter_skus.length > 0 && (
+                        <p className="font-mono text-xs mt-1">SKU depozit: {current.prepcenter_skus.join(", ")}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p>Stocul se completează automat din Prep Center după salvare.</p>
+                  );
+                })()}
+                <p className="text-xs text-gray-500 mt-1">
+                  Stocul nu se mai editează manual: vine din depozitul Prep Center, potrivit după ASIN (câmpul SKU).
+                </p>
               </div>
             </div>
           </div>

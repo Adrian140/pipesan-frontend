@@ -104,6 +104,13 @@ function AdminPanel() {
     if (!user || !isAdmin) return;
     fetchData();
   }, [activeTab, user, isAdmin]);
+
+  // Reîncarcă produsele după o sincronizare Prep Center pornită din admin
+  useEffect(() => {
+    const reload = () => { if (activeTab === 'products') fetchData(); };
+    window.addEventListener('pipesan:products-changed', reload);
+    return () => window.removeEventListener('pipesan:products-changed', reload);
+  }, [activeTab]);
   
   const fetchData = async () => {
     setPageLoading(true);

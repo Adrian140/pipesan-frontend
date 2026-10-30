@@ -7,3 +7,7 @@ verify_jwt = false
 
 [functions.send-order-emails]
 verify_jwt = true
+
+# Auth is checked in the handler: cron sends x-cron-secret, admins send their JWT (role checked server-side).
+[functions.prepcenter-sync]
+verify_jwt = false
