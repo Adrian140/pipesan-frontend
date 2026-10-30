@@ -822,7 +822,7 @@ const publishProduct = async () => {
                     className="w-full px-3 py-2 border rounded-lg"
                     placeholder="0.00"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Vânzare = achiziție ×3 (×2 peste 10 €)</p>
+                  <p className="text-xs text-gray-500 mt-1">Vânzare: ×2 până la 10 €, ×1,5 până la 20 €, ×1,28 peste 20 €</p>
                 </div>
                 <div>
                   <label htmlFor="product-price" className="block text-sm font-medium mb-1">
