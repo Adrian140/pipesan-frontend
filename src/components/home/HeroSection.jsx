@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { productPath } from '../../seo/meta';
 import { ArrowRight } from 'lucide-react';
 import PipeSanWordmark from '../brand/PipeSanWordmark';
 
@@ -73,7 +74,7 @@ function HeroSection({
             {(tiles.length ? tiles : [null, null, null, null]).map((p, i) => (
               <Link
                 key={p?.id ?? i}
-                to={p ? `/products/${p.id}` : '/products'}
+                to={p ? productPath(p) : '/products'}
                 className={`group relative block rounded-2xl bg-white p-5 sm:p-7 shadow-lift ring-1 ring-black/5 ${
                   i % 2 === 1 ? 'translate-y-8' : ''
                 }`}

@@ -1,15 +1,14 @@
 import React from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import {SiteContentProvider} from './contexts/SiteContentContext';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from './config/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { VATProvider } from './contexts/VATContext';
-import OrderDetail from "./components/admin/tabs/OrderDetail";
-import ResetPassword from './pages/ResetPassword';
+import { RouteSeo, NotFound } from './seo/RouteSeo';
 // Layout
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -21,8 +20,6 @@ import Categories from './pages/Categories';
 import TechnicalSpecs from './pages/TechnicalSpecs';
 import Products from './pages/Products';
 import Services from './pages/Services';
-import Checkout from './pages/Checkout.jsx';
-import OrderSuccess from './pages/OrderSuccess';
 import Contact from './pages/Contact';
 import Support from './pages/Support';
 import About from './pages/About';
@@ -36,10 +33,14 @@ import RegisterForm from './components/auth/RegisterForm';
 import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
 import EmailVerificationSuccess from './components/auth/EmailVerificationSuccess';
 
-// Dashboard / Admin
-import Dashboard from './components/dashboard/Dashboard';
-import AdminPanel from './components/admin/AdminPanel';
+// Account, checkout and admin load on demand so the public pages ship less JavaScript
 import RequireAdmin from './components/admin/RequireAdmin';
+const Dashboard = React.lazy(() => import('./components/dashboard/Dashboard'));
+const AdminPanel = React.lazy(() => import('./components/admin/AdminPanel'));
+const OrderDetail = React.lazy(() => import('./components/admin/tabs/OrderDetail'));
+const Checkout = React.lazy(() => import('./pages/Checkout.jsx'));
+const OrderSuccess = React.lazy(() => import('./pages/OrderSuccess'));
+const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
 
 // Legal
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -101,9 +102,11 @@ function AppContent() {
   return (
     <>
       <PasswordRecoveryRedirect />
+      <RouteSeo />
       <Header />
       <SafeShoppingCart />
       <main>
+        <React.Suspense fallback={<div className="min-h-[60vh]" />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/categories" element={<Categories />} />
@@ -128,10 +131,11 @@ function AppContent() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
-          <Route path="*" element={<div className="p-12"><h1>Page not found</h1><Link to="/products">Browse products</Link></div>} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/admin/orders/:id" element={<RequireAdmin><OrderDetail /></RequireAdmin>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        </React.Suspense>
       </main>
       <Footer />
       <CookieBanner />

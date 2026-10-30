@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, ShoppingCart, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { productPath } from '../../seo/meta';
 
 function FeaturedProducts() {
   const featuredProducts = [
@@ -134,7 +135,7 @@ function FeaturedProducts() {
                     Add to Cart
                   </button>
                   <Link
-                    to={`/products/${product.id}`}
+                    to={productPath(product)}
                     className="flex-1 border border-primary text-primary py-3 px-4 rounded-lg font-semibold hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2"
                   >
                     View Details
