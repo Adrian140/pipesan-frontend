@@ -1,6 +1,6 @@
 // FILE: src/pages/Products.jsx
 import {useSearchParams} from 'react-router-dom';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import ProductGrid from '../components/products/ProductGrid';
 import { apiClient } from '../config/api';
@@ -39,6 +39,7 @@ const T = {
     allCategories: 'Toutes les catégories',
     sortLabel: 'Trier par',
     sort: {
+      stock: 'En stock d’abord',
       name: 'Nom A–Z',
       category: 'Catégorie',
       priceLow: 'Prix : croissant',
@@ -73,6 +74,7 @@ const T = {
     allCategories: 'All Categories',
     sortLabel: 'Sort by',
     sort: {
+      stock: 'In stock first',
       name: 'Name A–Z',
       category: 'Category',
       priceLow: 'Price: Low to High',
@@ -107,6 +109,7 @@ const T = {
     allCategories: 'Tutte le categorie',
     sortLabel: 'Ordina per',
     sort: {
+      stock: 'Disponibili prima',
       category: 'Categoria',
       name: 'Nome A–Z',
       priceLow: 'Prezzo: dal più basso',
@@ -141,6 +144,7 @@ const T = {
     allCategories: 'Alle Kategorien',
     sortLabel: 'Sortieren nach',
     sort: {
+      stock: 'Lagernd zuerst',
       category: 'Kategorie',
       name: 'Name A–Z',
       priceLow: 'Preis: aufsteigend',
@@ -175,6 +179,7 @@ const T = {
     allCategories: 'Todas las categorías',
     sortLabel: 'Ordenar por',
     sort: {
+      stock: 'En stock primero',
       category: 'Categoría',
       name: 'Nombre A–Z',
       priceLow: 'Precio: de menor a mayor',
@@ -209,6 +214,7 @@ const T = {
     allCategories: 'Toate categoriile',
     sortLabel: 'Sortează după',
     sort: {
+      stock: 'Stoc întâi',
       category: 'Categorie',
       name: 'Nume A–Z',
       priceLow: 'Preț: crescător',
@@ -245,6 +251,14 @@ const useT = () => {
 
 const ALL = '__all__';
 
+// Inch marks are typed as " but product names use ″ or ʺ.
+const normalizeSearch = (value) => String(value || '').toLowerCase().replace(/[″ʺ“”]/g, '"').trim();
+const searchTokens = (value) => normalizeSearch(value).split(/[\s,;()]+/).filter(Boolean);
+const parsePrice = (value, fallback) => {
+  const n = parseFloat(String(value).replace(',', '.'));
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+};
+
 function Products() {
   const t = useT();
   const [params]=useSearchParams();
@@ -260,12 +274,13 @@ const [filters, setFilters] = useState({
   category: params.get('category')||ALL,
   priceRange: [0, 1000],
   inStock: false,
-  sortBy: 'name',
+  sortBy: 'stock',
 });
 const [showFilters, setShowFilters] = useState(false);
 
   const sortOptions = useMemo(
     () => [
+      { value: 'stock', label: t.sort.stock },
       { value: 'name', label: t.sort.name },
       { value: 'category', label: t.sort.category },
       { value: 'price-low', label: t.sort.priceLow },
@@ -279,6 +294,11 @@ const [showFilters, setShowFilters] = useState(false);
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const urlCategory = params.get('category') || ALL;
+  useEffect(() => {
+    setFilters((prev) => (prev.category === urlCategory ? prev : { ...prev, category: urlCategory }));
+  }, [urlCategory]);
 
  const fetchInitialData = async () => {
   try {
@@ -321,7 +341,9 @@ const [showFilters, setShowFilters] = useState(false);
   return () => clearTimeout(timeoutId);
 }, [filters.search, filters.category, filters.sortBy]);
 
+const latestRequest = useRef(0);
 const fetchProducts = async () => {
+  const requestId = ++latestRequest.current;
   try {
     // dacă avem deja produse pe ecran, nu mai „ștergem” UI-ul
     setRefreshing(true);
@@ -333,6 +355,8 @@ const fetchProducts = async () => {
       category: categorySlug,
       sortBy: filters.sortBy,
     });
+    // A slower earlier search must not replace the results of the current one.
+    if (requestId !== latestRequest.current) return;
 
     setError('');setProducts(data || []);
 
@@ -341,9 +365,9 @@ const fetchProducts = async () => {
     memCache.ts = Date.now();
     writeListCache(memCache.list);
   } catch (error) {
-    setError(error.message);
+    if (requestId === latestRequest.current) setError(error.message);
   } finally {
-    setRefreshing(false);
+    if (requestId === latestRequest.current) setRefreshing(false);
   }
 };
 
@@ -351,14 +375,12 @@ const fetchProducts = async () => {
   // Local refinement filters (stock & price & client-side search fallback)
   // MEMO: filtre locale (search, price, stock)
 const filteredProducts = useMemo(() => {
-  const q = (filters.search || '').toLowerCase();
+  const tokens = searchTokens(filters.search);
   const [minP, maxP] = filters.priceRange;
 
   return products.filter((product) => {
-    const matchesSearch =
-      !q ||
-      product.name?.toLowerCase().includes(q) ||
-      product.sku?.toLowerCase().includes(q);
+    const haystack = normalizeSearch(`${product.name} ${product.sku} ${product.description || ''}`);
+    const matchesSearch = tokens.every((token) => haystack.includes(token));
 
     const price = product.salePrice ?? product.price ?? 0;
     const matchesPrice = price >= minP && price <= maxP;
@@ -387,8 +409,11 @@ const sortedProducts = useMemo(() => {
     case 'category':
       arr.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
       break;
-    default:
+    case 'name':
       arr.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+      break;
+    default:
+      arr.sort((a, b) => Number(!!b.inStock) - Number(!!a.inStock) || (a.name ?? '').localeCompare(b.name ?? ''));
   }
   return arr;
 }, [filteredProducts, filters.sortBy]);
@@ -520,7 +545,7 @@ const selectedCategoryLabel =
                       onChange={(e) =>
                         setFilters((prev) => ({
                           ...prev,
-                          priceRange: [parseInt(e.target.value) || 0, prev.priceRange[1]],
+                          priceRange: [parsePrice(e.target.value, 0), prev.priceRange[1]],
                         }))
                       }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg"
@@ -532,7 +557,7 @@ const selectedCategoryLabel =
                       onChange={(e) =>
                         setFilters((prev) => ({
                           ...prev,
-                          priceRange: [prev.priceRange[0], parseInt(e.target.value) || 1000],
+                          priceRange: [prev.priceRange[0], parsePrice(e.target.value, 1000)],
                         }))
                       }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg"

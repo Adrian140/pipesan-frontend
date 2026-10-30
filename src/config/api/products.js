@@ -125,8 +125,13 @@ export const productsApi = {
 
         // Search
         if (filters.search) {
-          const s = String(filters.search);
-          query = query.or(
+          // Characters that delimit PostgREST filters would break the query.
+          // The longest word narrows the query; the page then requires every word.
+          // Inch marks (" ″ ʺ) become a one-character wildcard so 1/2" also finds 1/2″.
+          const s = String(filters.search).split(/[\s,;()%*\\]+/)
+            .reduce((longest, word) => (word.length > longest.length ? word : longest), '')
+            .replace(/["″ʺ“”]/g, '_');
+          if (s) query = query.or(
             `name.ilike.%${s}%,sku.ilike.%${s}%,description.ilike.%${s}%`
           );
         }

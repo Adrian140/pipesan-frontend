@@ -1,0 +1,18 @@
+vi.mock('../src/contexts/LanguageContext',()=>({useLanguage:()=>({currentLanguage:'en'})}));
+import React from 'react';
+import { it,expect,vi,beforeEach } from 'vitest';
+import { render,screen,fireEvent,waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+const mocks=vi.hoisted(()=>({all:vi.fn(),categories:vi.fn()}));
+vi.mock('../src/config/api',()=>({apiClient:{products:{getAll:mocks.all},categories:{getAll:mocks.categories}}}));
+vi.mock('../src/components/products/ProductGrid',()=>({default:({products})=><ol>{products.map(p=><li key={p.id}>{p.name}</li>)}</ol>}));
+import Products from '../src/pages/Products';
+const product=(id,name,price,inStock,extra={})=>({id,name,sku:id,price,inStock,categorySlug:'valves',created_at:'2026-01-01',...extra});
+const list=[product('a','Alpha valve 1/2″',9,false),product('b','Brass tee 3/4″',4,true),product('c','Coupling 1/2″ brass',7,true),product('d','Drain plug',12,false,{description:'laiton 1/2"'})];
+const names=()=>screen.getAllByRole('listitem').map(li=>li.textContent);
+beforeEach(()=>{sessionStorage.clear();mocks.all.mockResolvedValue(list);mocks.categories.mockResolvedValue([]);});
+const renderPage=async()=>{render(<MemoryRouter><Products/></MemoryRouter>);await screen.findByText('Alpha valve 1/2″');};
+it('shows products in stock first by default',async()=>{await renderPage();expect(names()).toEqual(['Brass tee 3/4″','Coupling 1/2″ brass','Alpha valve 1/2″','Drain plug']);});
+it('reorders only when another sort is chosen',async()=>{await renderPage();fireEvent.change(screen.getByLabelText('Sort by'),{target:{value:'price-low'}});await waitFor(()=>expect(names()[0]).toBe('Brass tee 3/4″'));expect(names()).toEqual(['Brass tee 3/4″','Coupling 1/2″ brass','Alpha valve 1/2″','Drain plug']);fireEvent.change(screen.getByLabelText('Sort by'),{target:{value:'name'}});await waitFor(()=>expect(names()[0]).toBe('Alpha valve 1/2″'));});
+it('matches every search word and typed inch marks',async()=>{await renderPage();const box=screen.getByPlaceholderText('Search products...');fireEvent.change(box,{target:{value:'brass, 1/2"'}});await waitFor(()=>expect(names()).toEqual(['Coupling 1/2″ brass']));fireEvent.change(box,{target:{value:'laiton'}});await waitFor(()=>expect(names()).toEqual(['Drain plug']));});
+it('filters by stock and price range',async()=>{await renderPage();fireEvent.click(screen.getByText('Filters'));fireEvent.click(screen.getByLabelText('In Stock Only'));expect(names()).toEqual(['Brass tee 3/4″','Coupling 1/2″ brass']);fireEvent.click(screen.getByLabelText('In Stock Only'));fireEvent.change(screen.getByPlaceholderText('Min'),{target:{value:'6.5'}});fireEvent.change(screen.getByPlaceholderText('Max'),{target:{value:'9'}});expect(names()).toEqual(['Coupling 1/2″ brass','Alpha valve 1/2″']);});
