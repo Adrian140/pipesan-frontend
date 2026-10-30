@@ -31,7 +31,7 @@ export function createCheckoutHandler({env,fetch:request=fetch}) {
    if(guest&&typeof body.email!=='string')return json({error:'Please sign in or enter your email address'},401);
    if(!guest&&!user.email_confirmed_at)return json({error:'Confirm your email before placing an order'},403);
    const {db,stripe}=backend(env,request);
-   const reservation=await db('rpc/pipesan_reserve_checkout',{account_id:guest?null:user.id,request_id:body.requestId,cart:body.items.map(i=>({productId:i.productId,quantity:i.quantity})),address:body.address,guest_email:guest?body.email:null});
+   const reservation=await db('rpc/pipesan_reserve_checkout',{account_id:guest?null:user.id,request_id:body.requestId,cart:body.items.map(i=>({productId:i.productId,quantity:i.quantity})),address:body.address,guest_email:typeof body.email==='string'?body.email:null});
    const {checkout,order}=reservation;
    if(checkout.state!=='reserved')return json({error:'This checkout has ended. Start a new checkout.'},409);
    if(checkout.stripe_session_id){
