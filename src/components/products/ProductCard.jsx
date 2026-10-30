@@ -52,7 +52,8 @@ export default function ProductCard({ product }) {
   const displayPrice = hasDiscount ? sale : base;
 
   const amazonLinks = p.amazon_links || {};
-  const amazonUrl = Object.values(amazonLinks).find(
+  // Amazon.fr by default, like the product page; another marketplace only when FR is missing.
+  const amazonUrl = [amazonLinks.FR, ...Object.values(amazonLinks)].find(
     (u) => typeof u === "string" && u.trim()
   );
 
