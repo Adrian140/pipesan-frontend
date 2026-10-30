@@ -514,6 +514,25 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
     }
   },
 
+  // Purchase costs (admin only); the database derives the selling price from them.
+  getProductCosts: async () => {
+    const { data, error } = await supabase.from('product_costs').select('product_id, cost_price');
+    if (error) throw new Error(error.message);
+    return Object.fromEntries((data || []).map((row) => [row.product_id, Number(row.cost_price)]));
+  },
+  saveProductCost: async (productId, costPrice) => {
+    if (costPrice == null) {
+      const { error } = await supabase.from('product_costs').delete().eq('product_id', productId);
+      if (error) throw new Error(error.message);
+      return null;
+    }
+    const { error } = await supabase
+      .from('product_costs')
+      .upsert({ product_id: productId, cost_price: costPrice }, { onConflict: 'product_id' });
+    if (error) throw new Error(error.message);
+    return costPrice;
+  },
+
   // Content
   getContent: async () => {
     let retries = 2;

@@ -3,6 +3,7 @@ import { Plus, Trash2, X, CheckCircle, FileImage, Upload } from "lucide-react";
 import { uploadProductImage, deleteImage } from "../../../config/supabase";
 import { apiClient } from "../../../config/api";
 import PrepCenterSyncPanel from "../PrepCenterSyncPanel";
+import { priceFromCost } from "../../../domain/pricing";
 
 const COUNTRY_KEYS = ["FR","DE","IT","ES","BE","NL","PL","SE","UK","OTHER"];
 // Limbi pentru editor (FR = baza)
@@ -28,6 +29,7 @@ const emptyForm = {
   name: "",        // compat: FR implicit
   sku: "",
   price: "",
+  costPrice: "",
   currency: "EUR",
   description: "", // compat: FR
   dimensions: "",  // compat: FR
@@ -193,9 +195,15 @@ const setT = (code, patch) => {
   const isEdit = useMemo(() => Boolean(editingId), [editingId]);
 
   // Fetch categories when component mounts
+  const [costs, setCosts] = useState({});
+
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    apiClient.admin.getProductCosts().then(setCosts).catch((error) => console.error('Error fetching product costs:', error));
+  }, [products]);
 
   const fetchCategories = async () => {
     try {
@@ -227,6 +235,7 @@ const setT = (code, patch) => {
   };
   setForm({
     price: p.price ?? "",
+    costPrice: costs[p.id] ?? "",
     sku: p.sku || "",
     currency: p.currency || "EUR",
     description: frSeed.description,
@@ -258,6 +267,25 @@ const setT = (code, patch) => {
   };
 
   const onChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const parsedCost = String(form.costPrice ?? '').trim() === '' ? null : Number(String(form.costPrice).replace(',', '.'));
+  const costPrice = parsedCost > 0 ? parsedCost : null;
+  const onCostChange = (value) => setForm((f) => {
+    const computed = priceFromCost(String(value).replace(',', '.'));
+    return { ...f, costPrice: value, price: computed ?? f.price };
+  });
+
+  // The database reprices the product as soon as its cost is saved.
+  const saveCost = async (productId) => {
+    if (!productId || costPrice === (costs[productId] ?? null)) return;
+    await apiClient.admin.saveProductCost(productId, costPrice);
+    setCosts((current) => {
+      const next = { ...current };
+      if (costPrice == null) delete next[productId]; else next[productId] = costPrice;
+      return next;
+    });
+    window.dispatchEvent(new Event("pipesan:products-changed"));
+  };
 
   const onBulletChange = (i, v) =>
     setForm((f) => {
@@ -504,11 +532,13 @@ const payload = {
 
       if (editingId) {
         await handleSave({ id: editingId, ...payload }, "products");
+        await saveCost(editingId);
         alert("Draft saved successfully!");
       } else {
         const created = await handleSave(payload, "products");
         const pid = (created?.data ?? created)?.id;
         if (pid) setEditingId(pid);
+        await saveCost(pid);
         alert("Draft created successfully!");
       }
 
@@ -556,10 +586,12 @@ const publishProduct = async () => {
 
     if (editingId) {
       await handleSave({ id: editingId, ...payload }, "products");
+      await saveCost(editingId);
     } else {
       const created = await handleSave(payload, "products");
       const pid = (created?.data ?? created)?.id;
       if (pid) setEditingId(pid);
+      await saveCost(pid);
     }
 
     alert("Product published successfully!");
@@ -607,6 +639,7 @@ const publishProduct = async () => {
                 <th className="px-4 py-3 text-left">SKU</th>
                 <th className="px-4 py-3 text-left">Category</th>
                 <th className="px-4 py-3 text-left">Price</th>
+                <th className="px-4 py-3 text-left">Preț achiziție</th>
                 <th className="px-4 py-3 text-left">Weight (g)</th>
                 <th className="px-4 py-3 text-left">Stoc depozit</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -646,6 +679,9 @@ const publishProduct = async () => {
                     <td className="px-4 py-3">{categoryName}</td>
                     <td className="px-4 py-3">
                       {Number(p.price).toFixed(2)} {p.currency || "EUR"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {costs[p.id] != null ? `${costs[p.id].toFixed(2)} EUR` : <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-4 py-3">{p.weight_grams || 0}g</td>
                     <td className="px-4 py-3">
@@ -773,17 +809,36 @@ const publishProduct = async () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label htmlFor="product-cost" className="block text-sm font-medium mb-1">
+                    Preț achiziție
+                  </label>
+                  <input
+                    id="product-cost"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.costPrice}
+                    onChange={(e) => onCostChange(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="0.00"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Vânzare = achiziție ×3 (×2 peste 10 €)</p>
+                </div>
+                <div>
+                  <label htmlFor="product-price" className="block text-sm font-medium mb-1">
                     Price {!isDraft && '*'}
                   </label>
                   <input
+                    id="product-price"
                     type="number"
                     step="0.01"
                     value={form.price}
                     onChange={(e) => onChange("price", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    readOnly={costPrice != null}
+                    className={`w-full px-3 py-2 border rounded-lg ${costPrice != null ? 'bg-gray-50 text-gray-600' : ''}`}
                     placeholder="0.00"
                   />
+                  {costPrice != null && <p className="text-xs text-gray-500 mt-1">Calculat din prețul de achiziție</p>}
                 </div>
               
               </div>
