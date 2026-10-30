@@ -170,3 +170,8 @@ export const countryName = (code, language) => {
   try { return new Intl.DisplayNames([language || 'fr'], { type: 'region' }).of(code) || code; }
   catch { return code; }
 };
+
+// Every country we deliver to, named in the site language; used by checkout and account forms.
+export const countryOptions = (language, codes) => codes
+  .map((code) => ({ code, name: countryName(code, language) }))
+  .sort((a, b) => a.name.localeCompare(b.name, language));

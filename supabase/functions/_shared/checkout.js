@@ -1,4 +1,4 @@
-export const allowedCountries=['FR','DE','IT','ES','NL','BE','PL','RO'];
+export const allowedCountries=['FR','AT','BE','BG','HR','CZ','DK','EE','FI','DE','GR','HU','IE','IT','LV','LI','LT','LU','NL','NO','PL','PT','RO','SK','SI','ES','SE','CH','GB'];
 export function formEncode(value,prefix='',out=new URLSearchParams()) {
   for(const [key,item] of Object.entries(value)){
     const name=prefix?`${prefix}[${key}]`:key;

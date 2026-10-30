@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { SHIPPING_COUNTRIES } from '../../data/chronopostRates';
+import { countryOptions } from '../../translations/checkout';
 import { Plus, Edit, Trash2, Building, User, Check, X } from 'lucide-react';
 import { useDashboardTranslation } from '../../hooks/useDashboardTranslation';
 import { apiClient } from '../../config/api';
@@ -25,16 +28,8 @@ function BillingProfiles() {
     isDefault: false
   });
 
-  const countries = [
-    { code: 'FR', name: dt('france') },
-    { code: 'DE', name: dt('germany') },
-    { code: 'IT', name: dt('italy') },
-    { code: 'ES', name: dt('spain') },
-    { code: 'NL', name: dt('netherlands') },
-    { code: 'BE', name: 'Belgium' },
-    { code: 'PL', name: dt('poland') },
-    { code: 'RO', name: dt('romania') }
-  ];
+  const { currentLanguage } = useLanguage();
+  const countries = countryOptions(currentLanguage, SHIPPING_COUNTRIES.map((c) => c.code));
 
   useEffect(() => {
     fetchProfiles();

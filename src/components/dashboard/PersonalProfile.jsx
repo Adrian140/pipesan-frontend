@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { SHIPPING_COUNTRIES } from '../../data/chronopostRates';
+import { countryOptions } from '../../translations/checkout';
 import { Save, Edit } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardTranslation } from '../../hooks/useDashboardTranslation';
@@ -33,15 +36,8 @@ function PersonalProfile() {
     }
   }, [user]);
 
-  const countries = [
-    { code: 'RO', name: dt('romania') },
-    { code: 'FR', name: dt('france') },
-    { code: 'DE', name: dt('germany') },
-    { code: 'IT', name: dt('italy') },
-    { code: 'ES', name: dt('spain') },
-    { code: 'PL', name: dt('poland') },
-    { code: 'NL', name: dt('netherlands') }
-  ];
+  const { currentLanguage } = useLanguage();
+  const countries = countryOptions(currentLanguage, SHIPPING_COUNTRIES.map((c) => c.code));
 
   const languages = [
     { code: 'ro', name: dt('romanian') },
