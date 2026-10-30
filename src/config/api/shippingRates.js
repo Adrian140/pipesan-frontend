@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import { handleDatabaseError } from './health';
+import { SHIPPING_COUNTRIES } from '../../data/chronopostRates';
 
 export const shippingRatesApi = {
   // Get all shipping rates (admin)
@@ -177,8 +178,8 @@ update: async (id, rateData) => {
         .eq('country_code', countryCode)
         .eq('is_active', true)
         .lte('weight_min_grams', totalWeightGrams)
-        .or(`weight_max_grams.is.null,weight_max_grams.gt.${totalWeightGrams}`)
-        .order('weight_min_grams', { ascending: false })
+        .or(`weight_max_grams.is.null,weight_max_grams.gte.${totalWeightGrams}`)
+        .order('weight_min_grams', { ascending: true })
         .limit(1);
 
       let applicableRate = null;
@@ -196,8 +197,8 @@ update: async (id, rateData) => {
           .eq('country_code', 'OTHER')
           .eq('is_active', true)
           .lte('weight_min_grams', totalWeightGrams)
-          .or(`weight_max_grams.is.null,weight_max_grams.gt.${totalWeightGrams}`)
-          .order('weight_min_grams', { ascending: false })
+          .or(`weight_max_grams.is.null,weight_max_grams.gte.${totalWeightGrams}`)
+          .order('weight_min_grams', { ascending: true })
           .limit(1);
 
         if (!otherError && otherRates && otherRates.length > 0) {
@@ -220,11 +221,9 @@ update: async (id, rateData) => {
 
       // Estimate delivery days based on country
       const estimatedDays = (() => {
-        const fastCountries = ['FR', 'DE', 'IT', 'ES', 'BE', 'NL', 'AT', 'PT'];
-        const slowCountries = ['CH', 'NO', 'GB'];
-        
-        if (fastCountries.includes(countryCode)) return { min: 2, max: 5 };
-        if (slowCountries.includes(countryCode)) return { min: 3, max: 7 };
+        const days = SHIPPING_COUNTRIES.find((c) => c.code === countryCode)?.days;
+        if (countryCode === 'FR') return { min: 2, max: 5 };
+        if (days) return { min: days, max: days };
         return { min: 3, max: 7 }; // Default for other countries
       })();
 

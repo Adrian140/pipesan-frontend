@@ -2,25 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Truck, Plus, Edit, Save, X, Trash2, Scale, Globe } from 'lucide-react';
 import { apiClient } from '../../../config/api';
 import FlagEmoji from '../../common/FlagEmoji';
+import { SHIPPING_COUNTRIES } from '../../../data/chronopostRates';
 
-// Lista țărilor – nu mai folosim câmpul `flag` (unele erau corupte)
+// Lista țărilor – aceleași ca în tarifele Chronopost publice, plus OTHER ca rezervă
 const AVAILABLE_COUNTRIES = [
-  { code: 'FR', name: 'France' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'CZ', name: 'Czech Republic' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'NO', name: 'Norway' },
-  { code: 'OTHER', name: 'Other EU Countries' }
+  ...SHIPPING_COUNTRIES.map(({ code, name }) => ({ code, name })),
+  { code: 'OTHER', name: 'Other Countries' }
 ];
 
 // Generează steag din cod ISO-2 (fără a depinde de emoji din listă)

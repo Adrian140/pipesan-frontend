@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Package, CheckCircle, Calculator, Download, Gift, Truck, Star } from 'lucide-react';
+import ShippingRates from '../components/services/ShippingRates';
 
 function ServicesPricing() {
   const [quantity, setQuantity] = useState(100);
@@ -106,6 +107,8 @@ function ServicesPricing() {
             </div>
           </div>
         </section>
+
+        <ShippingRates />
 
         {/* Calculator */}
         <section className="mb-20">
