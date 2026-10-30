@@ -427,7 +427,7 @@ function Home() {
         subtitle={content.hero_subtitle || t.heroSubtitle}
         ctaLabel={t.btnBrowseProducts}
         secondaryLabel={t.btnContact}
-        eyebrow={`PipeSan · ${t.eyebrow}`}
+        eyebrow={t.eyebrow}
         products={showcase}
       />
 

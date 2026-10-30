@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import PipeSanWordmark from '../brand/PipeSanWordmark';
 
 const SPEC_CHIPS = ['CW617N', 'BSP · NPT', 'DN8 – DN50', 'PN16 – PN40', 'CE'];
 
-// Titlul vine adesea ca „PipeSan - …”; brandul apare deja în eyebrow.
+// Titlul vine adesea ca „PipeSan - …”; brandul apare deja în logo, deasupra.
 function splitBrand(title = '') {
   const m = String(title).match(/^\s*PipeSan\s*[-–—:]\s*(.+)$/i);
   return m ? m[1] : title;
@@ -15,7 +16,7 @@ function HeroSection({
   subtitle,
   ctaLabel = 'Browse Products',
   secondaryLabel = 'Contact',
-  eyebrow = 'PipeSan · Pro plumbing components',
+  eyebrow = 'Pro plumbing components',
   products = [],
 }) {
   const tiles = products.slice(0, 4);
@@ -26,6 +27,7 @@ function HeroSection({
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:py-24 grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-6">
+          <PipeSanWordmark className="w-44 sm:w-56 -ml-2 mb-4" />
           <p className="inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-brass-light mb-6">
             <span className="h-px w-8 bg-brass-light" />
             {eyebrow}
