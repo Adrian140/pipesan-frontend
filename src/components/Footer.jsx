@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wrench, Phone, Mail, MapPin, Award, Truck, Shield } from 'lucide-react';
-import LogoComponent from './LogoComponent';
+import PipeSanWordmark from './brand/PipeSanWordmark';
 
 function Footer() {
   return (
@@ -10,9 +10,7 @@ function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="rounded-xl bg-white p-2">
-                <LogoComponent className="w-16 h-16" />
-              </div>
+              <PipeSanWordmark className="w-48 -ml-2" />
             </div>
             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
               Professional plumbing parts and pipe fittings supplier for Europe. High-quality brass and stainless steel components with technical specifications, certificates and fast delivery. Serving professionals and installers since 2020.
