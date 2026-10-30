@@ -10,50 +10,45 @@ function Testimonials({
   const has = testimonials && testimonials.length > 0;
 
   return (
-    <section className="py-16 lg:py-20 bg-white">
+    <section className="py-20 lg:py-28 bg-graphite-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+        <div className="max-w-3xl mb-14">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-brass-light mb-4">04 — Clients</p>
+          <h2 className="text-3xl lg:text-4xl font-extrabold mb-4">
             {title}
           </h2>
-          <p className="text-lg sm:text-xl text-text-secondary">{subtitle}</p>
+          <p className="text-lg text-gray-400">{subtitle}</p>
         </div>
 
         {has && (
-          <>
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-gray-50 p-6 sm:p-8 rounded-xl text-center">
-                <div className="flex justify-center mb-4">
+          <div className="grid md:grid-cols-3 gap-5">
+            {testimonials.map((item, index) => (
+              <figure
+                key={index}
+                onMouseEnter={() => setCurrentTestimonial(index)}
+                className={`rounded-2xl p-8 border transition-colors ${
+                  index === currentTestimonial
+                    ? 'border-brass/60 bg-white/[0.06]'
+                    : 'border-white/10 bg-white/[0.03]'
+                }`}
+              >
+                <div className="flex mb-6" aria-label={`${item.rating || 5}/5`}>
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    <Star key={i} className="w-4 h-4 text-brass-light fill-current" />
                   ))}
                 </div>
-                <p className="text-base sm:text-lg text-text-secondary mb-6 italic">
-                  "{testimonials[currentTestimonial].text}"
-                </p>
-                <div>
-                  <p className="text-sm sm:text-base font-semibold text-text-primary">
-                    {testimonials[currentTestimonial].name}
+                <blockquote className="text-gray-200 leading-relaxed mb-8">
+                  “{item.text}”
+                </blockquote>
+                <figcaption>
+                  <p className="font-bold">{item.name}</p>
+                  <p className="font-mono text-xs uppercase tracking-wider text-gray-500 mt-1">
+                    {item.company}
                   </p>
-                  <p className="text-sm sm:text-base text-text-secondary">
-                    {testimonials[currentTestimonial].company}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center mt-6 space-x-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentTestimonial ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-          </>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         )}
       </div>
     </section>

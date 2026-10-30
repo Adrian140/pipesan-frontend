@@ -19,6 +19,7 @@ import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import { apiClient } from "../config/api";
 import { normalizeProduct } from "../utils/normalizeProduct";
+import { extractSpecs } from "../utils/productSpecs";
 
 const COUNTRY_ORDER = ["FR", "DE", "IT", "ES", "BE", "NL", "PL", "SE", "UK", "OTHER"];
 const PH =
@@ -99,7 +100,8 @@ const writeCache = (p) => {
         }
       }
 
-      if (!cancel && !hadInitialData) setLoading(false);
+      // Oprim spinner-ul și când pornim din cache (altfel rămânea blocat la refresh)
+      if (!cancel) setLoading(false);
       if (!cancel && lastErr && !cached) {
         console.error(lastErr);
       }
@@ -144,7 +146,7 @@ const writeCache = (p) => {
   if (loading) {
     return (
       <div className="min-h-screen py-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-brass" />
       </div>
     );
   }
@@ -263,7 +265,7 @@ const writeCache = (p) => {
       <Star
         key={i}
         className={`${size} ${
-          i < Math.floor(rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+          i < Math.floor(rating) ? "text-brass fill-current" : "text-gray-300"
         }`}
       />
     ));
@@ -278,20 +280,20 @@ const writeCache = (p) => {
   };
 
   return (
-    <div className="min-h-screen py-20">
+    <div className="min-h-screen bg-paper pt-8 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="mb-8 text-sm">
-          <Link to="/" className="text-primary">Home</Link>{" "}
-          <span className="text-gray-400">/</span>{" "}
-          <Link to="/products" className="text-primary">Products</Link>{" "}
-          <span className="text-gray-400">/</span>{" "}
-          <span className="text-gray-700">{name}</span>
+        <nav className="mb-8 font-mono text-[11px] uppercase tracking-wider text-text-light truncate">
+          <Link to="/" className="hover:text-text-primary">Home</Link>
+          <span className="mx-2">/</span>
+          <Link to="/products" className="hover:text-text-primary">Products</Link>
+          <span className="mx-2">/</span>
+          <span className="text-text-secondary">{sku}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 mb-12">
           {/* LEFT: Images + Specifications */}
           <div className="space-y-8">
-            <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
+            <div className="aspect-square bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 overflow-hidden">
               <img
                 src={mainImage}
                 alt={name}
@@ -309,14 +311,14 @@ const writeCache = (p) => {
                   <button
                     key={`${img}-${i}`}
                     onClick={() => setSelectedImage(i)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                      selectedImage === i ? "border-primary" : "border-gray-200"
+                    className={`aspect-square rounded-lg overflow-hidden border-2 bg-white p-1.5 transition-colors ${
+                      selectedImage === i ? "border-graphite-900" : "border-gray-200 hover:border-gray-400"
                     }`}
                   >
                     <img
                       src={img}
                       alt={`thumb-${i}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={(e) => { e.currentTarget.src = PH; }}
                     />
                   </button>
@@ -325,13 +327,13 @@ const writeCache = (p) => {
             )}
 
             {specList.length > 0 && (
-              <section aria-labelledby="specs-title" className="bg-white">
-                <h2 id="specs-title" className="text-lg font-semibold mb-4">Specifications</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <section aria-labelledby="specs-title" className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h2 id="specs-title" className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">Specifications</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                   {specList.map(([k, v]) => (
-                    <div key={k} className="flex justify-between gap-4 py-2 border-b border-gray-100">
-                      <span className="font-medium">{k}:</span>
-                      <span className="text-gray-700 text-right">{String(v)}</span>
+                    <div key={k} className="flex justify-between gap-4 py-3 border-b border-gray-100 text-sm">
+                      <span className="text-text-secondary">{k}</span>
+                      <span className="font-semibold text-text-primary text-right">{String(v)}</span>
                     </div>
                   ))}
                 </div>
@@ -341,41 +343,50 @@ const writeCache = (p) => {
 
           {/* RIGHT: Info + CTAs */}
           <div>
-            <p className="text-sm text-gray-500">SKU: {sku}</p>
-            <h1 className="text-3xl font-bold mt-1 mb-4">{name}</h1>
+            <p className="font-mono text-xs uppercase tracking-wider text-text-light">SKU · {sku}</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary leading-tight mt-2 mb-4">{name}</h1>
+            {extractSpecs(name, 5).length > 0 && (
+              <ul className="flex flex-wrap gap-1.5 mb-4">
+                {extractSpecs(name, 5).map((sp) => (
+                  <li key={sp} className="font-mono text-xs px-2 py-1 rounded bg-white border border-gray-200 text-text-secondary">
+                    {sp}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className="flex items-center gap-2 mb-4">
               {renderStars(rating)}
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-text-secondary">
                 {rating > 0 ? `${rating.toFixed(1)} (${review_count} reviews)` : "No reviews yet"}
               </span>
             </div>
 
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl font-bold text-primary">
+            <div className="mb-6 py-5 border-y border-gray-200">
+              <div className="flex items-baseline gap-3 mb-1">
+                <span className="text-4xl font-extrabold text-text-primary">
                   {Number(displayPrice).toFixed(2)} {currency}
                 </span>
                 {hasDiscount && (
-                  <span className="text-xl text-gray-500 line-through">
+                  <span className="text-lg text-text-light line-through">
                     {Number(price).toFixed(2)} {currency}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600">Price excl. VAT — tax calculated at checkout</p>
+              <p className="text-sm text-text-secondary">Price excl. VAT — tax calculated at checkout</p>
             </div>
 
             {/* Key Features Section */}
             {bullet_points.length > 0 && (
-              <section aria-labelledby="features-title" className="bg-gray-50 rounded-xl p-6 mb-6">
-                <h2 id="features-title" className="text-lg font-semibold text-text-primary mb-4">
+              <section aria-labelledby="features-title" className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+                <h2 id="features-title" className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">
                   Key Features
                 </h2>
                 <div className="space-y-3">
                   {bullet_points.slice(0, 5).map((bp, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      <span className="text-gray-700">{bp}</span>
+                      <div className="w-1.5 h-1.5 bg-brass rounded-sm mt-2 flex-shrink-0" />
+                      <span className="text-sm text-text-secondary leading-relaxed">{bp}</span>
                     </div>
                   ))}
                 </div>
@@ -385,11 +396,11 @@ const writeCache = (p) => {
             {/* Stock */}
             <div className="mb-4">
               {inStock ? (
-                <span className="text-green-600 text-sm">
+                <span className="inline-flex items-center gap-2 text-emerald-700 text-sm font-semibold"><span className="w-2 h-2 rounded-full bg-emerald-500" />
                   In stock{manage_stock ? ` (${stock_quantity})` : ""}
                 </span>
               ) : (
-                <span className="text-red-600 text-sm">Out of stock</span>
+                <span className="inline-flex items-center gap-2 text-text-secondary text-sm font-semibold"><span className="w-2 h-2 rounded-full bg-gray-400" />Out of stock</span>
               )}
             </div>
 
@@ -406,7 +417,7 @@ const writeCache = (p) => {
             {/* Quantity selector */}
             <div className="mb-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center border border-gray-300 rounded-lg">
+                <div className="flex items-center bg-white border border-gray-300 rounded-lg">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))} 
                     className="px-3 py-2 hover:bg-gray-50 transition-colors"
@@ -435,12 +446,12 @@ const writeCache = (p) => {
                 <button
                   onClick={handleAddToCart}
                   disabled={!inStock || isAdding}
-                  className={`w-full py-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
+                  className={`w-full py-4 rounded-lg font-bold text-base transition-colors duration-200 ${
                     !inStock
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      ? 'bg-gray-300 text-white cursor-not-allowed'
                       : isAdding
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-primary text-white hover:bg-primary-dark hover:shadow-lg'
+                      ? 'bg-graphite-700 text-white'
+                      : 'bg-graphite-900 text-white hover:bg-primary'
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2">
@@ -464,7 +475,7 @@ const writeCache = (p) => {
               {/* Secondary actions */}
               <div className="flex items-center gap-3">
                 <select
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                  className="flex-1 px-3 py-2.5 bg-white border border-gray-300 rounded-lg font-mono text-sm"
                   value={amazonCountry}
                   onChange={(e) => setAmazonCountry(e.target.value)}
                   title="Amazon Country"
@@ -477,10 +488,10 @@ const writeCache = (p) => {
                 <button
                   onClick={openAmazon}
                   disabled={!selectedAmazonUrl}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                     selectedAmazonUrl
-                      ? "bg-orange-500 text-white hover:bg-orange-600"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      ? "bg-white border border-graphite-900 text-text-primary hover:bg-graphite-900 hover:text-white"
+                      : "bg-gray-100 text-text-light cursor-not-allowed"
                   }`}
                   title={selectedAmazonUrl ? "Buy on Amazon" : "Not available yet"}
                 >
@@ -489,8 +500,8 @@ const writeCache = (p) => {
 
                 <button
                   onClick={toggleFavorite}
-                  className={`p-2 border rounded-lg transition-colors ${
-                    isFav ? "border-red-400 text-red-500" : "border-gray-300 text-gray-500 hover:border-gray-400"
+                  className={`p-2.5 border rounded-lg transition-colors ${
+                    isFav ? "bg-white border-red-300 text-red-500" : "bg-white border-gray-300 text-text-secondary hover:border-gray-400"
                   }`}
                   title="Add to favorites"
                 >
@@ -499,7 +510,7 @@ const writeCache = (p) => {
 
                 <button
                   onClick={share}
-                  className="p-2 border border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 transition-colors"
+                  className="p-2.5 bg-white border border-gray-300 rounded-lg text-text-secondary hover:border-gray-400 transition-colors"
                   title="Share"
                 >
                   <Share2 className="w-5 h-5" />
@@ -508,17 +519,17 @@ const writeCache = (p) => {
             </div>
 
             {/* Perks */}
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center gap-3 text-sm">
-                <Truck className="w-5 h-5 text-green-600" />
+            <div className="grid sm:grid-cols-3 gap-3 mb-8">
+              <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
+                <Truck className="w-5 h-5 text-primary flex-shrink-0" />
                 <span>Free shipping for orders over €100</span>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <RotateCcw className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
+                <RotateCcw className="w-5 h-5 text-primary flex-shrink-0" />
                 <span>30-day return policy</span>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Shield className="w-5 h-5 text-purple-600" />
+              <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
+                <Shield className="w-5 h-5 text-primary flex-shrink-0" />
                 <span>2-year warranty included</span>
               </div>
             </div>
@@ -527,20 +538,20 @@ const writeCache = (p) => {
 
         {/* Full Width Description */}
         {!!(description && String(description).trim()) && (
-          <section aria-labelledby="desc-title" className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
-            <h2 id="desc-title" className="text-2xl font-bold text-text-primary mb-6">
+          <section aria-labelledby="desc-title" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 mb-8">
+            <h2 id="desc-title" className="text-2xl font-extrabold text-text-primary mb-6">
               Product Description
             </h2>
-            <div className="text-gray-700 leading-relaxed text-lg">
+            <div className="text-text-secondary leading-relaxed max-w-4xl">
               <p className="whitespace-pre-line">{String(description)}</p>
             </div>
           </section>
         )}
 
         {/* Customer Reviews - Full Width - ONLY DISPLAY */}
-        <section aria-labelledby="reviews-title" className="bg-white rounded-xl border border-gray-200 p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 id="reviews-title" className="text-2xl font-bold text-text-primary">
+        <section aria-labelledby="reviews-title" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <h2 id="reviews-title" className="text-2xl font-extrabold text-text-primary">
               Customer Reviews
             </h2>
             {reviews.length > 0 && (
@@ -555,7 +566,7 @@ const writeCache = (p) => {
 
           {reviewsLoading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-brass" />
             </div>
           ) : reviews.length > 0 ? (
             <div className="space-y-6">
@@ -563,8 +574,8 @@ const writeCache = (p) => {
                 <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary to-copper rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 bg-graphite-900 rounded-full flex items-center justify-center">
+                        <User className="w-5 h-5 text-brass-light" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -596,7 +607,7 @@ const writeCache = (p) => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-paper rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-500 mb-2">

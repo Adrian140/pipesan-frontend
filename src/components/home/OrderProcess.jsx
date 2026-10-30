@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
 
 function OrderProcess({
   title = 'How to Order',
@@ -14,30 +13,31 @@ function OrderProcess({
   ],
 }) {
   return (
-    <section className="py-16 lg:py-20 bg-gray-50">
+    <section className="py-20 lg:py-28 bg-paper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+        <div className="max-w-3xl mb-14">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">03 — Process</p>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">
             {title}
           </h2>
-          <p className="text-lg sm:text-xl text-text-secondary">{subtitle}</p>
+          <p className="text-lg text-text-secondary">{subtitle}</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
+        <ol className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-10">
           {steps.map((item, index) => (
-            <div key={index} className="text-center">
-              <div className="bg-primary text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-sm sm:text-base">
-                {index + 1}
+            <li key={index} className="relative">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="font-mono text-sm font-semibold text-primary">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="h-px flex-1 bg-gray-300" />
               </div>
-              <h3 className="text-sm sm:text-lg font-semibold text-text-primary mb-2">
+              <h3 className="text-base font-bold text-text-primary mb-2">
                 {item.step}
               </h3>
-              <p className="text-xs sm:text-sm text-text-secondary">{item.description}</p>
-              {index < steps.length - 1 && (
-                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 text-text-light mx-auto mt-4 hidden lg:block" />
-              )}
-            </div>
+              <p className="text-sm text-text-secondary leading-relaxed">{item.description}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

@@ -1,17 +1,30 @@
 // FILE: src/components/product/ProductCard.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star, ShoppingCart, Check } from "lucide-react";
+import { Star, ShoppingCart, Check, ExternalLink } from "lucide-react";
 import { normalizeProduct } from "../../utils/normalizeProduct";
 import { useCart } from "../../contexts/CartContext";
 import { apiClient } from "../../config/api";              // ⬅️ nou
+import { useLanguage } from "../../contexts/LanguageContext";
+import { extractSpecs } from "../../utils/productSpecs";
 
 const PH_400 =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
 
 
+const L = {
+  fr: { exVat: "HT", amazon: "Voir sur Amazon", onAmazon: "Sur Amazon", unavailable: "Indisponible", add: "Ajouter au panier", added: "Ajouté au panier", adding: "Ajout..." },
+  en: { exVat: "excl. VAT", amazon: "View on Amazon", onAmazon: "On Amazon", unavailable: "Unavailable", add: "Add to cart", added: "Added to cart", adding: "Adding..." },
+  it: { exVat: "IVA escl.", amazon: "Vedi su Amazon", onAmazon: "Su Amazon", unavailable: "Non disponibile", add: "Aggiungi al carrello", added: "Aggiunto al carrello", adding: "Aggiunta..." },
+  de: { exVat: "zzgl. MwSt.", amazon: "Auf Amazon ansehen", onAmazon: "Auf Amazon", unavailable: "Nicht verfügbar", add: "In den Warenkorb", added: "Im Warenkorb", adding: "Wird hinzugefügt..." },
+  es: { exVat: "sin IVA", amazon: "Ver en Amazon", onAmazon: "En Amazon", unavailable: "No disponible", add: "Añadir al carrito", added: "Añadido al carrito", adding: "Añadiendo..." },
+  ro: { exVat: "fără TVA", amazon: "Vezi pe Amazon", onAmazon: "Pe Amazon", unavailable: "Indisponibil", add: "Adaugă în coș", added: "Adăugat în coș", adding: "Se adaugă..." },
+};
+
 export default function ProductCard({ product }) {
   const p = normalizeProduct(product);
+  const { currentLanguage } = useLanguage();
+  const l = L[currentLanguage] || L.fr;
     const prefetchProduct = async (id) => {
     const key = `product:${id}`;
     try {
@@ -101,120 +114,123 @@ export default function ProductCard({ product }) {
     description: p.description, // opțional
   };
 
+  const specs = extractSpecs(p.name);
+  const discountPct = hasDiscount && base > 0 ? Math.round(((base - sale) / base) * 100) : 0;
+
   return (
     <div
-      className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative"
+      className="group relative flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-lift transition-all duration-300"
       onMouseEnter={() => prefetchProduct(p.id)}            // ⬅️ prefetch
     >
       <Link
         to={`/products/${p.id}`}
-        className="block"
+        className="flex flex-col flex-1"
         state={{ prefill }}                                 // ⬅️ trimite prefill
+        title={p.name}
       >
-        <div className="relative aspect-[5/4] overflow-hidden">
+        <div className="relative aspect-square bg-white p-4 overflow-hidden">
           <img
             src={mainImage}
             alt={p.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain group-hover:scale-[1.04] transition-transform duration-500"
             onError={(e) => { e.currentTarget.src = PH_400; }}
             loading="lazy"
             decoding="async"
           />
           {isOutOfStock && (
-            <span className="absolute top-3 left-3 bg-gray-700 text-white px-2 py-1 rounded-md text-xs font-medium">
-              {amazonUrl ? "Disponible sur Amazon" : "Indisponibil"}
+            <span className="absolute top-3 left-3 bg-white/90 backdrop-blur border border-gray-200 text-text-secondary px-2 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider">
+              {amazonUrl ? l.onAmazon : l.unavailable}
             </span>
           )}
-          {!isOutOfStock && hasDiscount && base > 0 && (
-            <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-              -{Math.round(((base - sale) / base) * 100)}%
+          {!isOutOfStock && discountPct > 0 && (
+            <span className="absolute top-3 left-3 bg-graphite-900 text-brass-light px-2 py-0.5 rounded font-mono text-[11px] font-semibold">
+              -{discountPct}%
             </span>
           )}
-          <div className="absolute bottom-3 right-3">
-            {isOutOfStock ? (
-              amazonUrl ? (
-                <button
-                  onClick={handleAmazonClick}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-lg bg-[#FF9900] text-white font-semibold hover:bg-[#ff8a00] transition"
-                  title="Cumpără pe Amazon"
-                >
-                  Amazon
-                </button>
-              ) : null
-            ) : (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isAdding}
-                  className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
-                    showSuccess
-                      ? "bg-green-500 text-white"
-                      : isAdding
-                      ? "bg-yellow-500 text-white"
-                      : "bg-primary text-white hover:bg-primary-dark hover:scale-110"
-                  }`}
-                  title={
-                    showSuccess ? "Added to cart!" : isAdding ? "Adding..." : "Add to cart"
-                  }
-                >
-                  {showSuccess ? (
-                    <Check className="w-5 h-5" />
-                  ) : isAdding ? (
-                    <div className="w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  ) : (
-                    <ShoppingCart className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
-        <div className="p-1.5 relative space-y-1">
-          <p className="text-[10px] text-gray-500 tracking-wide uppercase">SKU: {p.sku || ""}</p>
-          <h3 className="text-sm font-semibold text-text-primary leading-tight line-clamp-2">
+        <div className="flex flex-col flex-1 border-t border-gray-100 p-4 gap-2">
+          {p.sku && (
+            <p className="font-mono text-[10px] text-text-light tracking-wider uppercase truncate">{p.sku}</p>
+          )}
+          <h3 className="text-sm font-semibold text-text-primary leading-snug line-clamp-3 min-h-[3.9em]">
             {p.name || "Product Name"}
           </h3>
 
+          {specs.length > 0 && (
+            <ul className="flex flex-wrap gap-1">
+              {specs.map((s) => (
+                <li key={s} className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-paper text-text-secondary border border-gray-200">
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
+
           {Number(p.rating) > 0 && (
-            <div className="flex items-center gap-1 mb-1">
+            <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
                   className={`w-3 h-3 ${
                     i < Math.floor(Number(p.rating))
-                      ? "text-yellow-400 fill-current"
+                      ? "text-brass fill-current"
                       : "text-gray-300"
                   }`}
                 />
               ))}
-              <span className="text-[11px] text-gray-500">({p.review_count || 0})</span>
+              <span className="text-[11px] text-text-light">({p.review_count || 0})</span>
             </div>
           )}
 
-          {!isOutOfStock && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-lg font-bold text-primary leading-none">
-                {displayPrice.toFixed(2)} {p.currency} <span className="text-xs font-normal">excl. VAT</span>
-              </span>
-              {hasDiscount && base > 0 && (
-                <span className="text-xs text-gray-500 line-through absolute bottom-2 right-2">
-                  {base.toFixed(2)} {p.currency}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      </Link>
-
-      {showSuccess && (
-        <div className="absolute inset-0 bg-green-500 bg-opacity-90 flex items-center justify-center rounded-xl">
-          <div className="text-white text-center">
-            <Check className="w-8 h-8 mx-auto mb-2" />
-            <p className="font-semibold">Added to cart!</p>
+          <div className="mt-auto pt-2 flex items-end justify-between gap-2 min-h-[44px]">
+            {!isOutOfStock ? (
+              <>
+                <div className="leading-tight">
+                  {hasDiscount && base > 0 && (
+                    <span className="block text-xs text-text-light line-through">
+                      {base.toFixed(2)} {p.currency}
+                    </span>
+                  )}
+                  <span className="text-lg font-extrabold text-text-primary">
+                    {displayPrice.toFixed(2)} <span className="text-sm font-bold">{p.currency}</span>
+                  </span>
+                  <span className="block text-[11px] text-text-light">{l.exVat}</span>
+                </div>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAdding}
+                  aria-label={showSuccess ? l.added : isAdding ? l.adding : l.add}
+                  title={showSuccess ? l.added : isAdding ? l.adding : l.add}
+                  className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                    showSuccess
+                      ? "bg-emerald-600 text-white"
+                      : "bg-graphite-900 text-white hover:bg-primary"
+                  }`}
+                >
+                  {showSuccess ? (
+                    <Check className="w-5 h-5" />
+                  ) : isAdding ? (
+                    <div className="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <ShoppingCart className="w-[18px] h-[18px]" />
+                  )}
+                </button>
+              </>
+            ) : amazonUrl ? (
+              <button
+                onClick={handleAmazonClick}
+                className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-text-primary hover:border-graphite-900 transition-colors"
+              >
+                {l.amazon}
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <span className="text-sm text-text-light">{l.unavailable}</span>
+            )}
           </div>
         </div>
-      )}
+      </Link>
     </div>
   );
 }

@@ -39,29 +39,33 @@ function WhyChooseUs({
     },
   ],
 }) {
+  const icons = [Shield, Truck, Wrench, Award];
   return (
-    <section className="py-16 lg:py-20 bg-white">
+    <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-4">
+        <div className="max-w-3xl mb-14">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">01 — PipeSan</p>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-text-primary mb-4">
             {title}
           </h2>
-          <p className="text-lg sm:text-xl text-text-secondary">{subtitle}</p>
+          <p className="text-lg text-text-secondary">{subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-gray-200">
           {features.map((f, i) => {
-            const Icon = f.icon || Shield;
+            const Icon = f.icon || icons[i % icons.length];
             return (
               <div
                 key={i}
-                className="bg-gray-50 p-6 rounded-xl text-center hover:shadow-lg transition-shadow duration-200"
+                className="group p-8 border-r border-b border-gray-200 hover:bg-paper transition-colors"
               >
-                <Icon className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-base sm:text-lg font-semibold text-text-primary mb-2">
+                <div className="w-12 h-12 rounded-lg bg-graphite-900 flex items-center justify-center mb-6 group-hover:bg-brass-sheen transition-colors">
+                  <Icon className="w-6 h-6 text-brass-light group-hover:text-graphite-950 transition-colors" />
+                </div>
+                <h3 className="text-lg font-bold text-text-primary mb-2">
                   {f.title}
                 </h3>
-                <p className="text-sm sm:text-base text-text-secondary">
+                <p className="text-sm text-text-secondary leading-relaxed">
                   {f.description}
                 </p>
               </div>

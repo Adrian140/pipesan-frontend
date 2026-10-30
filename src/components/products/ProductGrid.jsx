@@ -4,14 +4,14 @@ import ProductCard from "./ProductCard";
 function ProductGrid({ products = [], loading = false }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
         {[...Array(8)].map((_, index) => (
           <div key={index} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
-            <div className="aspect-square bg-gray-200" />
+            <div className="aspect-square bg-gray-100" />
             <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-3/4" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-              <div className="h-8 bg-gray-200 rounded" />
+              <div className="h-4 bg-gray-100 rounded w-3/4" />
+              <div className="h-4 bg-gray-100 rounded w-1/2" />
+              <div className="h-8 bg-gray-100 rounded" />
             </div>
           </div>
         ))}
@@ -34,7 +34,7 @@ function ProductGrid({ products = [], loading = false }) {
   }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
       {products.map((product, idx) => (
         <ProductCard key={product?.id ?? `p-${idx}`} product={product} />
       ))}

@@ -9,12 +9,12 @@ function CartIcon() {
   return (
     <button
       onClick={openCart}
-      className="relative p-2 text-text-secondary hover:text-primary transition-colors"
+      className="relative p-2 text-text-primary hover:text-primary transition-colors"
       title="Shopping Cart"
     >
       <ShoppingCart className="w-6 h-6" />
       {itemCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+        <span className="absolute -top-1 -right-1 bg-brass text-graphite-950 text-[11px] rounded-full w-5 h-5 flex items-center justify-center font-bold">
           {itemCount > 99 ? '99+' : itemCount}
         </span>
       )}

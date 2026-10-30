@@ -19,7 +19,7 @@ function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors border border-gray-300 rounded-lg hover:border-primary"
+        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors border border-gray-200 rounded-lg hover:border-gray-400"
       >
         <Globe className="w-4 h-4" />
         <FlagEmoji code={langToCountry[currentLanguage]} />
@@ -40,7 +40,7 @@ function LanguageSwitcher() {
                   key={code}
                   onClick={() => handleLanguageChange(code)}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center space-x-3 ${
-                    currentLanguage === code ? 'bg-blue-50 text-primary' : 'text-text-secondary'
+                    currentLanguage === code ? 'bg-paper text-text-primary font-semibold' : 'text-text-secondary'
                   }`}
                 >
                   <FlagEmoji code={langToCountry[code]} />

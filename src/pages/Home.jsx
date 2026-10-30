@@ -6,7 +6,9 @@ import WhyChooseUs from '../components/home/WhyChooseUs';
 import OrderProcess from '../components/home/OrderProcess';
 import Testimonials from '../components/home/Testimonials';
 import Section from '../components/layout/Section';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ArrowRight } from 'lucide-react';
+import ProductCard from '../components/products/ProductCard';
+import { normalizeProduct } from '../utils/normalizeProduct';
 import { apiClient } from '../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -44,7 +46,7 @@ const T = {
 
     // TESTIMONIALS (doar titluri/subtitluri traduse)
     testiTitle: 'Ce que disent nos clients professionnels',
-    testiSubtitle: 'De încredere pentru instalatori profesioniști din întreaga Europă',
+    testiSubtitle: 'Choisi par des installateurs professionnels dans toute l’Europe',
 
     // Restul deja aveai:
     homeProductsTitle: 'Catégories de Produits Professionnels',
@@ -57,13 +59,18 @@ const T = {
     toolsTitle: 'Outils & Accessoires Professionnels',
     tools1: 'Outils professionnels d’installation',
     tools2: 'Joints et solutions d’étanchéité',
-    tools3: 'Flexibles și racorduri',
+    tools3: 'Flexibles et raccords',
     tools4: 'Documentation technique incluse',
     ctaTitle: 'Prêt à sourcer des pièces de plomberie professionnelles en Europe ?',
     ctaSubtitle:
       'Parcourez notre vaste catalogue de pièces de plomberie professionnelles. Composants certifiés CE, fiches techniques et livraison rapide dans toute l’Europe pour les installateurs.',
     btnRequestCatalog: 'Demander le Catalogue',
     btnBrowseProducts: 'Parcourir les Produits',
+    eyebrow: 'Composants de plomberie professionnels',
+    btnContact: 'Contacter un expert',
+    featuredTitle: 'Produits phares',
+    featuredSubtitle: 'Raccords en laiton prêts à expédier, avec SKU et spécifications claires.',
+    viewAll: 'Voir tout le catalogue',
   },
 
   en: {
@@ -119,6 +126,11 @@ const T = {
       'Browse our extensive catalog of professional plumbing parts. CE certified components, technical specifications and fast delivery across Europe for professional installers.',
     btnRequestCatalog: 'Request Catalog',
     btnBrowseProducts: 'Browse Products',
+    eyebrow: 'Professional plumbing components',
+    btnContact: 'Talk to an expert',
+    featuredTitle: 'Featured products',
+    featuredSubtitle: 'Brass fittings ready to ship, with clear SKUs and specifications.',
+    viewAll: 'View full catalogue',
   },
 
   it: {
@@ -170,6 +182,11 @@ const T = {
       'Sfoglia il nostro ampio catalogo di componenti idraulici professionali. Componenti certificati CE, specifiche tecniche e consegna rapida in tutta Europa.',
     btnRequestCatalog: 'Richiedi Catalogo',
     btnBrowseProducts: 'Sfoglia Prodotti',
+    eyebrow: 'Componenti idraulici professionali',
+    btnContact: 'Parla con un esperto',
+    featuredTitle: 'Prodotti in evidenza',
+    featuredSubtitle: 'Raccordi in ottone pronti per la spedizione, con SKU e specifiche chiare.',
+    viewAll: 'Vedi tutto il catalogo',
   },
 
   de: {
@@ -221,6 +238,11 @@ const T = {
       'Durchsuchen Sie unseren umfangreichen Katalog professioneller Sanitärkomponenten. CE-zertifizierte Bauteile, technische Daten und schnelle EU-Lieferung.',
     btnRequestCatalog: 'Katalog anfordern',
     btnBrowseProducts: 'Produkte durchsuchen',
+    eyebrow: 'Professionelle Sanitärkomponenten',
+    btnContact: 'Experten kontaktieren',
+    featuredTitle: 'Ausgewählte Produkte',
+    featuredSubtitle: 'Messingfittings versandbereit, mit klaren SKUs und Spezifikationen.',
+    viewAll: 'Gesamten Katalog ansehen',
   },
 
   es: {
@@ -272,6 +294,11 @@ const T = {
       'Explora nuestro amplio catálogo de piezas profesionales. Componentes certificados CE, especificaciones técnicas y entrega rápida en toda Europa.',
     btnRequestCatalog: 'Solicitar Catálogo',
     btnBrowseProducts: 'Explorar Productos',
+    eyebrow: 'Componentes de fontanería profesional',
+    btnContact: 'Hablar con un experto',
+    featuredTitle: 'Productos destacados',
+    featuredSubtitle: 'Accesorios de latón listos para enviar, con SKU y especificaciones claras.',
+    viewAll: 'Ver todo el catálogo',
   },
 
   ro: {
@@ -323,6 +350,11 @@ const T = {
       'Răsfoiește catalogul nostru de piese profesionale. Componente certificate CE, specificații tehnice și livrare rapidă în toată Europa.',
     btnRequestCatalog: 'Solicită Catalogul',
     btnBrowseProducts: 'Răsfoiește Produsele',
+    eyebrow: 'Componente profesionale pentru instalații',
+    btnContact: 'Vorbește cu un expert',
+    featuredTitle: 'Produse recomandate',
+    featuredSubtitle: 'Fitinguri din alamă gata de expediere, cu SKU și specificații clare.',
+    viewAll: 'Vezi tot catalogul',
   },
 };
 
@@ -361,25 +393,32 @@ function Home() {
   ];
 
   const [content, setContent] = useState({});
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [contentData, servicesData] = await Promise.all([
+        const [contentData, productsData] = await Promise.all([
           apiClient.content.getPublic(),
-          apiClient.admin.getServices(),
+          apiClient.products.getAll({ search: '', category: '', sortBy: 'name' }),
         ]);
         setContent(contentData || {});
-        setServices((servicesData || []).slice(0, 3));
+        setProducts(productsData || []);
       } catch (e) {
         console.error('Error fetching home data:', e);
-      } finally {
-        setLoading(false);
       }
     })();
   }, []);
+
+  // Produsele cu poză și preț afișabil merg în hero și în „Produse recomandate”
+  const showcase = useMemo(
+    () =>
+      products
+        .map(normalizeProduct)
+        .filter((p) => p.image && p.inStock && Number(p.price) > 0)
+        .slice(0, 8),
+    [products]
+  );
 
   return (
     <div className="min-h-screen">
@@ -387,21 +426,90 @@ function Home() {
         title={content.hero_title || t.heroTitle}
         subtitle={content.hero_subtitle || t.heroSubtitle}
         ctaLabel={t.btnBrowseProducts}
+        secondaryLabel={t.btnContact}
+        eyebrow={`PipeSan · ${t.eyebrow}`}
+        products={showcase}
       />
 
-      {/* ✅ acum trecem textele traduse ca props */}
       <WhyChooseUs title={whyTitle} subtitle={whySubtitle} features={whyFeatures} />
+
+      {/* Produse recomandate */}
+      {showcase.length > 0 && (
+        <Section background="gray" padding="py-20 lg:py-28">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+            <div className="max-w-2xl">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">02 — Catalogue</p>
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-text-primary mb-3">{t.featuredTitle}</h2>
+              <p className="text-lg text-text-secondary">{t.featuredSubtitle}</p>
+            </div>
+            <Link
+              to="/products"
+              className="group inline-flex items-center gap-2 font-semibold text-text-primary border-b-2 border-brass pb-1 self-start md:self-auto"
+            >
+              {t.viewAll}
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+            {showcase.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Materiale & accesorii */}
+      <Section padding="py-20 lg:py-28">
+        <div className="grid md:grid-cols-2 gap-5">
+          {[
+            { title: t.brassSteelTitle, items: [t.brass1, t.brass2, t.brass3, t.brass4], dark: true },
+            { title: t.toolsTitle, items: [t.tools1, t.tools2, t.tools3, t.tools4], dark: false },
+          ].map((card) => (
+            <div
+              key={card.title}
+              className={`rounded-2xl p-8 lg:p-10 ${
+                card.dark ? 'bg-blueprint text-white' : 'bg-paper text-text-primary'
+              }`}
+            >
+              <h3 className="text-2xl font-extrabold mb-6">{card.title}</h3>
+              <ul className="space-y-3">
+                {card.items.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${card.dark ? 'text-brass-light' : 'text-primary'}`} />
+                    <span className={card.dark ? 'text-gray-300' : 'text-text-secondary'}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       <OrderProcess title={orderTitle} subtitle={orderSubtitle} steps={orderSteps} />
       <Testimonials title={testiTitle} subtitle={testiSubtitle} testimonials={testiItems} />
 
-      {/* ... restul paginii (deja ok) */}
-      <Section>
-        {/* ... */}
-      </Section>
-
-      <Section background="primary">
-        {/* ... */}
-      </Section>
+      {/* CTA final */}
+      <section className="bg-white py-20 lg:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-text-primary mb-5">{t.ctaTitle}</h2>
+          <p className="text-lg text-text-secondary mb-10 max-w-3xl mx-auto">{t.ctaSubtitle}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/products"
+              className="inline-flex items-center justify-center gap-2 bg-graphite-900 text-white px-7 py-4 rounded-lg font-bold hover:bg-graphite-700 transition-colors"
+            >
+              {t.btnBrowseProducts}
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center px-7 py-4 rounded-lg font-semibold border border-gray-300 text-text-primary hover:border-graphite-900 transition-colors"
+            >
+              {t.btnRequestCatalog}
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
