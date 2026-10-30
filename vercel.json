@@ -1,9 +1,31 @@
 {
-  "routes": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/privacy", "destination": "/privacy-policy", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/products/:slug", "destination": "/_spa" },
+    { "source": "/checkout/:path*", "destination": "/_private" },
+    { "source": "/order-success/:path*", "destination": "/_private" },
+    { "source": "/login", "destination": "/_private" },
+    { "source": "/register", "destination": "/_private" },
+    { "source": "/forgot-password", "destination": "/_private" },
+    { "source": "/email-verified", "destination": "/_private" },
+    { "source": "/reset-password", "destination": "/_private" },
+    { "source": "/dashboard/:path*", "destination": "/_private" },
+    { "source": "/admin/:path*", "destination": "/_private" }
+  ],
+  "headers": [
     {
-      "src": "/[^.]+",
-      "dest": "/",
-      "status": 200
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(_spa|_private)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
     }
   ]
 }

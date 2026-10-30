@@ -14,7 +14,10 @@ import {
   User,
   Calendar,
 } from "lucide-react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useSeo } from "../seo/useSeo";
+import { NotFound } from "../seo/RouteSeo";
+import { breadcrumbJsonLd, productJsonLd, productMeta, productPath, productShortName } from "../seo/meta";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import { apiClient } from "../config/api";
@@ -26,8 +29,10 @@ const PH =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><rect width='100%' height='100%' fill='%23f3f4f6'/></svg>";
 
 export default function ProductDetail() {
+  // The route param is the product slug (or the legacy UUID).
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
  const navPrefill = location.state?.prefill || null;
   const { addItem, isAddingItem } = useCart();
   const { user } = useAuth();
@@ -42,8 +47,36 @@ const [loading, setLoading] = useState(!navPrefill);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
+  const productKey = product?.id || id;
+
   // Check if this specific product is being added
-  const isAdding = isAddingItem(id);
+  const isAdding = isAddingItem(productKey);
+
+  // Old /products/<uuid> links move to the slug URL
+  useEffect(() => {
+    if (product?.slug && id !== product.slug && product.id === id) {
+      navigate(productPath(product) + location.search, { replace: true, state: location.state });
+    }
+  }, [product, id, navigate, location.search, location.state]);
+
+  useSeo(
+    product
+      ? {
+          ...productMeta(product),
+          jsonLd: [
+            productJsonLd(product, product.categories),
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Products", path: "/products" },
+              ...(product.categories?.slug
+                ? [{ name: product.categories.name, path: `/products?category=${product.categories.slug}` }]
+                : []),
+              { name: productShortName(product), path: productPath(product) },
+            ]),
+          ],
+        }
+      : null
+  );
 
   // Fetch product data
   useEffect(() => {
@@ -122,7 +155,7 @@ const writeCache = (p) => {
   const loadProductReviews = async () => {
     try {
       setReviewsLoading(true);
-      const reviewsData = await apiClient.reviews.getByProduct(id);
+      const reviewsData = await apiClient.reviews.getByProduct(product.id);
       setReviews(reviewsData);
     } catch (error) {
       console.error('Error loading reviews:', error);
@@ -134,8 +167,8 @@ const writeCache = (p) => {
 
   useEffect(() => {
     const favs = new Set(JSON.parse(localStorage.getItem("favorites") || "[]"));
-    setIsFav(favs.has(String(id)));
-  }, [id]);
+    setIsFav(favs.has(String(productKey)));
+  }, [productKey]);
 
   const selectedAmazonUrl = useMemo(() => {
     if (!product?.amazon_links) return "";
@@ -152,9 +185,7 @@ const writeCache = (p) => {
   }
   if (!product) {
     return (
-      <div className="min-h-screen py-20 flex items-center justify-center text-gray-600">
-        Product not found.
-      </div>
+      <NotFound title="Product not found" />
     );
   }
 

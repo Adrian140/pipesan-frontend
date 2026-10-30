@@ -1,6 +1,7 @@
 // FILE: src/components/product/ProductCard.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { productPath } from "../../seo/meta";
 import { Star, ShoppingCart, Check, ExternalLink } from "lucide-react";
 import { normalizeProduct } from "../../utils/normalizeProduct";
 import { useCart } from "../../contexts/CartContext";
@@ -124,7 +125,7 @@ export default function ProductCard({ product }) {
       onMouseEnter={() => prefetchProduct(p.id)}            // ⬅️ prefetch
     >
       <Link
-        to={`/products/${p.id}`}
+        to={productPath(p)}
         className="flex flex-col flex-1"
         state={{ prefill }}                                 // ⬅️ trimite prefill
         title={p.name}

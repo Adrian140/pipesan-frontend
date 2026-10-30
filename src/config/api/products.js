@@ -2,6 +2,8 @@
 import { supabase } from '../supabase';
 import { handleDatabaseError, checkTablesExist } from './health';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Small helpers for sessionStorage cache
 const SS_KEY_ALL = 'products_all_v1';
 
@@ -199,6 +201,7 @@ export const productsApi = {
     }
   },
 
+  // Accepts either the product UUID or its URL slug.
   getById: async (id, opts = {}) => {
     const { signal } = opts;
     let retries = 2;
@@ -216,7 +219,7 @@ export const productsApi = {
             product_images(image_url, alt_text, is_primary, sort_order),
             product_variants(*)
           `)
-          .eq('id', id)
+          .eq(UUID_RE.test(String(id)) ? 'id' : 'slug', id)
           .eq('is_active', true)
           .single();
 

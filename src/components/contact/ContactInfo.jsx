@@ -34,7 +34,7 @@ function ContactInfo() {
             Chat WhatsApp
           </a>
           <a
-            href="tel:+33675111618"
+            href="tel:+33675116218"
             className="flex items-center justify-center w-full bg-primary text-white py-4 px-6 rounded-lg font-semibold hover:bg-primary-dark transition-colors"
           >
             <Phone className="w-5 h-5 mr-2" />
