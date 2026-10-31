@@ -1,4 +1,4 @@
-export const allowedCountries=['FR','DE','IT','ES','NL','BE','PL','RO'];
+export const allowedCountries=['FR','AT','BE','BG','HR','CZ','DK','EE','FI','DE','GR','HU','IE','IT','LV','LI','LT','LU','NL','NO','PL','PT','RO','SK','SI','ES','SE','CH','GB'];
 export function formEncode(value,prefix='',out=new URLSearchParams()) {
   for(const [key,item] of Object.entries(value)){
     const name=prefix?`${prefix}[${key}]`:key;
@@ -13,8 +13,8 @@ export function stripeSessionPayload({checkout,order},customer,origin,locale,cre
     mode:'payment',customer,client_reference_id:order.id,locale:STRIPE_LOCALES.includes(locale)?locale:'auto',
     payment_method_types:['card'],automatic_tax:{enabled:true},billing_address_collection:'required',
     customer_update:{address:'auto',name:'auto'},tax_id_collection:{enabled:true},
-    line_items:checkout.items.map(item=>({quantity:item.quantity,price_data:{currency:'eur',unit_amount:Math.round(item.unitPrice*100),tax_behavior:'exclusive',product_data:{name:item.name.slice(0,250),metadata:{sku:item.sku}}}})),
-    shipping_options:[{shipping_rate_data:{display_name:'Chronopost',type:'fixed_amount',fixed_amount:{amount:Math.round(order.shipping_amount*100),currency:'eur'},tax_behavior:'exclusive',tax_code:'txcd_92010001'}}],
+    line_items:checkout.items.map(item=>({quantity:item.quantity,price_data:{currency:'eur',unit_amount:Math.round(item.unitPrice*100),tax_behavior:'inclusive',product_data:{name:item.name.slice(0,250),metadata:{sku:item.sku}}}})),
+    shipping_options:[{shipping_rate_data:{display_name:'Chronopost',type:'fixed_amount',fixed_amount:{amount:Math.round(order.shipping_amount*100),currency:'eur'},tax_behavior:'inclusive',tax_code:'txcd_92010001'}}],
     metadata:{pipesan_order_id:order.id,pipesan_checkout_id:checkout.id,...(createAccount?{pipesan_create_account:'1'}:{})},
     payment_intent_data:{metadata:{pipesan_order_id:order.id}},
     success_url:`${origin}/order-success?order_id=${encodeURIComponent(order.id)}`,
@@ -47,7 +47,9 @@ export function backend(env,request=fetch){
  }
  async function stripe(path,body,idempotencyKey){
   const response=await request(`https://api.stripe.com/v1/${path}`,{method:body?'POST':'GET',headers:{authorization:`Bearer ${stripeKey}`,'Content-Type':'application/x-www-form-urlencoded',...(idempotencyKey?{'Idempotency-Key':idempotencyKey}:{})},body:body?formEncode(body):undefined,signal:AbortSignal.timeout(20000)});
-  const data=await response.json();if(!response.ok)throw new Error('Stripe could not prepare the payment. Please try again or contact support.');return data;
+  const data=await response.json();
+  // Stripe's own reason (e.g. account restricted, tax not activated) is safe to show and needed to fix it.
+  if(!response.ok)throw new Error(`Stripe could not prepare the payment${data?.error?.message?`: ${data.error.message}`:'.'} Please try again or contact support.`);return data;
  }
  // Auth admin calls (service role) for accounts created from a guest order.
  async function auth(path,body){

@@ -404,7 +404,7 @@ const writeCache = (p) => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-text-secondary">Price excl. VAT — tax calculated at checkout</p>
+              <p className="text-sm text-text-secondary">Price incl. VAT</p>
             </div>
 
             {/* Key Features Section */}

@@ -6,7 +6,7 @@ import { countryName } from '../../translations/checkout';
 
 const euro = (value) => `€${value.toFixed(2)}`;
 
-// Shipping from the same shipping_rates the server charges; VAT is an estimate for a private customer.
+// Shipping from the same shipping_rates the server charges; all prices include VAT, shown as its share.
 export default function OrderEstimate({ items, country, onCountryChange, t, language, showCountry = true }) {
   const [quote, setQuote] = useState(null);
   const cartKey = items.map((i) => `${i.productId}:${i.quantity}`).join(',');
@@ -52,7 +52,7 @@ export default function OrderEstimate({ items, country, onCountryChange, t, lang
       </div>
       <div className="border-t pt-2 flex justify-between font-semibold">
         <span>{t.total}</span>
-        <span data-testid="estimate-total">{shipping == null ? '—' : euro(subtotal + shipping + vat.amount)}</span>
+        <span data-testid="estimate-total">{shipping == null ? '—' : euro(subtotal + shipping)}</span>
       </div>
       <p className="text-xs text-gray-500">{t.estimateNote}</p>
     </div>

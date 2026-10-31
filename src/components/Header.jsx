@@ -11,12 +11,12 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 // Bandă utilitară de sus (texte scurte, per limbă)
 const TOPBAR = {
-  fr: ['Livraison rapide dans toute l’UE', 'Laiton CW617N certifié CE', 'Prix HT pour professionnels'],
-  en: ['Fast delivery across the EU', 'CE certified CW617N brass', 'Trade prices excl. VAT'],
-  it: ['Consegna rapida in tutta l’UE', 'Ottone CW617N certificato CE', 'Prezzi IVA esclusa per professionisti'],
-  de: ['Schnelle Lieferung in die ganze EU', 'CE-zertifiziertes CW617N-Messing', 'Netto-Preise für Profis'],
-  es: ['Envío rápido a toda la UE', 'Latón CW617N con certificación CE', 'Precios sin IVA para profesionales'],
-  ro: ['Livrare rapidă în toată UE', 'Alamă CW617N certificată CE', 'Prețuri fără TVA pentru firme'],
+  fr: ['Livraison rapide dans toute l’UE', 'Laiton CW617N certifié CE', 'Prix TTC, TVA incluse'],
+  en: ['Fast delivery across the EU', 'CE certified CW617N brass', 'Prices include VAT'],
+  it: ['Consegna rapida in tutta l’UE', 'Ottone CW617N certificato CE', 'Prezzi IVA inclusa'],
+  de: ['Schnelle Lieferung in die ganze EU', 'CE-zertifiziertes CW617N-Messing', 'Preise inkl. MwSt.'],
+  es: ['Envío rápido a toda la UE', 'Latón CW617N con certificación CE', 'Precios con IVA incluido'],
+  ro: ['Livrare rapidă în toată UE', 'Alamă CW617N certificată CE', 'Prețuri cu TVA inclus'],
 };
 
 function Header() {

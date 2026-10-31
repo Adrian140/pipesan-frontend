@@ -237,7 +237,7 @@ export const getCountryBands = (country, serviceId) => {
   return { service: null, bands: CLASSIC_ZONE_BANDS[country.zone] };
 };
 
-// Customer price excl. VAT for one parcel, or null when the weight is not covered.
+// Customer price incl. VAT for one parcel, or null when the weight is not covered.
 export const getShippingQuote = (countryCode, weightKg, serviceId) => {
   const country = SHIPPING_COUNTRIES.find((c) => c.code === countryCode);
   const weight = Number(weightKg);
