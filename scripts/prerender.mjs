@@ -188,7 +188,7 @@ function llmsTxt(products, categories) {
 
 > PipeSan is an EU online shop for brass plumbing parts: ball valves, 3-way corner valves, BSP (G) reducers and adapters, Geka quick couplings and accessories, mostly in CW617N brass. It sells to installers, resellers (B2B, with EU VAT invoicing) and private customers (B2C), and ships across the European Union.
 
-Company: PipeSan, ${a.streetAddress}, ${a.addressRegion}, Romania. VAT ${ORGANIZATION.vatID}. Contact: ${ORGANIZATION.email}, +33 675 11 62 18. Prices are in EUR.
+Company: PipeSan, operated by ${ORGANIZATION.legalName}, ${a.streetAddress}, ${a.postalCode} ${a.addressLocality}, ${a.addressRegion}, Romania. VAT ${ORGANIZATION.vatID}. Contact: ${ORGANIZATION.email}, +33 675 11 62 18. Prices are in EUR.
 
 Full product details (specifications, descriptions): ${SITE_URL}/llms-full.txt
 

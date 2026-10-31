@@ -7,13 +7,15 @@ export const DEFAULT_IMAGE = `${SITE_URL}/apple-touch-icon.png`;
 
 export const ORGANIZATION = {
   name: 'PipeSan',
+  legalName: 'FISH VALLEY S.R.L.',
   email: 'contact@pipesan.eu',
   telephone: '+33675116218',
   vatID: 'RO39535603',
   address: {
-    streetAddress: 'Sat Leamna de Jos, Comuna Bucovăț, nr. 159 A',
+    streetAddress: 'Sat Lemna de Jos, Nr. 159A',
     addressLocality: 'Bucovăț',
     addressRegion: 'Dolj',
+    postalCode: '207128',
     addressCountry: 'RO',
   },
 };
@@ -219,6 +221,7 @@ export function organizationJsonLd() {
     '@type': 'Organization',
     '@id': `${SITE_URL}/#organization`,
     name: ORGANIZATION.name,
+    legalName: ORGANIZATION.legalName,
     url: `${SITE_URL}/`,
     logo: DEFAULT_IMAGE,
     email: ORGANIZATION.email,
