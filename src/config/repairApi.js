@@ -63,7 +63,7 @@ export const apiClient = {
   user:{updateProfile:async input=>{const u=await owner();return result(client().from('users').update(fields(input,['firstName','lastName','phone','country','language'])).eq('id',u.id).select('id').single());}},
   products:{
     getAll:async()=>{let all=[];for(let start=0;;start+=500){const rows=await result(client().from('products').select('*,categories(name,slug)').eq('is_active',true).eq('is_draft',false).order('id').range(start,start+499));all.push(...rows.map(normalizeProduct));if(rows.length<500)break;}return all;},
-    getById:async id=>{const row=await result(client().from('products').select('*,categories(name,slug)').eq('id',id).eq('is_active',true).eq('is_draft',false).maybeSingle());return row?normalizeProduct(row):null;},
+    getById:async id=>{const row=await result(client().from('products').select('*,categories(name,slug)').eq(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id))?'id':'slug',id).eq('is_active',true).eq('is_draft',false).maybeSingle());return row?normalizeProduct(row):null;},
   },
   content:{getPublic:async()=>Object.fromEntries((await result(client().from('content').select('key,value').eq('language','en'))).map(r=>[r.key,r.value]))},
   categories:{getAll:async()=>{const [rows,items]=await Promise.all([result(client().from('categories').select('*').eq('is_active',true).order('sort_order')),apiClient.products.getAll()]);return rows.map(row=>({...row,productCount:items.filter(p=>p.category_id===row.id).length}));}},
