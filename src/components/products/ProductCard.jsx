@@ -14,12 +14,12 @@ const PH_400 =
 
 
 const L = {
-  fr: { exVat: "HT", amazon: "Voir sur Amazon", onAmazon: "Sur Amazon", unavailable: "Indisponible", add: "Ajouter au panier", added: "Ajouté au panier", adding: "Ajout..." },
-  en: { exVat: "excl. VAT", amazon: "View on Amazon", onAmazon: "On Amazon", unavailable: "Unavailable", add: "Add to cart", added: "Added to cart", adding: "Adding..." },
-  it: { exVat: "IVA escl.", amazon: "Vedi su Amazon", onAmazon: "Su Amazon", unavailable: "Non disponibile", add: "Aggiungi al carrello", added: "Aggiunto al carrello", adding: "Aggiunta..." },
-  de: { exVat: "zzgl. MwSt.", amazon: "Auf Amazon ansehen", onAmazon: "Auf Amazon", unavailable: "Nicht verfügbar", add: "In den Warenkorb", added: "Im Warenkorb", adding: "Wird hinzugefügt..." },
-  es: { exVat: "sin IVA", amazon: "Ver en Amazon", onAmazon: "En Amazon", unavailable: "No disponible", add: "Añadir al carrito", added: "Añadido al carrito", adding: "Añadiendo..." },
-  ro: { exVat: "fără TVA", amazon: "Vezi pe Amazon", onAmazon: "Pe Amazon", unavailable: "Indisponibil", add: "Adaugă în coș", added: "Adăugat în coș", adding: "Se adaugă..." },
+  fr: { exVat: "TTC", amazon: "Voir sur Amazon", onAmazon: "Sur Amazon", unavailable: "Indisponible", add: "Ajouter au panier", added: "Ajouté au panier", adding: "Ajout..." },
+  en: { exVat: "incl. VAT", amazon: "View on Amazon", onAmazon: "On Amazon", unavailable: "Unavailable", add: "Add to cart", added: "Added to cart", adding: "Adding..." },
+  it: { exVat: "IVA incl.", amazon: "Vedi su Amazon", onAmazon: "Su Amazon", unavailable: "Non disponibile", add: "Aggiungi al carrello", added: "Aggiunto al carrello", adding: "Aggiunta..." },
+  de: { exVat: "inkl. MwSt.", amazon: "Auf Amazon ansehen", onAmazon: "Auf Amazon", unavailable: "Nicht verfügbar", add: "In den Warenkorb", added: "Im Warenkorb", adding: "Wird hinzugefügt..." },
+  es: { exVat: "IVA incl.", amazon: "Ver en Amazon", onAmazon: "En Amazon", unavailable: "No disponible", add: "Añadir al carrito", added: "Añadido al carrito", adding: "Añadiendo..." },
+  ro: { exVat: "TVA inclus", amazon: "Vezi pe Amazon", onAmazon: "Pe Amazon", unavailable: "Indisponibil", add: "Adaugă în coș", added: "Adăugat în coș", adding: "Se adaugă..." },
 };
 
 export default function ProductCard({ product }) {

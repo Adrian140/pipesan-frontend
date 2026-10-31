@@ -55,7 +55,7 @@ function ShippingRates() {
         <Truck className="w-12 h-12 text-primary mx-auto mb-4" />
         <h2 className="text-3xl font-bold text-text-primary mb-4">Shipping Rates by Country</h2>
         <p className="text-text-secondary max-w-3xl mx-auto">
-          Chronopost delivery from France, priced per parcel by destination and weight. All prices exclude VAT.
+          Chronopost delivery from France, priced per parcel by destination and weight. All prices include VAT.
         </p>
       </div>
 
@@ -139,7 +139,7 @@ function ShippingRates() {
               </div>
               <div className="text-left md:text-right">
                 <p className="text-4xl font-bold text-primary" data-testid="shipping-quote">{formatEuro(quote.price)}</p>
-                <p className="text-sm text-text-secondary">per parcel, excl. VAT</p>
+                <p className="text-sm text-text-secondary">per parcel, incl. VAT</p>
               </div>
             </div>
           )}
@@ -193,7 +193,7 @@ function ShippingRates() {
       </div>
       <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm text-text-secondary">
         <p>
-          Prices per parcel, excl. VAT. United Kingdom and Switzerland add the surcharge shown above. France home delivery
+          Prices per parcel, incl. VAT. United Kingdom and Switzerland add the surcharge shown above. France home delivery
           up to 30 kg, pickup point up to 20 kg; Europe up to {CLASSIC_MAX_KG} kg. Online checkout ships to the address
           (home delivery in France) for orders up to 30 kg; contact us for pickup point delivery or heavier orders.
         </p>

@@ -287,12 +287,12 @@ export function productJsonLd(product, category) {
       url,
       price: price.toFixed(2),
       priceCurrency: product.currency || 'EUR',
-      // Catalogue prices are shown excluding VAT; VAT is added at checkout.
+      // Catalogue prices include VAT.
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         price: price.toFixed(2),
         priceCurrency: product.currency || 'EUR',
-        valueAddedTaxIncluded: false,
+        valueAddedTaxIncluded: true,
       },
       availability: productInStock(product)
         ? 'https://schema.org/InStock'
