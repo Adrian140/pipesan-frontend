@@ -224,7 +224,7 @@ function PrivacyPolicy() {
                 <div className="flex items-start">
                   <Mail className="w-4 h-4 text-primary mr-2 mt-1" />
                   <span className="text-text-secondary">
-                    Adresă: Sat Leamna de jos, Comuna Bucovat, nr.159 A, Region: Dolj, România
+                    Adresă: FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Jud. Dolj, România
                   </span>
                 </div>
               </div>

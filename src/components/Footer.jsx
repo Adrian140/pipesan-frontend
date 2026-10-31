@@ -48,8 +48,9 @@ function Footer() {
               <div className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-gray-500 mt-1" />
                 <span className="text-gray-400">
-                  Sat Leamna de jos, Comuna Bucovat, nr.159 A<br />
-                  Region: Dolj, România<br />
+                  FISH VALLEY S.R.L.<br />
+                  Sat Lemna de Jos, Com. Bucovăț, Nr. 159A<br />
+                  207128, Jud. Dolj, România<br />
                   VAT: RO39535603
                 </span>
               </div>

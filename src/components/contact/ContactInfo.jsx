@@ -51,8 +51,9 @@ function ContactInfo() {
             <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
             <div>
               <p className="text-text-secondary">
-                {content.contact_address || "Sat Leamna de jos, Comuna Bucovat, nr.159 A"}<br />
-                Region: Dolj, România<br />
+                FISH VALLEY S.R.L.<br />
+                {content.contact_address || "Sat Lemna de Jos, Com. Bucovăț, Nr. 159A"}<br />
+                207128, Jud. Dolj, România<br />
                 VAT Number: RO39535603
               </p>
             </div>

@@ -105,7 +105,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Région Dolj, Roumanie',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Roumanie',
     },
     changesTitle: '12. Modifications',
     changesText:
@@ -207,7 +207,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Dolj Region, Romania',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Romania',
     },
     changesTitle: '12. Changes',
     changesText:
@@ -309,7 +309,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Regione Dolj, Romania',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Romania',
     },
     changesTitle: '12. Modifiche',
     changesText:
@@ -411,7 +411,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Region Dolj, Rumänien',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Rumänien',
     },
     changesTitle: '12. Änderungen',
     changesText:
@@ -513,7 +513,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Región Dolj, Rumanía',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Rumanía',
     },
     changesTitle: '12. Cambios',
     changesText:
@@ -614,7 +614,7 @@ const T = {
       email: 'contact@pipesan.eu',
       phone: '+33 675 11 62 18',
       address:
-        'Sat Leamna de jos, Comuna Bucovat, nr.159 A, Județ Dolj, România',
+        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Jud. Dolj, România',
     },
     changesTitle: '12. Modificări',
     changesText:

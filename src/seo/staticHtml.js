@@ -31,7 +31,7 @@ function navHtml() {
 
 function footerHtml() {
   const a = ORGANIZATION.address;
-  return `<footer class="bg-graphite-950 text-gray-400 text-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"><p><strong class="text-white">PipeSan</strong> · ${esc(a.streetAddress)}, ${esc(a.addressRegion)}, Romania · VAT ${esc(ORGANIZATION.vatID)}</p><p class="mt-2"><a href="mailto:${esc(ORGANIZATION.email)}">${esc(ORGANIZATION.email)}</a> · <a href="tel:${esc(ORGANIZATION.telephone)}">+33 675 11 62 18</a> · <a href="/privacy-policy">Privacy policy</a> · <a href="/terms">Terms</a></p></div></footer>`;
+  return `<footer class="bg-graphite-950 text-gray-400 text-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"><p><strong class="text-white">PipeSan</strong> · ${esc(ORGANIZATION.legalName)}, ${esc(a.streetAddress)}, ${esc(a.postalCode)} ${esc(a.addressLocality)}, ${esc(a.addressRegion)}, Romania · VAT ${esc(ORGANIZATION.vatID)}</p><p class="mt-2"><a href="mailto:${esc(ORGANIZATION.email)}">${esc(ORGANIZATION.email)}</a> · <a href="tel:${esc(ORGANIZATION.telephone)}">+33 675 11 62 18</a> · <a href="/privacy-policy">Privacy policy</a> · <a href="/terms">Terms</a></p></div></footer>`;
 }
 
 function shell(main) {
