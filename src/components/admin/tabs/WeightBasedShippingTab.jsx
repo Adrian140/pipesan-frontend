@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, Plus, Edit, Save, X, Trash2, Scale, Globe } from 'lucide-react';
+import { Truck, Plus, Edit, Save, Trash2, Scale, Globe, ChevronDown } from 'lucide-react';
 import { apiClient } from '../../../config/api';
 import FlagEmoji from '../../common/FlagEmoji';
 import { SHIPPING_COUNTRIES } from '../../../data/chronopostRates';
@@ -20,6 +20,7 @@ const flagText = (code) => {
 function WeightBasedShippingTab() {
   const [shippingRates, setShippingRates] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState('FR');
+  const [openCountry, setOpenCountry] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -306,67 +307,64 @@ function WeightBasedShippingTab() {
       {/* Formular Adăugare */}
       {showAddForm && renderRateForm(newRate, true)}
 
-      {/* Grid țări + intervale */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Lista țărilor: un rând pe țară, la click se deschid intervalele */}
+      <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
         {AVAILABLE_COUNTRIES.map(country => {
           const countryRates = groupedRates[country.code] || [];
+          const isOpen = openCountry === country.code || editingRate?.countryCode === country.code;
+          const cheapest = countryRates.length ? Math.min(...countryRates.map(r => Number(r.shipping_cost))) : null;
 
           return (
-            <div key={country.code} className="bg-white border border-gray-200 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl"><FlagEmoji code={country.code} /></span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-text-primary">{country.name}</h3>
-                    <p className="text-sm text-text-secondary">{countryRates.length} intervale configurate</p>
-                  </div>
-                </div>
-                <Scale className="w-6 h-6 text-gray-400" />
-              </div>
+            <div key={country.code}>
+              <button
+                type="button"
+                onClick={() => setOpenCountry(isOpen ? null : country.code)}
+                aria-expanded={isOpen}
+                className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-gray-50 transition-colors ${isOpen ? 'bg-gray-50' : ''}`}
+              >
+                <span className="text-xl"><FlagEmoji code={country.code} /></span>
+                <span className="flex-1 font-semibold text-text-primary">{country.name}</span>
+                <span className="text-sm text-text-secondary">{countryRates.length} intervale</span>
+                <span className="w-28 text-right text-sm font-semibold text-primary">
+                  {cheapest === null ? '—' : `de la ${cheapest.toFixed(2)} €`}
+                </span>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-              {/* Edit form per țară */}
-              {editingRate && editingRate.country_code === country.code && (
-                <div className="mb-4">{renderRateForm(editingRate)}</div>
-              )}
+              {isOpen && (
+                <div className="px-5 pb-5 pt-2 bg-gray-50">
+                  {editingRate && editingRate.countryCode === country.code && (
+                    <div className="mb-4">{renderRateForm(editingRate)}</div>
+                  )}
 
-              {/* Lista intervale */}
-              <div className="space-y-3">
-                {countryRates.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Truck className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p>Niciun tarif configurat</p>
-                  </div>
-                ) : (
-                  countryRates.map(rate => (
-                    <div key={rate.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Scale className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium text-text-primary">{getDisplayWeightRange(rate)}</span>
-                        </div>
-                        <div className="text-lg font-bold text-primary">
-                          {Number(rate.shipping_cost).toFixed(2)} {rate.currency}
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => startEdit(rate)}
-                          className="text-blue-600 hover:text-blue-800 p-1"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRate(rate.id)}
-                          className="text-red-600 hover:text-red-800 p-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                  {countryRates.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500">
+                      <Truck className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                      <p>Niciun tarif configurat</p>
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {countryRates.map(rate => (
+                        <div key={rate.id} className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Scale className="w-4 h-4 text-gray-400" />
+                            <span className="text-text-primary">{getDisplayWeightRange(rate)}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-primary mr-1">{Number(rate.shipping_cost).toFixed(2)} {rate.currency}</span>
+                            <button onClick={() => startEdit(rate)} className="text-blue-600 hover:text-blue-800 p-1" aria-label="Editează">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteRate(rate.id)} className="text-red-600 hover:text-red-800 p-1" aria-label="Șterge">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
