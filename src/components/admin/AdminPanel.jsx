@@ -9,8 +9,9 @@ import UsersTab from './tabs/UsersTab';
 import ReviewsTab from './tabs/ReviewsTab';
 import { Navigate, useLocation } from 'react-router-dom';
 import OrdersTab from './tabs/OrdersTab';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, RotateCcw } from 'lucide-react';
 import AnalyticsTab from './tabs/AnalyticsTab';
+import WithdrawalsTab from './tabs/WithdrawalsTab';
 
 function AdminPanel() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function AdminPanel() {
     { id: 'reviews', label: 'Recenzii', icon: MessageSquare },
     { id: 'users', label: 'Utilizatori', icon: Users },
     { id: 'orders', label: 'Comenzi', icon: FileText }, // importă FileText din lucide-react
+    { id: 'withdrawals', label: 'Retrageri', icon: RotateCcw },
     { id: 'settings', label: 'Setări', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];
@@ -162,6 +164,8 @@ function AdminPanel() {
         return <SettingsTab />;
       case 'analytics':
         return <AnalyticsTab />;
+      case 'withdrawals':
+        return <WithdrawalsTab />;
         default:
         return null;
     }

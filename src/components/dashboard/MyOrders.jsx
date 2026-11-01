@@ -3,6 +3,9 @@ import { Package, Calendar, Star, MessageSquare, Eye, X, CheckCircle } from 'luc
 import { useDashboardTranslation } from '../../hooks/useDashboardTranslation';
 import { apiClient } from '../../config/api';
 import { supabase } from '../../config/supabase';
+import { Link } from 'react-router-dom';
+import { useLegalText } from '../legal/LegalPage';
+import { RETURNS_T } from '../../legal/returns';
 
 function ReviewModal({ isOpen, onClose, product, order, onReviewSubmitted }) {
   const { dt } = useDashboardTranslation();
@@ -186,6 +189,7 @@ function ReviewModal({ isOpen, onClose, product, order, onReviewSubmitted }) {
 
 function MyOrders() {
   const { dt } = useDashboardTranslation();
+  const withdrawLabel = useLegalText(RETURNS_T).t.cta;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -370,6 +374,11 @@ useEffect(() => {
                 <p className="text-sm text-gray-500">
                   {order.payment_status === 'paid' ? dt('paid') : dt('paymentPending')}
                 </p>
+                {order.payment_status === 'paid' && !['canceled', 'cancelled', 'refunded'].includes(order.status) && (
+                  <Link to={`/withdrawal?order=${encodeURIComponent(order.order_number || '')}`} className="text-sm text-primary underline">
+                    {withdrawLabel}
+                  </Link>
+                )}
               </div>
             </div>
 

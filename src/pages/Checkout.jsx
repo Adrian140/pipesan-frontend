@@ -16,6 +16,15 @@ const OPTIONAL=['company'];
 const WIDE=['company','address'];
 const EMPTY={firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',phone:''};
 const EMPTY_BILLING={firstName:'',lastName:'',company:'',address:'',city:'',postalCode:'',country:'FR'};
+// Pre-contract information shown next to the pay button (CRD art. 6 and 8).
+const LEGAL_LINE={
+ fr:['En passant commande, vous acceptez nos','conditions générales de vente','. Vous disposez de 14 jours pour vous rétracter :','retours et garanties'],
+ en:['By ordering you accept our','terms and conditions of sale','. You have 14 days to withdraw:','returns and guarantees'],
+ it:['Ordinando accetti le nostre','condizioni generali di vendita','. Hai 14 giorni per recedere:','resi e garanzie'],
+ de:['Mit Ihrer Bestellung akzeptieren Sie unsere','Allgemeinen Verkaufsbedingungen','. Sie haben 14 Tage Widerrufsrecht:','Rückgabe und Gewährleistung'],
+ es:['Al realizar el pedido aceptas nuestras','condiciones generales de venta','. Tienes 14 días para desistir:','devoluciones y garantías'],
+ ro:['Plasând comanda, accepți','termenii și condițiile de vânzare','. Ai 14 zile pentru retragere:','retururi și garanții'],
+};
 const isServed=code=>SHIPPING_COUNTRIES.some(c=>c.code===code);
 const fromSaved=a=>({firstName:a.first_name||'',lastName:a.last_name||'',company:a.company||'',address:a.address||'',city:a.city||'',postalCode:a.postal_code||'',phone:a.phone||''});
 const AUTOCOMPLETE={firstName:'given-name',lastName:'family-name',company:'organization',address:'street-address',city:'address-level2',postalCode:'postal-code',phone:'tel'};
@@ -33,7 +42,7 @@ function Section({step,title,children}){
 }
 export default function Checkout(){
  const {items}=useCart();const {user,loading}=useAuth();
- const {currentLanguage}=useLanguage();const t=checkoutText(currentLanguage);
+ const {currentLanguage}=useLanguage();const t=checkoutText(currentLanguage);const legal=LEGAL_LINE[currentLanguage]||LEGAL_LINE.fr;
  const [params]=useSearchParams();
  const [country,setCountry]=useShippingCountry();
  const [address,setAddress]=useState(EMPTY);
@@ -119,6 +128,7 @@ export default function Checkout(){
      <div className="space-y-3">
       <button disabled={busy} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white rounded-lg px-8 py-3 font-semibold disabled:opacity-50"><Lock className="w-4 h-4"/>{busy?t.preparing:t.pay}</button>
       <p className="text-xs text-gray-500">{t.stripeNote} {t.secure}.</p>
+      <p className="text-xs text-gray-500">{legal[0]} <Link to="/terms" className="underline">{legal[1]}</Link>{legal[2]} <Link to="/returns" className="underline">{legal[3]}</Link>.</p>
      </div>
     </form>}
    </div>

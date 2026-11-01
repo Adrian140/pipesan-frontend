@@ -1,9 +1,24 @@
 import React from 'react';
 import { Wrench, Phone, Mail, MapPin, Award, Truck, Shield } from 'lucide-react';
 import PipeSanWordmark from './brand/PipeSanWordmark';
+import { Link } from 'react-router-dom';
 import { openConsentSettings } from '../consent/consent';
+import { useLanguage } from '../contexts/LanguageContext';
+
+const LINKS = [['/terms', 'terms'], ['/shipping', 'shipping'], ['/returns', 'returns'], ['/withdrawal', 'withdraw'], ['/legal-notice', 'legal'], ['/privacy-policy', 'privacy'], ['/support', 'support']];
+
+const FOOTER_T = {
+  fr: { heading: 'Informations', terms: 'Conditions générales de vente', shipping: 'Livraison', returns: 'Retours et garanties', withdraw: 'Renoncer au contrat ici', legal: 'Mentions légales', privacy: 'Confidentialité', support: 'Support technique', cookies: 'Paramètres des cookies' },
+  en: { heading: 'Information', terms: 'Terms and conditions of sale', shipping: 'Shipping', returns: 'Returns and guarantees', withdraw: 'Withdraw from contract here', legal: 'Legal notice', privacy: 'Privacy policy', support: 'Technical support', cookies: 'Cookie settings' },
+  it: { heading: 'Informazioni', terms: 'Condizioni generali di vendita', shipping: 'Spedizioni', returns: 'Resi e garanzie', withdraw: 'Recedi dal contratto qui', legal: 'Note legali', privacy: 'Privacy', support: 'Supporto tecnico', cookies: 'Impostazioni cookie' },
+  de: { heading: 'Informationen', terms: 'Allgemeine Verkaufsbedingungen', shipping: 'Versand', returns: 'Rückgabe und Gewährleistung', withdraw: 'Vertrag hier widerrufen', legal: 'Impressum', privacy: 'Datenschutz', support: 'Technischer Support', cookies: 'Cookie-Einstellungen' },
+  es: { heading: 'Información', terms: 'Condiciones generales de venta', shipping: 'Envíos', returns: 'Devoluciones y garantías', withdraw: 'Desistir del contrato aquí', legal: 'Aviso legal', privacy: 'Privacidad', support: 'Soporte técnico', cookies: 'Configuración de cookies' },
+  ro: { heading: 'Informații', terms: 'Termeni și condiții de vânzare', shipping: 'Livrare', returns: 'Retururi și garanții', withdraw: 'Renunță la contract aici', legal: 'Informații legale', privacy: 'Confidențialitate', support: 'Suport tehnic', cookies: 'Setări cookie-uri' },
+};
 
 function Footer() {
+  const { currentLanguage } = useLanguage();
+  const f = FOOTER_T[currentLanguage] || FOOTER_T.fr;
   return (
     <footer className="bg-graphite-950 text-gray-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -58,27 +73,17 @@ function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Legal and help */}
           <div>
-            <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-brass-light mb-5">Quick Links</h3>
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-brass-light mb-5">{f.heading}</h3>
             <div className="space-y-2">
-              <a href="/categories" className="block text-gray-400 hover:text-white transition-colors">
-                Product Categories
-              </a>
-              <a href="/technical-specs" className="block text-gray-400 hover:text-white transition-colors">
-                Technical Specifications
-              </a>
-              <a href="/support" className="block text-gray-400 hover:text-white transition-colors">
-                Technical Support
-              </a>
-              <a href="/terms" className="block text-gray-400 hover:text-white transition-colors">
-                Terms of Service
-              </a>
-              <a href="/privacy-policy" className="block text-gray-400 hover:text-white transition-colors">
-                Privacy Policy
-              </a>
+              {LINKS.map(([to, key]) => (
+                <Link key={to} to={to} className={`block transition-colors ${key === 'withdraw' ? 'text-brass-light hover:text-white' : 'text-gray-400 hover:text-white'}`}>
+                  {f[key]}
+                </Link>
+              ))}
               <button type="button" onClick={openConsentSettings} className="block text-left text-gray-400 hover:text-white transition-colors">
-                Cookie settings
+                {f.cookies}
               </button>
             </div>
           </div>

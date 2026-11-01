@@ -46,6 +46,10 @@ const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
 // Legal
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import LegalNotice from './components/legal/LegalNotice';
+import ShippingPolicy from './components/legal/ShippingPolicy';
+import ReturnsPolicy from './components/legal/ReturnsPolicy';
+import Withdrawal from './components/legal/Withdrawal';
 
 // Product detail
 import ProductDetail from './pages/ProductDetail';
@@ -136,6 +140,10 @@ function AppContent() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/privacy" element={<Navigate to="/privacy-policy" replace />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/legal-notice" element={<LegalNotice />} />
+          <Route path="/shipping" element={<ShippingPolicy />} />
+          <Route path="/returns" element={<ReturnsPolicy />} />
+          <Route path="/withdrawal" element={<Withdrawal />} />
           <Route path="/admin/orders/:id" element={<RequireAdmin><OrderDetail /></RequireAdmin>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
