@@ -61,8 +61,7 @@ function LoginForm() {
         if (redirectPath) {
           navigate(redirectPath);
         } else {
-          // Default redirect, admin check happens in auth context
-          navigate('/dashboard');
+          navigate(result.user.role === 'admin' ? '/admin' : '/dashboard');
         }
       } else {
         setError(result.error || 'Authentication error.');

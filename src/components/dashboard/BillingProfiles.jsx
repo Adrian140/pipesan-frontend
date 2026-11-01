@@ -13,6 +13,7 @@ function BillingProfiles() {
   const [editingProfile, setEditingProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     type: 'individual', // individual or company
     firstName: '',
@@ -42,6 +43,7 @@ function BillingProfiles() {
       setProfiles(data);
     } catch (error) {
       console.error('Error fetching profiles:', error);
+      setIsSuccess(false);
       setMessage('Eroare la încărcarea profilelor de facturare');
     }
   };
@@ -87,10 +89,12 @@ function BillingProfiles() {
       if (editingProfile) {
         const result = await apiClient.billingProfiles.update(editingProfile.id, profileData);
         console.log('✅ Profile updated:', result);
+        setIsSuccess(true);
         setMessage(dt('profileUpdatedSuccess'));
       } else {
         const result = await apiClient.billingProfiles.create(profileData);
         console.log('✅ Profile created:', result);
+        setIsSuccess(true);
         setMessage(dt('profileSavedSuccess'));
       }
       
@@ -100,6 +104,7 @@ function BillingProfiles() {
       
     } catch (error) {
       console.error('❌ Error saving billing profile:', error);
+      setIsSuccess(false);
       setMessage(error.message || 'Eroare la salvarea profilului');
     }
 
@@ -133,10 +138,12 @@ function BillingProfiles() {
 
     try {
       await apiClient.billingProfiles.delete(profileId);
+      setIsSuccess(true);
       setMessage(dt('profileDeletedSuccess'));
       await fetchProfiles(); // ✅ Refresh profiles list
     } catch (error) {
       console.error('❌ Error deleting billing profile:', error);
+      setIsSuccess(false);
       setMessage(error.message || 'Eroare la ștergerea profilului');
     }
   };
@@ -193,7 +200,7 @@ function BillingProfiles() {
 
       {message && (
         <div className={`mb-6 px-4 py-3 rounded-lg ${
-          message.includes('succes') 
+          isSuccess 
             ? 'bg-green-50 border border-green-200 text-green-600'
             : 'bg-red-50 border border-red-200 text-red-600'
         }`}>

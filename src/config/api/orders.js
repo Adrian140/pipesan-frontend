@@ -234,7 +234,14 @@ export const ordersApi = {
                 return { ...order, items: [] };
               }
 
-              return { ...order, items: orderItems || [] };
+              // Rândurile salvează numele/SKU-ul la momentul comenzii; UI-ul citește name/sku/image.
+              const items = (orderItems || []).map((it) => ({
+                ...it,
+                name: it.product_name || it.product?.name || '',
+                sku: it.product_sku || it.product?.sku || '',
+                image: Array.isArray(it.product?.images) ? it.product.images[0] : undefined,
+              }));
+              return { ...order, items };
             } catch (err) {
               console.warn(`Error processing order ${order.id}:`, err);
               return { ...order, items: [] };

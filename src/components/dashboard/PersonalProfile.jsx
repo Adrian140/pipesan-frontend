@@ -8,7 +8,7 @@ import { useDashboardTranslation } from '../../hooks/useDashboardTranslation';
 import { apiClient } from '../../config/api';
 
 function PersonalProfile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { dt } = useDashboardTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,6 +20,7 @@ function PersonalProfile() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -68,6 +69,8 @@ function PersonalProfile() {
       console.log('📤 Sending profile update:', profileData);
       
       await apiClient.user.updateProfile(profileData);
+      await refreshProfile?.();
+      setIsSuccess(true);
       setMessage(dt('profileUpdatedSuccess'));
       setIsEditing(false);
       
@@ -76,6 +79,7 @@ function PersonalProfile() {
       
     } catch (error) {
       console.error('❌ Error updating profile:', error);
+      setIsSuccess(false);
       setMessage(error.message || 'Eroare la actualizarea profilului');
     }
 
@@ -104,7 +108,7 @@ function PersonalProfile() {
 
       {message && (
         <div className={`mb-6 px-4 py-3 rounded-lg ${
-          message.includes('succes') 
+          isSuccess 
             ? 'bg-green-50 border border-green-200 text-green-600'
             : 'bg-red-50 border border-red-200 text-red-600'
         }`}>

@@ -106,6 +106,7 @@ export default function ResetPassword() {
 
     return {
       accessToken: hashParams.get('access_token') || searchParams.get('access_token'),
+      refreshToken: hashParams.get('refresh_token') || searchParams.get('refresh_token'),
       code: searchParams.get('code'),
     };
   }, [location.search, location.hash]);
@@ -133,8 +134,8 @@ export default function ResetPassword() {
         if (recoveryParams.code) {
           const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
           if (error) throw error;
-        } else if (recoveryParams.accessToken) {
-          const { error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+        } else if (recoveryParams.accessToken && recoveryParams.refreshToken) {
+          const { error } = await supabase.auth.setSession({ access_token: recoveryParams.accessToken, refresh_token: recoveryParams.refreshToken });
           if (error) throw error;
         } else {
           throw new Error('No recovery params');
@@ -206,7 +207,8 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       setStatus(Status.error);
-      setMessage(text.invalid);
+      // Doar sesiunea expirată înseamnă link invalid; altfel arătăm motivul real (ex. parolă prea slabă).
+      setMessage(/session|jwt|expired|token/i.test(error.message || '') ? text.invalid : error.message);
       return;
     }
     await supabase.auth.signOut();

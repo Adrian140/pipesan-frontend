@@ -12,16 +12,23 @@ export function AuthProvider({children}) {
     const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>setSession(next));
     return ()=>subscription.unsubscribe();
   },[]);
+  // Token refreshes and re-sign-ins of the same user must not unmount the account/admin pages.
+  const userId=session===undefined?undefined:(session?.user?.id ?? null);
   useEffect(()=>{
-    if(session===undefined)return;
+    if(userId===undefined)return;
     let active=true;
     setLoading(true);setError('');setUser(null);
-    if(!session){setLoading(false);return;}
+    if(!userId){setLoading(false);return;}
     getProfile(session.user).then(profile=>{if(active)setUser(profile);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});
     return ()=>{active=false;};
-  },[session]);
+  },[userId]);
   const wrap=fn=>async(...args)=>{try{return {success:true,...await fn(...args)};}catch(e){return {success:false,error:e.message};}};
-  const logout=async()=>{if(!supabase)return;const {error}=await supabase.auth.signOut();if(error){setError(error.message);return;}setUser(null);};
+  const logout=async()=>{if(!supabase)return;const {error}=await supabase.auth.signOut();if(error)return;setUser(null);};
   const refreshProfile=async()=>{if(session?.user)setUser(await getProfile(session.user));};
-  return <AuthContext.Provider value={{user,loading,sessionChecked:!loading,error,logout,refreshProfile,refreshUser:refreshProfile,login:wrap(apiClient.auth.login),register:wrap(apiClient.auth.register),forgotPassword:wrap(apiClient.auth.forgotPassword),enable2FA:wrap(apiClient.auth.enable2FA),verify2FA:wrap(apiClient.auth.verify2FA),disable2FA:wrap(apiClient.auth.disable2FA)}}>{children}</AuthContext.Provider>;
+  const resendEmailVerification=async()=>{
+    const email=session?.user?.email;if(!email)return {success:false,error:'Please sign in again.'};
+    const {error:e}=await supabase.auth.resend({type:'signup',email,options:{emailRedirectTo:window.location.origin+'/dashboard'}});
+    return e?{success:false,error:e.message}:{success:true};
+  };
+  return <AuthContext.Provider value={{user:user&&session?.user?{...user,emailVerified:!!session.user.email_confirmed_at}:user,loading,sessionChecked:!loading,error,logout,refreshProfile,refreshUser:refreshProfile,resendEmailVerification,login:wrap(apiClient.auth.login),register:wrap(apiClient.auth.register),forgotPassword:wrap(apiClient.auth.forgotPassword),enable2FA:wrap(apiClient.auth.enable2FA),verify2FA:wrap(apiClient.auth.verify2FA),disable2FA:wrap(apiClient.auth.disable2FA)}}>{children}</AuthContext.Provider>;
 }

@@ -9,6 +9,7 @@ function SecuritySettings() {
   const [showPasswords, setShowPasswords] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -16,12 +17,14 @@ function SecuritySettings() {
     setMessage('');
 
     if (newPassword !== confirmPassword) {
+      setIsSuccess(false);
       setMessage('Parolele nu se potrivesc');
       setLoading(false);
       return;
     }
 
     if (newPassword.length < 8) {
+      setIsSuccess(false);
       setMessage('Parola trebuie să aibă minim 8 caractere');
       setLoading(false);
       return;
@@ -29,11 +32,13 @@ function SecuritySettings() {
 
     try {
       await apiClient.auth.changePassword(currentPassword, newPassword);
+      setIsSuccess(true);
       setMessage('Parola a fost schimbată cu succes');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
    } catch (error) {
+       setIsSuccess(false);
        setMessage(error.message || 'Eroare la schimbarea parolei');
    }
 
@@ -48,7 +53,7 @@ function SecuritySettings() {
 
       {message && (
         <div className={`px-4 py-3 rounded-lg ${
-          message.includes('succes') 
+          isSuccess 
             ? 'bg-green-50 border border-green-200 text-green-600'
             : 'bg-red-50 border border-red-200 text-red-600'
         }`}>

@@ -226,7 +226,7 @@ function InvoicesList() {
                   <p className="text-2xl font-bold text-text-primary">
                     €{invoice.amount.toFixed(2)}
                   </p>
-                  {invoice.vatAmount && (
+                  {invoice.vatAmount > 0 && (
                     <p className="text-sm text-text-secondary">
                       TVA: €{invoice.vatAmount.toFixed(2)}
                     </p>

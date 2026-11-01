@@ -1,797 +1,146 @@
 // FILE: src/components/TermsOfService.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Scale } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FileText, Scale, AlertTriangle, Shield } from 'lucide-react';
 
+// Condiții generale de vânzare pentru magazinul PipeSan (vânzător: FISH VALLEY S.R.L.).
+// Data se schimbă manual, doar când se schimbă textul.
+const UPDATED = '2026-11-01';
+const SELLER = 'FISH VALLEY S.R.L. · Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, România · VAT RO39535603';
+const CONTACT = 'contact@pipesan.eu · +33 675 11 62 18';
 
-/**
- * Dicționar simplu. Am tradus concis tot conținutul esențial.
- * Dacă vrei, poți ajusta liber textele de mai jos.
- */
 const T = {
   fr: {
-    title: 'Conditions Générales',
-    updated: 'Dernière mise à jour',
-    introTitle: '1. Introduction',
-    intro:
-      'Ces Conditions Générales (« Conditions ») régissent l’utilisation des services fournis par Prep Center France via le site prep-center.eu et les services de préparation FBA. En accédant à nos services, vous acceptez ces Conditions.',
-    servicesTitle: '2. Nos Services',
-    servicesBullets: [
-      'Préparation Amazon FBA (réception, contrôle qualité, étiquetage FNSKU)',
-      'Emballage et protection (polybagging, calage)',
-      'Stockage temporaire',
-      'Expéditions vers les centres de distribution Amazon',
-      'FBM pour plusieurs places de marché (Amazon, eBay, Shopify)',
-      'Conseil Private Label & sourcing produits',
+    title: 'Conditions générales de vente', updated: 'Dernière mise à jour', privacy: 'Politique de confidentialité',
+    sections: [
+      ['1. Vendeur', [`Le site pipesan.eu (marque PipeSan) est exploité par ${SELLER}.`, `Contact : ${CONTACT}.`]],
+      ['2. Champ d’application', ['Les présentes conditions s’appliquent à toute commande passée sur pipesan.eu par un consommateur ou un professionnel. Elles prévalent sur tout autre document, sauf accord écrit. La version applicable est celle en vigueur au moment de la commande.']],
+      ['3. Produits', ['Nous vendons des raccords, vannes et composants de plomberie. Les caractéristiques techniques (filetage, diamètre, pression, matériau) figurent sur chaque fiche produit ; les photos sont illustratives.', 'L’installation doit être réalisée selon les règles de l’art et dans les limites de pression et de température indiquées.']],
+      ['4. Prix', ['Les prix sont indiqués en euros, TVA incluse. Les frais de livraison sont calculés et affichés avant la validation de la commande. Le prix applicable est celui affiché au moment de la commande.']],
+      ['5. Commande et paiement', ['La commande est ferme après paiement accepté. Le paiement se fait par carte bancaire via Stripe ; nous n’avons jamais accès aux données de votre carte. Une confirmation est envoyée par email.', 'Nous pouvons annuler une commande en cas de rupture de stock ou d’erreur manifeste ; le montant payé est alors intégralement remboursé.']],
+      ['6. Livraison', ['Les commandes sont expédiées depuis notre entrepôt logistique en France vers les pays proposés lors de la commande. Les délais annoncés sont indicatifs. Vérifiez le colis à la réception et signalez tout dommage au transporteur et à nous sous 3 jours.']],
+      ['7. Droit de rétractation (consommateurs)', ['Vous disposez de 14 jours à compter de la réception pour vous rétracter sans motif, en nous écrivant à contact@pipesan.eu. Les produits doivent être renvoyés complets, non installés et dans leur état d’origine, dans les 14 jours suivant votre demande ; les frais de retour sont à votre charge.', 'Nous remboursons le prix et les frais de livraison standard dans les 14 jours suivant votre demande, au plus tard à réception des produits. Ce droit ne s’applique pas aux achats professionnels.']],
+      ['8. Garanties', ['Les consommateurs bénéficient de la garantie légale de conformité de 2 ans (directive (UE) 2019/771) et de la garantie contre les vices cachés. Contactez-nous avec le numéro de commande et des photos : nous réparons, remplaçons ou remboursons le produit non conforme.']],
+      ['9. Responsabilité', ['Notre responsabilité ne couvre pas les dommages résultant d’une installation non conforme, d’une utilisation hors des spécifications ou d’une usure normale. Rien dans ces conditions ne limite les droits que la loi accorde aux consommateurs.']],
+      ['10. Données personnelles', ['Vos données sont traitées conformément au RGPD, comme décrit dans notre politique de confidentialité.'], true],
+      ['11. Droit applicable et litiges', ['Ces conditions sont régies par le droit roumain, sans priver le consommateur des protections impératives de son pays de résidence. En cas de litige, contactez-nous d’abord pour une solution amiable ; le consommateur peut ensuite saisir un médiateur de la consommation ou les tribunaux compétents.']],
     ],
-    accountTitle: '3. Création de Compte',
-    accountBullets: [
-      'Maintenir la confidentialité de vos identifiants',
-      'Assumer la responsabilité des activités de votre compte',
-      'Informer immédiatement en cas d’utilisation non autorisée',
-      'Mettre à jour les coordonnées et la facturation',
-    ],
-    pricingTitle: '4. Tarifs et Paiements',
-    pricingWarnTitle: 'Tarifs & Facturation :',
-    pricingWarnBullets: [
-      "Les prix sont affichés en EUR et hors TVA",
-      "La facturation s’effectue au maximum toutes les 2 semaines",
-      "Les paiements sont traités via des prestataires de paiement agréés",
-      "Les factures impayées peuvent entraîner la suspension des services",
-    ],
-    refundTitle: 'Politique de Remboursement :',
-    refundText:
-      'Les services rendus (préparation, étiquetage, expédition) ne sont pas remboursables. En cas d’erreur de notre part, correction gratuite ou avoir pour services futurs.',
-    handlingTitle: '5. Manipulation des Produits',
-    clientRespTitle: 'Responsabilités du Client :',
-    clientRespBullets: [
-      'Fournir des informations complètes et exactes',
-      'Respecter les règles Amazon FBA et la loi',
-      'S’assurer que les produits ne sont pas dangereux/interdits',
-      'Communiquer des instructions claires de préparation',
-    ],
-    ourRespTitle: 'Nos Responsabilités :',
-    ourRespBullets: [
-      'Manipulation professionnelle et soignée',
-      'Respect des standards de qualité Amazon FBA',
-      'Signalement rapide des problèmes',
-      'Sécurité et intégrité des produits en stockage',
-    ],
-    liabilityTitle: '6. Limitation de Responsabilité',
-    liabilityBullets: [
-      'Responsabilité limitée à la valeur des services fournis',
-      'Pas de responsabilité pour pertes indirectes/consécutives',
-      'Assurance produits à la charge du client',
-      'Aucune garantie d’acceptation par Amazon',
-      'Force majeure exonératoire',
-    ],
-    prohibitedTitle: '7. Produits Interdits',
-    dangerous: 'Produits Dangereux :',
-    dangerousBullets: [
-      'Substances chimiques dangereuses',
-      'Matériaux inflammables',
-      'Batteries lithium défectueuses',
-      'Produits radioactifs',
-    ],
-    illegal: 'Produits Illégaux :',
-    illegalBullets: [
-      'Produits contrefaits',
-      'Substances interdites',
-      'Armes et munitions',
-      'Produits pour adultes',
-    ],
-    privacyTitle: '8. Protection des Données',
-    privacyText:
-      'Nous respectons strictement le RGPD. Voir notre ',
-    privacyLink: 'Politique de Confidentialité',
-    terminationTitle: '9. Résiliation',
-    terminationText:
-      'Chaque partie peut mettre fin au contrat avec un préavis de 30 jours. En cas de violation grave, nous pouvons suspendre/fermer le compte immédiatement.',
-    terminationBulletsTitle: 'En cas de résiliation :',
-    terminationBullets: [
-      'Retour des produits à l’adresse indiquée (aux frais du client)',
-      'Les factures impayées restent dues',
-      'Les données du compte sont archivées selon la politique de confidentialité',
-    ],
-    lawTitle: '10. Droit Applicable',
-    lawText:
-      'Ces Conditions sont régies par le droit français et/ou roumain selon la nature du service. Les litiges seront réglés à l’amiable ou par les tribunaux compétents en France ou en Roumanie.',
-    contactTitle: '11. Contact',
-    contactText: 'Pour toute question concernant ces Conditions :',
-    contact: {
-      emailLabel: 'Email',
-      phoneLabel: 'Téléphone',
-      addressLabel: 'Adresse',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Roumanie',
-    },
-    changesTitle: '12. Modifications',
-    changesText:
-      'Nous pouvons modifier ces Conditions. Les changements seront notifiés par email et publiés sur le site au moins 30 jours avant leur entrée en vigueur. La poursuite d’utilisation vaut acceptation.',
   },
-
   en: {
-    title: 'Terms of Service',
-    updated: 'Last updated',
-    introTitle: '1. Introduction',
-    intro:
-      'These Terms govern the services provided by Prep Center France via prep-center.eu and FBA preparation. By using our services you agree to these Terms.',
-    servicesTitle: '2. Our Services',
-    servicesBullets: [
-      'Amazon FBA prep (receiving, QC, FNSKU labeling)',
-      'Packaging & protection (polybagging, dunnage)',
-      'Temporary storage',
-      'Shipments to Amazon FCs',
-      'FBM for multiple marketplaces (Amazon, eBay, Shopify)',
-      'Private Label consulting & product sourcing',
+    title: 'Terms and Conditions of Sale', updated: 'Last updated', privacy: 'Privacy policy',
+    sections: [
+      ['1. Seller', [`pipesan.eu (PipeSan brand) is operated by ${SELLER}.`, `Contact: ${CONTACT}.`]],
+      ['2. Scope', ['These terms apply to every order placed on pipesan.eu by a consumer or a business. They prevail over any other document unless agreed in writing. The version in force when you order applies.']],
+      ['3. Products', ['We sell plumbing fittings, valves and components. Technical characteristics (thread, size, pressure, material) are listed on each product page; photos are illustrative.', 'Installation must follow good trade practice and stay within the stated pressure and temperature limits.']],
+      ['4. Prices', ['Prices are in euros and include VAT. Shipping costs are calculated and shown before you confirm the order. The price shown when you order applies.']],
+      ['5. Order and payment', ['Your order is binding once payment is accepted. Payment is by card through Stripe; we never see your card details. You receive a confirmation email.', 'We may cancel an order if an item is out of stock or the price is obviously wrong; any amount paid is then refunded in full.']],
+      ['6. Delivery', ['Orders ship from our logistics warehouse in France to the countries offered at checkout. Delivery times are estimates. Please check the parcel on arrival and report any damage to the carrier and to us within 3 days.']],
+      ['7. Right of withdrawal (consumers)', ['You may withdraw within 14 days of receiving the goods, without giving a reason, by writing to contact@pipesan.eu. Return the products complete, uninstalled and in their original condition within 14 days of your request; return shipping is at your cost.', 'We refund the price and standard delivery within 14 days of your request, at the latest once we receive the products. This right does not apply to business purchases.']],
+      ['8. Guarantees', ['Consumers benefit from the 2-year legal guarantee of conformity (Directive (EU) 2019/771) and the guarantee against hidden defects. Contact us with your order number and photos: we repair, replace or refund non-conforming products.']],
+      ['9. Liability', ['We are not liable for damage caused by incorrect installation, use outside the specifications, or normal wear. Nothing in these terms limits the rights consumers have under the law.']],
+      ['10. Personal data', ['Your data is processed under the GDPR as described in our privacy policy.'], true],
+      ['11. Governing law and disputes', ['These terms are governed by Romanian law, without depriving consumers of the mandatory protection of their country of residence. In case of a dispute please contact us first for an amicable solution; consumers may then turn to a consumer mediator or the competent courts.']],
     ],
-    accountTitle: '3. Account Registration',
-    accountBullets: [
-      'Keep credentials confidential',
-      'You are responsible for account activity',
-      'Notify us of any unauthorized use',
-      'Keep contact & billing info up to date',
-    ],
-    pricingTitle: '4. Pricing & Payments',
-    pricingWarnTitle: 'Pricing & Invoicing:',
-    pricingWarnBullets: [
-       "Prices are displayed in EUR and exclude VAT",
-  "Invoicing occurs at most every 2 weeks",
-  "Payments are processed by authorized payment processors",
-  "Overdue invoices may lead to suspension of services",
-    ],
-    refundTitle: 'Refund Policy:',
-    refundText:
-      'Rendered services (prep, labeling, shipping) are non-refundable. If we make an error, we correct it or credit future services.',
-    handlingTitle: '5. Product Handling',
-    clientRespTitle: 'Client Responsibilities:',
-    clientRespBullets: [
-      'Provide complete and accurate product info',
-      'Comply with Amazon FBA rules and laws',
-      'Ensure products are not dangerous/illegal',
-      'Provide clear prep instructions',
-    ],
-    ourRespTitle: 'Our Responsibilities:',
-    ourRespBullets: [
-      'Careful, professional handling',
-      'Respect Amazon FBA quality standards',
-      'Promptly report issues',
-      'Secure storage and integrity',
-    ],
-    liabilityTitle: '6. Limitation of Liability',
-    liabilityBullets: [
-      'Liability limited to the value of services provided',
-      'No liability for indirect/consequential losses',
-      'Product insurance is client’s responsibility',
-      'No guarantee of Amazon acceptance',
-      'Force majeure applies',
-    ],
-    prohibitedTitle: '7. Prohibited Items',
-    dangerous: 'Dangerous Goods:',
-    dangerousBullets: [
-      'Hazardous chemicals',
-      'Flammable materials',
-      'Defective lithium batteries',
-      'Radioactive products',
-    ],
-    illegal: 'Illegal Items:',
-    illegalBullets: [
-      'Counterfeit goods',
-      'Prohibited substances',
-      'Weapons & ammunition',
-      'Adult products',
-    ],
-    privacyTitle: '8. Data Protection',
-    privacyText: 'We strictly comply with GDPR. See our ',
-    privacyLink: 'Privacy Policy',
-    terminationTitle: '9. Termination',
-    terminationText:
-      'Either party may terminate with 30 days’ notice. For material breach we may suspend or close the account immediately.',
-    terminationBulletsTitle: 'Upon termination:',
-    terminationBullets: [
-      'Remaining products returned (at client’s cost)',
-      'Outstanding invoices remain due',
-      'Account data archived per privacy policy',
-    ],
-    lawTitle: '10. Governing Law',
-    lawText:
-      'French and/or Romanian law applies depending on service. Disputes by negotiation or competent courts in France/Romania.',
-    contactTitle: '11. Contact',
-    contactText: 'For questions regarding these Terms:',
-    contact: {
-      emailLabel: 'Email',
-      phoneLabel: 'Phone',
-      addressLabel: 'Address',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Romania',
-    },
-    changesTitle: '12. Changes',
-    changesText:
-      'We may update these Terms with at least 30 days’ notice by email and on the site. Continued use constitutes acceptance.',
   },
-
   it: {
-    title: 'Termini e Condizioni',
-    updated: 'Ultimo aggiornamento',
-    introTitle: '1. Introduzione',
-    intro:
-      'Questi Termini regolano i servizi di Prep Center France su prep-center.eu e la preparazione FBA. Usando i servizi accetti i Termini.',
-    servicesTitle: '2. I Nostri Servizi',
-    servicesBullets: [
-      'Preparazione Amazon FBA (ricezione, QC, etichettatura FNSKU)',
-      'Imballaggio e protezione',
-      'Stoccaggio temporaneo',
-      'Spedizioni ai centri Amazon',
-      'FBM per più marketplace',
-      'Consulenza Private Label & sourcing',
+    title: 'Condizioni generali di vendita', updated: 'Ultimo aggiornamento', privacy: 'Informativa privacy',
+    sections: [
+      ['1. Venditore', [`Il sito pipesan.eu (marchio PipeSan) è gestito da ${SELLER}.`, `Contatti: ${CONTACT}.`]],
+      ['2. Ambito', ['Queste condizioni si applicano a ogni ordine effettuato su pipesan.eu da un consumatore o da un professionista. Prevalgono su ogni altro documento salvo accordo scritto. Si applica la versione in vigore al momento dell’ordine.']],
+      ['3. Prodotti', ['Vendiamo raccordi, valvole e componenti idraulici. Le caratteristiche tecniche (filettatura, diametro, pressione, materiale) sono indicate in ogni scheda; le foto sono illustrative.', 'L’installazione deve seguire la regola dell’arte e rispettare i limiti di pressione e temperatura indicati.']],
+      ['4. Prezzi', ['I prezzi sono in euro, IVA inclusa. Le spese di spedizione sono calcolate e mostrate prima della conferma dell’ordine. Vale il prezzo mostrato al momento dell’ordine.']],
+      ['5. Ordine e pagamento', ['L’ordine è vincolante dopo l’accettazione del pagamento, con carta tramite Stripe; non vediamo mai i dati della carta. Ricevi una conferma via email.', 'Possiamo annullare un ordine in caso di prodotto esaurito o errore evidente di prezzo; l’importo pagato viene rimborsato per intero.']],
+      ['6. Consegna', ['Gli ordini partono dal nostro magazzino logistico in Francia verso i paesi proposti al checkout. I tempi sono indicativi. Controlla il pacco alla consegna e segnala eventuali danni al corriere e a noi entro 3 giorni.']],
+      ['7. Diritto di recesso (consumatori)', ['Puoi recedere entro 14 giorni dal ricevimento, senza motivazione, scrivendo a contact@pipesan.eu. Restituisci i prodotti completi, non installati e integri entro 14 giorni dalla richiesta; le spese di reso sono a tuo carico.', 'Rimborsiamo il prezzo e la spedizione standard entro 14 giorni dalla richiesta, al più tardi al ricevimento dei prodotti. Il diritto non si applica agli acquisti professionali.']],
+      ['8. Garanzie', ['I consumatori godono della garanzia legale di conformità di 2 anni (direttiva (UE) 2019/771) e della garanzia per vizi occulti. Contattaci con numero d’ordine e foto: ripariamo, sostituiamo o rimborsiamo il prodotto non conforme.']],
+      ['9. Responsabilità', ['Non rispondiamo di danni dovuti a installazione non corretta, uso fuori specifica o normale usura. Nulla in queste condizioni limita i diritti dei consumatori previsti dalla legge.']],
+      ['10. Dati personali', ['I tuoi dati sono trattati secondo il GDPR, come descritto nella nostra informativa privacy.'], true],
+      ['11. Legge applicabile e controversie', ['Queste condizioni sono regolate dalla legge rumena, senza privare il consumatore delle tutele inderogabili del paese di residenza. In caso di controversia contattaci prima per una soluzione amichevole; il consumatore può poi rivolgersi a un mediatore o ai tribunali competenti.']],
     ],
-    accountTitle: '3. Registrazione Account',
-    accountBullets: [
-      'Mantieni riservate le credenziali',
-      'Responsabile delle attività del tuo account',
-      'Notifica uso non autorizzato',
-      'Aggiorna contatti e fatturazione',
-    ],
-    pricingTitle: '4. Prezzi e Pagamenti',
-    pricingWarnTitle: 'Prezzi & Fatturazione:',
-    pricingWarnBullets: [
-      "I prezzi sono espressi in EUR e sono IVA esclusa",
-  "La fatturazione avviene al massimo ogni 2 settimane",
-  "I pagamenti sono elaborati da processori di pagamento autorizzati",
-  "Le fatture scadute possono comportare la sospensione dei servizi",
-    ],
-    refundTitle: 'Politica di Rimborso:',
-    refundText:
-      'Servizi resi non rimborsabili. Errori nostri → correzione o credito futuro.',
-    handlingTitle: '5. Gestione Prodotti',
-    clientRespTitle: 'Responsabilità del Cliente:',
-    clientRespBullets: [
-      'Info prodotto complete e accurate',
-      'Rispetto regole Amazon FBA e leggi',
-      'Prodotti non pericolosi/illegali',
-      'Istruzioni chiare di preparazione',
-    ],
-    ourRespTitle: 'Le Nostre Responsabilità:',
-    ourRespBullets: [
-      'Manipolazione professionale',
-      'Standard qualità Amazon FBA',
-      'Segnalazione rapida dei problemi',
-      'Sicurezza in magazzino',
-    ],
-    liabilityTitle: '6. Limitazione di Responsabilità',
-    liabilityBullets: [
-      'Limitata al valore dei servizi',
-      'No perdite indirette/consequenziali',
-      'Assicurazione a carico del cliente',
-      'Nessuna garanzia di accettazione Amazon',
-      'Forza maggiore',
-    ],
-    prohibitedTitle: '7. Prodotti Vietati',
-    dangerous: 'Prodotti Pericolosi:',
-    dangerousBullets: [
-      'Sostanze pericolose',
-      'Materiali infiammabili',
-      'Batterie al litio difettose',
-      'Prodotti radioattivi',
-    ],
-    illegal: 'Prodotti Illegali:',
-    illegalBullets: [
-      'Prodotti contraffatti',
-      'Sostanze proibite',
-      'Armi e munizioni',
-      'Prodotti per adulti',
-    ],
-    privacyTitle: '8. Protezione Dati',
-    privacyText: 'Conformità rigorosa al GDPR. Vedi la nostra ',
-    privacyLink: 'Informativa sulla Privacy',
-    terminationTitle: '9. Cessazione',
-    terminationText:
-      'Ciascuna parte può recedere con preavviso di 30 giorni. In caso di violazioni gravi, sospensione/chiusura immediata.',
-    terminationBulletsTitle: 'Alla cessazione:',
-    terminationBullets: [
-      'Reso dei prodotti (a carico del cliente)',
-      'Fatture insolute dovute',
-      'Dati archiviati secondo privacy',
-    ],
-    lawTitle: '10. Legge Applicabile',
-    lawText:
-      'Legge francese/rumena. Controversie al negoziato o tribunali competenti.',
-    contactTitle: '11. Contatto',
-    contactText: 'Per domande su questi Termini:',
-    contact: {
-      emailLabel: 'Email',
-      phoneLabel: 'Telefono',
-      addressLabel: 'Indirizzo',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Romania',
-    },
-    changesTitle: '12. Modifiche',
-    changesText:
-      'Possiamo aggiornare i Termini con 30 giorni di preavviso. L’uso continuato implica accettazione.',
   },
-
   de: {
-    title: 'Allgemeine Geschäftsbedingungen',
-    updated: 'Zuletzt aktualisiert',
-    introTitle: '1. Einführung',
-    intro:
-      'Diese Bedingungen regeln die Dienste von Prep Center France über prep-center.eu und FBA-Preparation. Durch Nutzung stimmen Sie zu.',
-    servicesTitle: '2. Unsere Leistungen',
-    servicesBullets: [
-      'Amazon FBA-Prep (Wareneingang, QC, FNSKU-Label)',
-      'Verpackung & Schutz',
-      'Temporäre Lagerung',
-      'Versand an Amazon-Zentren',
-      'FBM für mehrere Marktplätze',
-      'Private Label Beratung & Sourcing',
+    title: 'Allgemeine Verkaufsbedingungen', updated: 'Zuletzt aktualisiert', privacy: 'Datenschutzerklärung',
+    sections: [
+      ['1. Verkäufer', [`pipesan.eu (Marke PipeSan) wird betrieben von ${SELLER}.`, `Kontakt: ${CONTACT}.`]],
+      ['2. Geltungsbereich', ['Diese Bedingungen gelten für alle Bestellungen auf pipesan.eu durch Verbraucher oder Unternehmen. Sie haben Vorrang vor anderen Dokumenten, sofern nichts anderes schriftlich vereinbart ist. Es gilt die Fassung zum Zeitpunkt der Bestellung.']],
+      ['3. Produkte', ['Wir verkaufen Sanitärfittings, Ventile und Komponenten. Technische Merkmale (Gewinde, Größe, Druck, Material) stehen auf jeder Produktseite; Fotos sind beispielhaft.', 'Die Installation muss fachgerecht und innerhalb der angegebenen Druck- und Temperaturgrenzen erfolgen.']],
+      ['4. Preise', ['Preise in Euro inklusive Mehrwertsteuer. Versandkosten werden vor Abschluss der Bestellung berechnet und angezeigt. Es gilt der zum Bestellzeitpunkt angezeigte Preis.']],
+      ['5. Bestellung und Zahlung', ['Die Bestellung ist verbindlich, sobald die Zahlung akzeptiert ist. Bezahlt wird per Karte über Stripe; Ihre Kartendaten sehen wir nie. Sie erhalten eine Bestätigung per E-Mail.', 'Bei fehlendem Bestand oder offensichtlichem Preisfehler können wir eine Bestellung stornieren; der gezahlte Betrag wird vollständig erstattet.']],
+      ['6. Lieferung', ['Der Versand erfolgt aus unserem Logistiklager in Frankreich in die beim Checkout angebotenen Länder. Lieferzeiten sind Richtwerte. Bitte prüfen Sie das Paket bei Ankunft und melden Sie Schäden innerhalb von 3 Tagen dem Zusteller und uns.']],
+      ['7. Widerrufsrecht (Verbraucher)', ['Sie können innerhalb von 14 Tagen nach Erhalt ohne Angabe von Gründen widerrufen, per E-Mail an contact@pipesan.eu. Senden Sie die Ware vollständig, nicht eingebaut und im Originalzustand innerhalb von 14 Tagen nach dem Widerruf zurück; die Rücksendekosten tragen Sie.', 'Wir erstatten Preis und Standardversand innerhalb von 14 Tagen nach dem Widerruf, spätestens nach Eingang der Ware. Für gewerbliche Käufe gilt das Widerrufsrecht nicht.']],
+      ['8. Gewährleistung', ['Verbraucher haben die gesetzliche Gewährleistung von 2 Jahren (Richtlinie (EU) 2019/771). Kontaktieren Sie uns mit Bestellnummer und Fotos: Wir reparieren, ersetzen oder erstatten mangelhafte Ware.']],
+      ['9. Haftung', ['Wir haften nicht für Schäden durch unsachgemäße Installation, Verwendung außerhalb der Spezifikationen oder normalen Verschleiß. Gesetzliche Verbraucherrechte bleiben unberührt.']],
+      ['10. Personenbezogene Daten', ['Ihre Daten werden gemäß DSGVO verarbeitet, wie in unserer Datenschutzerklärung beschrieben.'], true],
+      ['11. Anwendbares Recht und Streitigkeiten', ['Es gilt rumänisches Recht, ohne Verbrauchern den zwingenden Schutz ihres Wohnsitzlandes zu entziehen. Bitte wenden Sie sich bei Streitigkeiten zuerst an uns; Verbraucher können anschließend eine Verbraucherschlichtungsstelle oder die zuständigen Gerichte anrufen.']],
     ],
-    accountTitle: '3. Kontoerstellung',
-    accountBullets: [
-      'Zugangsdaten vertraulich halten',
-      'Verantwortung für Kontonutzung',
-      'Unbefugte Nutzung melden',
-      'Kontaktdaten & Abrechnung aktualisieren',
-    ],
-    pricingTitle: '4. Preise & Zahlungen',
-    pricingWarnTitle: 'Preise & Abrechnung:',
-    pricingWarnBullets: [
-      "Preise werden in EUR angezeigt und verstehen sich exkl. MwSt.",
-  "Die Abrechnung erfolgt spätestens alle 2 Wochen",
-  "Zahlungen werden über autorisierte Zahlungsdienstleister abgewickelt",
-  "Überfällige Rechnungen können zur Aussetzung der Dienstleistungen führen",
-    ],
-    refundTitle: 'Rückerstattungen:',
-    refundText:
-      'Erbrachte Leistungen sind nicht erstattungsfähig. Bei unserem Fehler: Korrektur oder Gutschrift.',
-    handlingTitle: '5. Produkt-Handling',
-    clientRespTitle: 'Pflichten des Kunden:',
-    clientRespBullets: [
-      'Vollständige und korrekte Produktinfos',
-      'Einhaltung Amazon FBA & Gesetze',
-      'Keine gefährlichen/illegalen Produkte',
-      'Klare Prep-Anweisungen',
-    ],
-    ourRespTitle: 'Unsere Pflichten:',
-    ourRespBullets: [
-      'Sorgfältige, professionelle Handhabung',
-      'Amazon FBA Qualitätsstandards',
-      'Schnelle Problem-Meldung',
-      'Sichere Lagerung',
-    ],
-    liabilityTitle: '6. Haftungsbeschränkung',
-    liabilityBullets: [
-      'Haftung auf Leistungswert begrenzt',
-      'Keine Haftung für indirekte Schäden',
-      'Produktversicherung beim Kunden',
-      'Keine Amazon-Garantie',
-      'Höhere Gewalt',
-    ],
-    prohibitedTitle: '7. Verbotene Produkte',
-    dangerous: 'Gefahrgut:',
-    dangerousBullets: [
-      'Gefährliche Chemikalien',
-      'Entzündliche Stoffe',
-      'Defekte Lithiumbatterien',
-      'Radioaktive Produkte',
-    ],
-    illegal: 'Illegale Produkte:',
-    illegalBullets: [
-      'Fälschungen',
-      'Verbotene Substanzen',
-      'Waffen & Munition',
-      'Erwachsenenprodukte',
-    ],
-    privacyTitle: '8. Datenschutz',
-    privacyText: 'Strikte DSGVO-Konformität. Siehe unsere ',
-    privacyLink: 'Datenschutzerklärung',
-    terminationTitle: '9. Kündigung',
-    terminationText:
-      'Kündigung mit 30 Tagen Frist. Bei schwerem Verstoß sofortige Sperrung/Schließung möglich.',
-    terminationBulletsTitle: 'Bei Kündigung:',
-    terminationBullets: [
-      'Rücksendung der Waren (auf Kosten des Kunden)',
-      'Offene Rechnungen bleiben fällig',
-      'Datenarchivierung gem. Datenschutz',
-    ],
-    lawTitle: '10. Anwendbares Recht',
-    lawText:
-      'Französisches/rumänisches Recht. Streitfälle vor zuständigen Gerichten.',
-    contactTitle: '11. Kontakt',
-    contactText: 'Fragen zu diesen Bedingungen:',
-    contact: {
-      emailLabel: 'E-Mail',
-      phoneLabel: 'Telefon',
-      addressLabel: 'Adresse',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Rumänien',
-    },
-    changesTitle: '12. Änderungen',
-    changesText:
-      'Änderungen mit 30 Tagen Vorlauf; Nutzung bedeutet Zustimmung.',
   },
-
   es: {
-    title: 'Términos y Condiciones',
-    updated: 'Última actualización',
-    introTitle: '1. Introducción',
-    intro:
-      'Estos Términos rigen los servicios de Prep Center France en prep-center.eu y preparación FBA. Al usar los servicios aceptas estos Términos.',
-    servicesTitle: '2. Nuestros Servicios',
-    servicesBullets: [
-      'Preparación Amazon FBA (recepción, QC, FNSKU)',
-      'Embalaje y protección',
-      'Almacenamiento temporal',
-      'Envíos a centros de Amazon',
-      'FBM para múltiples marketplaces',
-      'Consultoría Private Label y sourcing',
+    title: 'Condiciones generales de venta', updated: 'Última actualización', privacy: 'Política de privacidad',
+    sections: [
+      ['1. Vendedor', [`pipesan.eu (marca PipeSan) está gestionado por ${SELLER}.`, `Contacto: ${CONTACT}.`]],
+      ['2. Ámbito', ['Estas condiciones se aplican a todo pedido realizado en pipesan.eu por un consumidor o un profesional. Prevalecen sobre cualquier otro documento salvo acuerdo escrito. Se aplica la versión vigente en el momento del pedido.']],
+      ['3. Productos', ['Vendemos racores, válvulas y componentes de fontanería. Las características técnicas (rosca, diámetro, presión, material) figuran en cada ficha; las fotos son ilustrativas.', 'La instalación debe realizarse según las buenas prácticas y dentro de los límites de presión y temperatura indicados.']],
+      ['4. Precios', ['Los precios están en euros, IVA incluido. Los gastos de envío se calculan y muestran antes de confirmar el pedido. Se aplica el precio mostrado en el momento del pedido.']],
+      ['5. Pedido y pago', ['El pedido es firme una vez aceptado el pago, con tarjeta a través de Stripe; nunca vemos los datos de tu tarjeta. Recibes una confirmación por email.', 'Podemos cancelar un pedido por falta de stock o error evidente de precio; el importe pagado se reembolsa íntegramente.']],
+      ['6. Entrega', ['Los pedidos salen de nuestro almacén logístico en Francia hacia los países ofrecidos en el checkout. Los plazos son orientativos. Revisa el paquete al recibirlo y comunica cualquier daño al transportista y a nosotros en 3 días.']],
+      ['7. Derecho de desistimiento (consumidores)', ['Puedes desistir en 14 días desde la recepción, sin dar motivos, escribiendo a contact@pipesan.eu. Devuelve los productos completos, sin instalar y en su estado original en los 14 días siguientes a tu solicitud; los gastos de devolución corren de tu cuenta.', 'Reembolsamos el precio y el envío estándar en 14 días desde tu solicitud, como tarde al recibir los productos. Este derecho no se aplica a compras profesionales.']],
+      ['8. Garantías', ['Los consumidores disponen de la garantía legal de conformidad de 2 años (Directiva (UE) 2019/771). Contáctanos con el número de pedido y fotos: reparamos, sustituimos o reembolsamos el producto no conforme.']],
+      ['9. Responsabilidad', ['No respondemos de daños causados por una instalación incorrecta, un uso fuera de especificaciones o el desgaste normal. Nada en estas condiciones limita los derechos legales de los consumidores.']],
+      ['10. Datos personales', ['Tus datos se tratan conforme al RGPD, como se describe en nuestra política de privacidad.'], true],
+      ['11. Ley aplicable y litigios', ['Estas condiciones se rigen por la ley rumana, sin privar al consumidor de la protección imperativa de su país de residencia. En caso de litigio, contáctanos primero para una solución amistosa; después el consumidor puede acudir a un mediador de consumo o a los tribunales competentes.']],
     ],
-    accountTitle: '3. Registro de Cuenta',
-    accountBullets: [
-      'Mantener credenciales confidenciales',
-      'Responsable por la actividad de la cuenta',
-      'Notificar uso no autorizado',
-      'Actualizar contacto y facturación',
-    ],
-    pricingTitle: '4. Precios y Pagos',
-    pricingWarnTitle: 'Precios & Facturación:',
-    pricingWarnBullets: [
-      "Los precios se muestran en EUR y no incluyen IVA",
-  "La facturación se realiza como máximo cada 2 semanas",
-  "Los pagos se procesan a través de proveedores de pago autorizados",
-  "Las facturas vencidas pueden conllevar la suspensión de los servicios",
-    ],
-    refundTitle: 'Política de Reembolso:',
-    refundText:
-      'Servicios prestados no reembolsables. Si fallamos, corregimos o damos crédito futuro.',
-    handlingTitle: '5. Manipulación de Productos',
-    clientRespTitle: 'Responsabilidades del Cliente:',
-    clientRespBullets: [
-      'Información de producto completa y exacta',
-      'Cumplir con normas de Amazon FBA y leyes',
-      'Productos no peligrosos/ilegales',
-      'Instrucciones claras de preparación',
-    ],
-    ourRespTitle: 'Nuestras Responsabilidades:',
-    ourRespBullets: [
-      'Manipulación profesional',
-      'Estándares de calidad Amazon FBA',
-      'Reporte rápido de problemas',
-      'Almacenaje seguro',
-    ],
-    liabilityTitle: '6. Limitación de Responsabilidad',
-    liabilityBullets: [
-      'Limitada al valor de los servicios',
-      'Sin responsabilidad por pérdidas indirectas',
-      'Seguro de productos a cargo del cliente',
-      'Sin garantía de aceptación por Amazon',
-      'Fuerza mayor',
-    ],
-    prohibitedTitle: '7. Productos Prohibidos',
-    dangerous: 'Peligrosos:',
-    dangerousBullets: [
-      'Químicos peligrosos',
-      'Materiales inflamables',
-      'Baterías de litio defectuosas',
-      'Productos radiactivos',
-    ],
-    illegal: 'Ilegales:',
-    illegalBullets: [
-      'Productos falsificados',
-      'Sustancias prohibidas',
-      'Armas y munición',
-      'Productos para adultos',
-    ],
-    privacyTitle: '8. Protección de Datos',
-    privacyText: 'Cumplimos estrictamente RGPD. Ver ',
-    privacyLink: 'Política de Privacidad',
-    terminationTitle: '9. Terminación',
-    terminationText:
-      'Cualquiera puede terminar con 30 días de aviso. Por incumplimiento grave, suspensión/cierre inmediato.',
-    terminationBulletsTitle: 'Al terminar:',
-    terminationBullets: [
-      'Devolución de productos (a cargo del cliente)',
-      'Facturas pendientes siguen debidas',
-      'Datos archivados según privacidad',
-    ],
-    lawTitle: '10. Ley Aplicable',
-    lawText:
-      'Ley francesa/rumana. Disputas por negociación o tribunales competentes.',
-    contactTitle: '11. Contacto',
-    contactText: 'Para preguntas sobre estos Términos:',
-    contact: {
-      emailLabel: 'Email',
-      phoneLabel: 'Teléfono',
-      addressLabel: 'Dirección',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Dolj, Rumanía',
-    },
-    changesTitle: '12. Cambios',
-    changesText:
-      'Podemos actualizar los Términos con 30 días de aviso. El uso continuado implica aceptación.',
   },
-
   ro: {
-    title: 'Termeni și Condiții',
-    updated: 'Ultima actualizare',
-    introTitle: '1. Introducere',
-    intro:
-      'Acești Termeni reglementează serviciile oferite de Prep Center France prin prep-center.eu și serviciile FBA. Folosind serviciile, acceptați acești Termeni.',
-    servicesTitle: '2. Serviciile Noastre',
-    servicesBullets: [
-      'Prelucrare Amazon FBA (recepție, QC, etichetare FNSKU)',
-      'Ambalare și protecție',
-      'Depozitare temporară',
-      'Expediere către centrele Amazon',
-      'FBM pentru mai multe marketplace-uri',
-      'Consultanță Private Label & sourcing',
+    title: 'Termeni și condiții de vânzare', updated: 'Ultima actualizare', privacy: 'Politica de confidențialitate',
+    sections: [
+      ['1. Vânzătorul', [`Site-ul pipesan.eu (marca PipeSan) este operat de ${SELLER}.`, `Contact: ${CONTACT}.`]],
+      ['2. Domeniu de aplicare', ['Acești termeni se aplică oricărei comenzi plasate pe pipesan.eu de un consumator sau de o firmă. Au prioritate față de orice alt document, cu excepția unui acord scris. Se aplică versiunea în vigoare la data comenzii.']],
+      ['3. Produse', ['Vindem fitinguri, robinete și componente pentru instalații. Caracteristicile tehnice (filet, diametru, presiune, material) sunt pe fiecare pagină de produs; fotografiile sunt orientative.', 'Montajul trebuie făcut conform regulilor tehnice și în limitele de presiune și temperatură indicate.']],
+      ['4. Prețuri', ['Prețurile sunt în euro, cu TVA inclus. Costul livrării este calculat și afișat înainte de confirmarea comenzii. Se aplică prețul afișat la momentul comenzii.']],
+      ['5. Comandă și plată', ['Comanda devine fermă după acceptarea plății, cu cardul prin Stripe; nu vedem niciodată datele cardului. Primești confirmarea pe email.', 'Putem anula o comandă dacă produsul nu mai e în stoc sau prețul e evident greșit; suma plătită se rambursează integral.']],
+      ['6. Livrare', ['Comenzile pleacă din depozitul nostru logistic din Franța către țările oferite la finalizarea comenzii. Termenele sunt orientative. Verifică coletul la primire și semnalează orice deteriorare curierului și nouă în 3 zile.']],
+      ['7. Dreptul de retragere (consumatori)', ['Te poți retrage în 14 zile de la primire, fără motiv, scriind la contact@pipesan.eu. Returnează produsele complete, nemontate și în starea inițială în 14 zile de la cerere; costul returului este al tău.', 'Rambursăm prețul și livrarea standard în 14 zile de la cerere, cel târziu la primirea produselor. Dreptul nu se aplică achizițiilor făcute de firme.']],
+      ['8. Garanții', ['Consumatorii beneficiază de garanția legală de conformitate de 2 ani (Directiva (UE) 2019/771) și de garanția pentru vicii ascunse. Scrie-ne cu numărul comenzii și fotografii: reparăm, înlocuim sau rambursăm produsul neconform.']],
+      ['9. Răspundere', ['Nu răspundem pentru daune cauzate de montaj necorespunzător, folosire în afara specificațiilor sau uzură normală. Nimic din acești termeni nu limitează drepturile legale ale consumatorilor.']],
+      ['10. Date personale', ['Datele tale sunt prelucrate conform GDPR, așa cum este descris în politica de confidențialitate.'], true],
+      ['11. Legea aplicabilă și litigii', ['Acești termeni sunt guvernați de legea română, fără a priva consumatorul de protecția obligatorie din țara sa de reședință. În caz de litigiu, contactează-ne mai întâi pentru o soluție amiabilă; consumatorul se poate adresa apoi ANPC, unui mediator sau instanțelor competente.']],
     ],
-    accountTitle: '3. Înregistrarea Contului',
-    accountBullets: [
-      'Păstrarea confidențialității datelor',
-      'Responsabil pentru activitatea contului',
-      'Notificare la utilizare neautorizată',
-      'Actualizare date de contact și facturare',
-    ],
-    pricingTitle: '4. Prețuri și Plăți',
-    pricingWarnTitle: 'Prețuri & Facturare:',
-    pricingWarnBullets: [
-        'Prețurile sunt afișate în EUR și nu includ TVA',
-        'Facturarea se face la maximum 2 săptămâni',
-        'Plățile sunt procesate prin procesatori de plăți autorizați',
-        'Facturile restante pot duce la suspendarea serviciilor',
-    ],
-    refundTitle: 'Politica de Rambursare:',
-    refundText:
-      'Serviciile prestate nu sunt rambursabile. La erorile noastre: corectăm sau oferim credit.',
-    handlingTitle: '5. Manipularea Produselor',
-    clientRespTitle: 'Responsabilitățile Clientului:',
-    clientRespBullets: [
-      'Informații complete și corecte despre produse',
-      'Respectarea regulilor Amazon FBA și a legii',
-      'Produse nepericuloase/neinterzise',
-      'Instrucțiuni clare de pregătire',
-    ],
-    ourRespTitle: 'Responsabilitățile Noastre:',
-    ourRespBullets: [
-      'Manipulare atentă și profesională',
-      'Respectarea standardelor Amazon FBA',
-      'Raportarea promptă a problemelor',
-      'Securitate în depozitare',
-    ],
-    liabilityTitle: '6. Limitarea Răspunderii',
-    liabilityBullets: [
-      'Limitată la valoarea serviciilor',
-      'Fără răspundere pentru pierderi indirecte',
-      'Asigurarea produselor aparține clientului',
-      'Nu garantăm acceptarea produselor de către Amazon; dacă problema nu este de ambalare, nu este responsabilitatea noastră să verificăm conformitatea produselor',
-    ],
-    prohibitedTitle: '7. Produse Interzise',
-    dangerous: 'Produse Periculoase:',
-    dangerousBullets: [
-      'Substanțe periculoase',
-      'Materiale inflamabile',
-      'Baterii litiu defecte',
-      'Produse radioactive',
-    ],
-    illegal: 'Produse Ilegale:',
-    illegalBullets: [
-      'Produse contrafăcute',
-      'Substanțe interzise',
-      'Arme și muniție',
-      'Produse pentru adulți',
-    ],
-    privacyTitle: '8. Protecția Datelor',
-    privacyText: 'Respectăm strict GDPR. Vezi ',
-    privacyLink: 'Politica de Confidențialitate',
-    terminationTitle: '9. Încetarea Serviciilor',
-    terminationText:
-      'Oricare parte poate înceta cu preaviz de 30 zile. Pentru încălcări grave: suspendare/închidere imediată.',
-    terminationBulletsTitle: 'La încetare:',
-    terminationBullets: [
-      'Returnarea produselor (pe cheltuiala clientului)',
-      'Facturile restante rămân datorate',
-      'Datele sunt arhivate conform politicii de confidențialitate',
-    ],
-    lawTitle: '10. Legea Aplicabilă',
-    lawText:
-      'Legea franceză și/sau română. Litigiile la instanțele competente.',
-    contactTitle: '11. Contact',
-    contactText: 'Întrebări despre acești Termeni:',
-    contact: {
-      emailLabel: 'Email',
-      phoneLabel: 'Telefon',
-      addressLabel: 'Adresă',
-      email: 'contact@pipesan.eu',
-      phone: '+33 675 11 62 18',
-      address:
-        'FISH VALLEY S.R.L., Sat Lemna de Jos, Com. Bucovăț, Nr. 159A, 207128, Jud. Dolj, România',
-    },
-    changesTitle: '12. Modificări',
-    changesText:
-      'Putem actualiza Termenii cu 30 de zile înainte; folosirea continuă înseamnă acceptare.',
   },
 };
 
-function SectionTitle({ children }) {
-  return <h2 className="text-2xl font-bold text-text-primary mb-4">{children}</h2>;
-}
+const LOCALE = { fr: 'fr-FR', en: 'en-GB', it: 'it-IT', de: 'de-DE', es: 'es-ES', ro: 'ro-RO' };
 
 function TermsOfService() {
   const { currentLanguage } = useLanguage();
-  const lang = currentLanguage || 'fr';
-  const t = T[lang] || T.fr;
-
+  const lang = T[currentLanguage] ? currentLanguage : 'fr';
+  const t = T[lang];
 
   return (
-    <div className="min-h-screen py-20">
+    <div className="min-h-screen bg-paper py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <Scale className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-text-primary mb-4">{t.title}</h1>
-          <p className="text-xl text-text-secondary">
-           {t.updated}: {new Date().toLocaleDateString(
-              { fr:'fr-FR', en:'en-US', it:'it-IT', de:'de-DE', es:'es-ES', ro:'ro-RO' }[lang] || 'fr-FR'
-            )}
+        <div className="text-center mb-10">
+          <Scale className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-3">{t.title}</h1>
+          <p className="text-text-secondary">
+            {t.updated}: {new Date(UPDATED).toLocaleDateString(LOCALE[lang])}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-8 space-y-8">
-          {/* 1. Intro */}
-          <section>
-            <SectionTitle>{t.introTitle}</SectionTitle>
-            <p className="text-text-secondary leading-relaxed">{t.intro}</p>
-          </section>
-
-          {/* 2. Services */}
-          <section>
-            <div className="flex items-center mb-4">
-              <FileText className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-text-primary">{t.servicesTitle}</h2>
-            </div>
-            <ul className="list-disc list-inside text-text-secondary space-y-2">
-              {t.servicesBullets.map((x, i) => <li key={i}>{x}</li>)}
-            </ul>
-          </section>
-
-          {/* 3. Account */}
-          <section>
-            <SectionTitle>{t.accountTitle}</SectionTitle>
-            <ul className="list-disc list-inside text-text-secondary space-y-1">
-              {t.accountBullets.map((x, i) => <li key={i}>{x}</li>)}
-            </ul>
-          </section>
-
-          {/* 4. Pricing */}
-          <section>
-            <SectionTitle>{t.pricingTitle}</SectionTitle>
-            <div className="space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-yellow-800 mb-2">{t.pricingWarnTitle}</h3>
-                    <ul className="text-sm text-yellow-700 space-y-1">
-                      {t.pricingWarnBullets.map((x, i) => <li key={i}>• {x}</li>)}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">{t.refundTitle}</h3>
-                <p className="text-text-secondary">{t.refundText}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* 5. Handling */}
-          <section>
-            <SectionTitle>{t.handlingTitle}</SectionTitle>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">{t.clientRespTitle}</h3>
-                <ul className="list-disc list-inside text-text-secondary space-y-1">
-                  {t.clientRespBullets.map((x, i) => <li key={i}>{x}</li>)}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">{t.ourRespTitle}</h3>
-                <ul className="list-disc list-inside text-text-secondary space-y-1">
-                  {t.ourRespBullets.map((x, i) => <li key={i}>{x}</li>)}
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* 6. Liability */}
-          <section>
-            <div className="flex items-center mb-4">
-              <Shield className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-text-primary">{t.liabilityTitle}</h2>
-            </div>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h3 className="font-semibold text-red-800 mb-2">Info</h3>
-              <ul className="text-sm text-red-700 space-y-1">
-                {t.liabilityBullets.map((x, i) => <li key={i}>• {x}</li>)}
-              </ul>
-            </div>
-          </section>
-
-          {/* 7. Prohibited */}
-          <section>
-            <SectionTitle>{t.prohibitedTitle}</SectionTitle>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-text-primary mb-2">{t.dangerous}</h3>
-                <ul className="text-sm text-text-secondary space-y-1">
-                  {t.dangerousBullets.map((x, i) => <li key={i}>• {x}</li>)}
-                </ul>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-text-primary mb-2">{t.illegal}</h3>
-                <ul className="text-sm text-text-secondary space-y-1">
-                  {t.illegalBullets.map((x, i) => <li key={i}>• {x}</li>)}
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* 8. Privacy */}
-          <section>
-            <SectionTitle>{t.privacyTitle}</SectionTitle>
-            <p className="text-text-secondary">
-              {t.privacyText}
-              <a href="/privacy-policy" className="text-primary hover:text-primary-dark underline ml-1">
-                {t.privacyLink}
-              </a>.
-            </p>
-          </section>
-
-          {/* 9. Termination */}
-          <section>
-            <SectionTitle>{t.terminationTitle}</SectionTitle>
-            <p className="text-text-secondary mb-3">{t.terminationText}</p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 mb-2">{t.terminationBulletsTitle}</h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                {t.terminationBullets.map((x, i) => <li key={i}>• {x}</li>)}
-              </ul>
-            </div>
-          </section>
-
-          {/* 10. Law */}
-          <section>
-            <SectionTitle>{t.lawTitle}</SectionTitle>
-            <p className="text-text-secondary">{t.lawText}</p>
-          </section>
-
-          {/* 11. Contact */}
-          <section>
-            <SectionTitle>{t.contactTitle}</SectionTitle>
-            <div className="bg-primary-light bg-opacity-10 p-6 rounded-lg">
-              <p className="text-text-secondary mb-4">{t.contactText}</p>
-              <div className="space-y-2 text-text-secondary">
-                <p><strong>{t.contact.emailLabel}:</strong> {t.contact.email}</p>
-                <p><strong>{t.contact.phoneLabel}:</strong> {t.contact.phone}</p>
-                <p><strong>{t.contact.addressLabel}:</strong> {t.contact.address}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* 12. Changes */}
-          <section>
-            <SectionTitle>{t.changesTitle}</SectionTitle>
-            <p className="text-text-secondary">{t.changesText}</p>
-          </section>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 space-y-8">
+          {t.sections.map(([title, paragraphs, privacyLink]) => (
+            <section key={title}>
+              <h2 className="text-xl font-bold text-text-primary mb-3">{title}</h2>
+              {paragraphs.map((p) => (
+                <p key={p} className="text-text-secondary leading-relaxed mb-2 last:mb-0">{p}</p>
+              ))}
+              {privacyLink && (
+                <Link to="/privacy-policy" className="text-primary hover:text-primary-dark underline">
+                  {t.privacy}
+                </Link>
+              )}
+            </section>
+          ))}
         </div>
       </div>
     </div>

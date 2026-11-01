@@ -198,9 +198,11 @@ function MyOrders() {
   }, []);
 
 useEffect(() => {
+  let channel = null;
+  let cancelled = false;
   const setupListener = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user || cancelled) return;
 
     const { data: userProfile } = await supabase
       .from('users')
@@ -208,9 +210,9 @@ useEffect(() => {
       .eq('auth_id', user.id)
       .single();
 
-    if (!userProfile) return;
+    if (!userProfile || cancelled) return;
 
-    const channel = supabase
+    channel = supabase
       .channel(`orders-updates-${userProfile.id}`)
       .on(
         'postgres_changes',
@@ -226,11 +228,13 @@ useEffect(() => {
         }
       )
       .subscribe();
-
-    return () => supabase.removeChannel(channel);
   };
 
   setupListener();
+  return () => {
+    cancelled = true;
+    if (channel) supabase.removeChannel(channel);
+  };
 }, []);
 
 
@@ -375,14 +379,14 @@ useEffect(() => {
                 <h4 className="font-medium text-text-primary mb-3">{dt('orderItems')}:</h4>
                 <div className="space-y-3">
                   {order.items.map((item) => (
-                    <div key={`${order.id}-${item.sku}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={item.id || `${order.id}-${item.sku}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <img
                           src={
                             (item.product?.images?.[0]) ||
                             (Array.isArray(item.images) && item.images[0]) ||
                             item.image ||
-                            'https://via.placeholder.com/60?text=No+Image'
+                            '/product-placeholder.svg'
                           }
                           alt={item.name}
                           className="w-12 h-12 object-cover rounded"

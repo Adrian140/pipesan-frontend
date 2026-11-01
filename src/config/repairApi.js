@@ -18,11 +18,13 @@ async function owner() { const profile=await getProfile(await authenticatedUser(
 async function admin() { const profile=await owner(); if(profile.role!=='admin') throw new Error('Administrator access required.'); return profile; }
 const addressFields=['type','label','firstName','lastName','company','address','city','postalCode','country','phone','isDefault'];
 const billingFields=['type','firstName','lastName','companyName','vatNumber','sirenSiret','country','address','city','postalCode','phone','isDefault'];
+// Only one default per user (per address type); the new default is written right after.
+async function clearDefault(table,userId,type,exceptId){let q=client().from(table).update({is_default:false}).eq('user_id',userId).eq('is_default',true);if(table==='addresses'&&type)q=q.eq('type',type);if(exceptId)q=q.neq('id',exceptId);await result(q);}
 function ownedResource(table,allowed) {
   return {
-    getAll:async()=>{const u=await owner(); return (await result(client().from(table).select('*').eq('user_id',u.id))).map(camel);},
-    create:async input=>{const u=await owner();return camel(await result(client().from(table).insert({...fields(input,allowed),user_id:u.id}).select().single()));},
-    update:async(id,input)=>{const u=await owner();return camel(await result(client().from(table).update(fields(input,allowed)).eq('id',id).eq('user_id',u.id).select().single()));},
+    getAll:async()=>{const u=await owner(); return (await result(client().from(table).select('*').eq('user_id',u.id).order('is_default',{ascending:false}).order('created_at'))).map(camel);},
+    create:async input=>{const u=await owner();if(input.isDefault)await clearDefault(table,u.id,input.type);return camel(await result(client().from(table).insert({...fields(input,allowed),user_id:u.id}).select().single()));},
+    update:async(id,input)=>{const u=await owner();if(input.isDefault)await clearDefault(table,u.id,input.type,id);return camel(await result(client().from(table).update(fields(input,allowed)).eq('id',id).eq('user_id',u.id).select().single()));},
     delete:async id=>{const u=await owner();await result(client().from(table).delete().eq('id',id).eq('user_id',u.id).select('id').single());},
   };
 }
@@ -56,7 +58,7 @@ export const apiClient = {
     login:async(email,password)=>{const {data,error}=await client().auth.signInWithPassword({email,password});if(error)throw error;return {user:await getProfile(data.user)};},
     register:async input=>{const {error}=await client().auth.signUp({email:input.email,password:input.password,options:{emailRedirectTo:window.location.origin+'/dashboard',data:fields(input,['firstName','lastName','phone','deliveryCountry','accountType','companyName','vatNumber'])}});if(error)throw error;return {message:'Check your email to confirm your account.'};},
     validate:async()=>getProfile(await authenticatedUser()),
-    forgotPassword:async email=>{const {error}=await client().auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/reset-password'});if(error)throw error;},
+    forgotPassword:async email=>{const {error}=await client().auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/reset-password'});if(error)throw error;return {message:'sent'};},
     changePassword:async(currentPassword,password)=>{const user=await authenticatedUser();const check=await client().auth.signInWithPassword({email:user.email,password:currentPassword});if(check.error)throw check.error;const {error}=await client().auth.updateUser({password});if(error)throw error;},
     enable2FA:unavailable('Two-factor authentication setup'),verify2FA:unavailable('Two-factor authentication setup'),disable2FA:unavailable('Two-factor authentication setup'),
   },

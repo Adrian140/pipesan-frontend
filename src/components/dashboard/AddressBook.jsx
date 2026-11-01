@@ -13,6 +13,7 @@ function AddressBook() {
   const [editingAddress, setEditingAddress] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     type: 'shipping', // shipping, billing, both
     label: '',
@@ -47,6 +48,7 @@ function AddressBook() {
       setAddresses(data);
     } catch (error) {
       console.error('Error fetching addresses:', error);
+      setIsSuccess(false);
       setMessage('Eroare la încărcarea adreselor');
     }
   };
@@ -79,10 +81,12 @@ function AddressBook() {
       if (editingAddress) {
         const result = await apiClient.addresses.update(editingAddress.id, addressData);
         console.log('✅ Address updated:', result);
+        setIsSuccess(true);
         setMessage(dt('addressUpdatedSuccess'));
       } else {
         const result = await apiClient.addresses.create(addressData);
         console.log('✅ Address created:', result);
+        setIsSuccess(true);
         setMessage(dt('addressSavedSuccess'));
       }
       
@@ -92,6 +96,7 @@ function AddressBook() {
       
     } catch (error) {
       console.error('❌ Error saving address:', error);
+      setIsSuccess(false);
       setMessage(error.message || 'Eroare la salvarea adresei');
     }
 
@@ -124,10 +129,12 @@ function AddressBook() {
 
     try {
       await apiClient.addresses.delete(addressId);
+      setIsSuccess(true);
       setMessage(dt('addressDeletedSuccess'));
       await fetchAddresses(); // ✅ Refresh addresses list
     } catch (error) {
       console.error('❌ Error deleting address:', error);
+      setIsSuccess(false);
       setMessage(error.message || 'Eroare la ștergerea adresei');
     }
   };
@@ -190,7 +197,7 @@ function AddressBook() {
 
       {message && (
         <div className={`mb-6 px-4 py-3 rounded-lg ${
-          message.includes('succes') 
+          isSuccess 
             ? 'bg-green-50 border border-green-200 text-green-600'
             : 'bg-red-50 border border-red-200 text-red-600'
         }`}>

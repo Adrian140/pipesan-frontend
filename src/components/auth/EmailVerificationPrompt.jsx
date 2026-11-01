@@ -18,7 +18,7 @@ function EmailVerificationPrompt({ user }) {
       const result = await resendEmailVerification();
       
       if (result.success) {
-        setMessage(result.message);
+        setMessage(result.message || 'Email-ul de verificare a fost trimis.');
         setSuccess(true);
       } else {
         setMessage(result.error);
