@@ -40,9 +40,9 @@ export default function AnalyticsTab() {
           sessionsRes
         ] = await Promise.all([
           supabase.from('analytics_pageviews').select('id', { count: 'exact', head: true }).gte('ts', sinceIso),
-          supabase.from('analytics_events').select('id', { count: 'exact', head: true }).gte('ts', sinceIso),
+          supabase.from('analytics_events').select('id', { count: 'exact', head: true }).gte('ts', sinceIso).neq('name', 'page_view'),
           supabase.from('analytics_events').select('id', { count: 'exact', head: true }).gte('ts', sinceIso).eq('name', 'add_to_cart'),
-          supabase.from('orders').select('total_amount, created_at').gte('created_at', sinceIso),
+          supabase.from('orders').select('total_amount, created_at').gte('created_at', sinceIso).eq('payment_status', 'paid'),
           supabase
             .from('analytics_sessions')
             .select('visitor_id', { count: 'exact' })
@@ -148,9 +148,9 @@ export default function AnalyticsTab() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card title="Pageviews (7d)" value={cards.pageviews7d} loading={loading} />
-        <Card title="Events (7d)" value={cards.events7d} loading={loading} />
+        <Card title="Evenimente (7d, fără pageviews)" value={cards.events7d} loading={loading} />
         <Card title="Add to cart (7d)" value={cards.addToCart7d} loading={loading} />
-        <Card title="Comenzi (7d)" value={cards.orders7d} loading={loading} />
+        <Card title="Comenzi plătite (7d)" value={cards.orders7d} loading={loading} />
         <Card title="Venit (7d)" value={`${cards.revenue7d.toFixed(2)} EUR`} loading={loading} />
       </div>
 

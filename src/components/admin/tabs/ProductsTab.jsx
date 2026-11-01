@@ -128,6 +128,7 @@ export default function ProductsTab({
   const [form, setForm] = useState({ ...emptyForm });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [categories, setCategories] = useState([]);
   const fileInputRef = useRef(null);
   const [isDraft, setIsDraft] = useState(true);
@@ -652,7 +653,7 @@ const publishProduct = async () => {
                 const stock = Number(p.stock_quantity ?? 0);
                 const inWarehouse = p.warehouse_quantity != null && p.warehouse_quantity > 0;
                 const categoryName = categories.find(c => c.id === p.category_id)?.name || "—";
-                const isDraftProduct = p.is_draft || (!p.is_active && p.created_by_admin);
+                const isDraftProduct = !!p.is_draft;
                 
                 return (
                   <tr key={p.id} className={isDraftProduct ? 'bg-yellow-50' : ''}>
@@ -700,12 +701,17 @@ const publishProduct = async () => {
                       >
                         Edit
                       </button>
+                      {/* Ștergerea e definitivă: al doilea click confirmă (window.confirm poate fi blocat). */}
                       <button
-                        onClick={() => handleDelete(p.id, "products")}
-                        className="px-3 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200"
+                        onClick={() => {
+                          if (pendingDeleteId === p.id) { setPendingDeleteId(null); handleDelete(p.id, "products"); }
+                          else setPendingDeleteId(p.id);
+                        }}
+                        onBlur={() => setPendingDeleteId((cur) => (cur === p.id ? null : cur))}
+                        className={`px-3 py-1 rounded ${pendingDeleteId === p.id ? "bg-red-600 text-white" : "bg-red-100 text-red-600 hover:bg-red-200"}`}
                       >
                         <Trash2 className="w-4 h-4 inline-block -mt-1 mr-1" />
-                        Delete
+                        {pendingDeleteId === p.id ? "Confirmă ștergerea" : "Delete"}
                       </button>
                     </td>
                   </tr>

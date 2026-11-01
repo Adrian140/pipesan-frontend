@@ -62,8 +62,8 @@ function UserDetailModal({ user, isOpen, onClose, onRefresh }) {
   };
 
   const getDisplayName = () => {
-    if (user.billingProfiles && user.billingProfiles.length > 0) {
-      const companyProfile = user.billingProfiles.find(p => p.type === 'company' && p.company_name);
+    if ((user.billing_profiles || user.billingProfiles) && (user.billing_profiles || user.billingProfiles).length > 0) {
+      const companyProfile = (user.billing_profiles || user.billingProfiles).find(p => p.type === 'company' && p.company_name);
       if (companyProfile) {
         return companyProfile.company_name;
       }
@@ -80,8 +80,8 @@ function UserDetailModal({ user, isOpen, onClose, onRefresh }) {
   };
 
   const getUserType = () => {
-    if (user.billingProfiles && user.billingProfiles.length > 0) {
-      const hasCompany = user.billingProfiles.some(p => p.type === 'company');
+    if ((user.billing_profiles || user.billingProfiles) && (user.billing_profiles || user.billingProfiles).length > 0) {
+      const hasCompany = (user.billing_profiles || user.billingProfiles).some(p => p.type === 'company');
       return hasCompany ? 'company' : 'individual';
     }
     return 'individual';
@@ -308,14 +308,14 @@ function UserDetailModal({ user, isOpen, onClose, onRefresh }) {
       </div>
 
       {/* Billing Profiles */}
-      {user.billingProfiles && user.billingProfiles.length > 0 && (
+      {(user.billing_profiles || user.billingProfiles) && (user.billing_profiles || user.billingProfiles).length > 0 && (
         <div className="bg-gray-50 rounded-lg p-6">
           <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
             <Building className="w-5 h-5 mr-2" />
             Profile de Facturare
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {user.billingProfiles.map((profile, index) => (
+            {(user.billing_profiles || user.billingProfiles).map((profile, index) => (
               <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center mb-2">
                   {profile.type === 'company' ? (
@@ -817,7 +817,7 @@ function UserDetailModal({ user, isOpen, onClose, onRefresh }) {
                 <div className="space-y-2">
                   {order.items.map((item, itemIndex) => (
                     <div key={itemIndex} className="flex justify-between text-sm">
-                      <span>{item.name} × {item.quantity}</span>
+                      <span>{item.product_name || item.name} × {item.quantity}</span>
                       <span>€{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}

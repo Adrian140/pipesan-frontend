@@ -81,7 +81,9 @@ getOrders: async ({ q = '', status = 'all', from, to, limit = 50, offset = 0 } =
     if (to) query = query.lte('created_at', to);
     if (q) {
       // căutăm după nr comandă / email
-      query = query.or(`order_number.ilike.%${q}%,customer_email.ilike.%${q}%`);
+      // virgulele/parantezele rup sintaxa .or() din PostgREST
+      const term = String(q).replace(/[,()%*\\]/g, ' ').trim();
+      if (term) query = query.or(`order_number.ilike.%${term}%,customer_email.ilike.%${term}%`);
     }
 
     const { data, error } = await query;
@@ -96,8 +98,8 @@ getOrderById: async (id) => {
       id, order_number, status, payment_status, total_amount, currency, created_at,
       billing_first_name, billing_last_name, billing_address, billing_city, billing_postal_code, billing_country,
       shipping_first_name, shipping_last_name, shipping_address, shipping_city, shipping_postal_code, shipping_country,
-      shipping_method, carrier, tracking_number, tracking_url, invoice_id,
-      items:order_items ( id, product_id, sku, name, quantity, unit_price, price ),
+      shipping_method, carrier, tracking_number, tracking_url, invoice_id, admin_comment,
+      items:order_items ( id, product_id, sku, name, product_sku, product_name, quantity, unit_price, price, total_price ),
       users:user_id ( id, first_name, last_name, company_name, email )
     `)
     .eq('id', id)
@@ -137,8 +139,8 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
       id, order_number, status, payment_status, total_amount, currency, created_at,
       billing_first_name, billing_last_name, billing_address, billing_city, billing_postal_code, billing_country,
       shipping_first_name, shipping_last_name, shipping_address, shipping_city, shipping_postal_code, shipping_country,
-      carrier, tracking_number, tracking_url,
-      items:order_items ( id, product_id, sku, name, quantity, unit_price, price ),
+      carrier, tracking_number, tracking_url, invoice_id, admin_comment,
+      items:order_items ( id, product_id, sku, name, product_sku, product_name, quantity, unit_price, price, total_price ),
       users:user_id ( id, first_name, last_name, company_name, email )
     `)
     .eq('id', id)
@@ -405,6 +407,7 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
           created_by_admin: true,
           meta_title: productData.meta_title || null,
           meta_description: productData.meta_description || null,
+          translations: productData.translations || {},
         };
 
         console.log('🛠️ Creating product with payload:', payload);
@@ -456,6 +459,7 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
           is_draft: productData.is_draft,
           meta_title: productData.meta_title,
           meta_description: productData.meta_description,
+          translations: productData.translations,
           updated_at: new Date().toISOString(),
         };
         
@@ -700,7 +704,7 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
             title: reviewData.title,
             comment: reviewData.comment,
             is_verified_purchase: reviewData.isVerifiedPurchase,
-            purchase_date: reviewData.purchaseDate,
+            purchase_date: reviewData.purchaseDate || null,
             admin_notes: reviewData.adminNotes || '',
             is_approved: reviewData.isApproved,
             updated_at: new Date().toISOString()
@@ -802,7 +806,7 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
                 const orderIds = userOrders.map(o => o.id);
                 const { data: items } = await supabase
                   .from('order_items')
-                  .select('id, order_id, quantity, price, unit_price, total_price, name, sku, product_id')
+                  .select('id, order_id, quantity, price, unit_price, total_price, name, sku, product_name, product_sku, product_id')
                   .in('order_id', orderIds);
                 orderItems = items || [];
               }
@@ -882,7 +886,7 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
             .select(`
               id, order_id, quantity, 
               price, unit_price, total_price, 
-              name, sku, product_id
+              name, sku, product_name, product_sku, product_id
             `)
             .in('order_id', orderIds);
           
@@ -1005,18 +1009,16 @@ const { error: upErr } = await supabase.from('orders').update(safePatch).eq('id'
     try {
       const { data: invoice, error } = await supabase
         .from('invoices')
-        .select('pdf_url')
+        .select('file_path')
         .eq('id', invoiceId)
         .single();
       
       if (error) throw error;
-      
-      if (invoice.pdf_url) {
-        const response = await fetch(invoice.pdf_url);
-        return await response.blob();
-      }
-      
-      throw new Error('PDF URL not found');
+      // Bucket-ul user-invoices e privat: descărcăm prin API-ul de storage, nu prin URL public.
+      if (!invoice?.file_path) throw new Error('Invoice file not found');
+      const { data: blob, error: dlError } = await supabase.storage.from('user-invoices').download(invoice.file_path);
+      if (dlError) throw dlError;
+      return blob;
     } catch (error) {
       console.error('Error downloading invoice:', error);
       throw error;

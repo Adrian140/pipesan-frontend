@@ -26,6 +26,7 @@ export default function OrderDetail() {
         setCarrierName(data?.carrier ?? '');
         setTrackingNumber(data?.tracking_number ?? '');
         setTrackingUrl(data?.tracking_url ?? '');
+        setAdminComment(data?.admin_comment ?? '');
       } catch (e) {
         console.error(e);
         setMessage('❌ Eroare la încărcarea comenzii');
@@ -44,7 +45,9 @@ export default function OrderDetail() {
       setMessage('');
 
       const prevStatus = order?.status; // capturat înainte de patch
-      const patch = { status, admin_comment: adminComment };
+      const patch = { status };
+      // Comentariul se trimite doar dacă s-a schimbat, ca să nu fie șters din greșeală.
+      if (adminComment !== (order?.admin_comment ?? '')) patch.admin_comment = adminComment;
 
       // câmpuri tracking pentru shipped/completed
       if (status === 'shipped' || status === 'completed') {
@@ -53,25 +56,26 @@ export default function OrderDetail() {
         if (trackingUrl)    patch.tracking_url = trackingUrl;
       }
 
-      // upload factură la completed (dacă ai user.id în payloadul comenzii)
-      if (status === 'completed' && invoiceFile && order?.users?.id) {
+      let updated = await apiClient.admin.updateOrder(order.id, patch);
+
+      // Factura se încarcă doar după ce statusul a fost acceptat (altfel rămânea o factură orfană).
+      if (updated.status === 'completed' && invoiceFile && order?.users?.id) {
         const formData = new FormData();
         formData.append('invoice', invoiceFile);
         formData.append('invoiceNumber', `INV-${order.order_number}`);
         const uploaded = await apiClient.admin.uploadUserInvoice(order.users.id, formData);
-        if (uploaded?.id) {
-          patch.invoice_id = uploaded.id;
-        }
+        if (uploaded?.id) updated = await apiClient.admin.updateOrder(order.id, { invoice_id: uploaded.id });
+        setInvoiceFile(null);
       }
 
-      const updated = await apiClient.admin.updateOrder(order.id, patch);
       setOrder(updated);
       setStatus(updated.status);
+      setAdminComment(updated.admin_comment ?? adminComment);
 
       setMessage('✅ Commande mise à jour avec succès');
     } catch (e) {
       console.error(e);
-      setMessage('❌ Échec de la mise à jour');
+      setMessage(`❌ ${e?.message || 'Échec de la mise à jour'}`);
     } finally {
       setSaving(false);
     }
@@ -116,8 +120,8 @@ export default function OrderDetail() {
           {(order.items || []).map(it => (
             <div key={it.id} className="py-2 flex items-center justify-between">
               <div>
-                <div className="font-medium">{it.name}</div>
-                <div className="text-sm text-gray-500">SKU : {it.sku}</div>
+                <div className="font-medium">{it.product_name || it.name}</div>
+                <div className="text-sm text-gray-500">SKU : {it.product_sku || it.sku}</div>
               </div>
               <div className="text-sm text-gray-600">x{it.quantity}</div>
               <div className="font-semibold">
@@ -177,7 +181,8 @@ export default function OrderDetail() {
               value={status}
               onChange={e => setStatus(e.target.value)}
             >
-              {['pending', 'paid', 'shipped', 'delivered', 'completed', 'canceled'].map(s => (
+              {/* Plata/anularea/rambursarea vin din Stripe; adminul poate doar avansa livrarea unei comenzi plătite. */}
+              {[...new Set([order.status, ...(order.payment_status === 'paid' ? ['packed', 'shipped', 'delivered', 'completed'] : [])])].map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -215,18 +220,22 @@ export default function OrderDetail() {
             </>
           )}
 
-          {status === 'canceled' && (
-            <div className="md:col-span-2">
-              <label className="block text-sm text-gray-600 mb-1">Raison de l’annulation</label>
+          {order.payment_status !== 'paid' && (
+            <p className="md:col-span-2 text-sm text-gray-500">
+              Cette commande n’est pas payée : le statut est géré automatiquement par Stripe.
+            </p>
+          )}
+
+          <div className="md:col-span-2">
+              <label className="block text-sm text-gray-600 mb-1">Commentaire interne</label>
               <textarea
                 className="w-full border rounded-lg px-3 py-2"
                 rows={3}
                 value={adminComment}
                 onChange={e => setAdminComment(e.target.value)}
-                placeholder="Expliquez la raison..."
+                placeholder="Note interne (non visible par le client)"
               />
-            </div>
-          )}
+          </div>
 
           {status === 'completed' && (
             <div className="md:col-span-2">

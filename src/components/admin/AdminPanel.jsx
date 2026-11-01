@@ -7,13 +7,12 @@ import SettingsTab from './tabs/SettingsTab';
 import WeightBasedShippingTab from './tabs/WeightBasedShippingTab';
 import UsersTab from './tabs/UsersTab';
 import ReviewsTab from './tabs/ReviewsTab';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import OrdersTab from './tabs/OrdersTab';
 import { BarChart3 } from 'lucide-react';
 import AnalyticsTab from './tabs/AnalyticsTab';
 
 function AdminPanel() {
-  const navigate = useNavigate();
   const location = useLocation();
 
   // Persist last active tab
@@ -42,52 +41,6 @@ function AdminPanel() {
     return user.role === 'admin';
   }, [user]);
   
-  // Show loading only briefly during initial session check
-  if (loading && !sessionChecked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-          <div className="text-text-secondary">Verificare sesiune...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // If session is checked but no user, redirect to login
-  if (!user) {
-    console.log('❌ No user found in AdminPanel, redirecting to login...');
-    const currentPath = location.pathname + location.search;
-    navigate(`/login?redirect=${encodeURIComponent(currentPath)}`);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-          <div className="text-text-secondary">Redirecționare...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // If user exists but is not admin, redirect to dashboard
-  if (!isAdmin) {
-    console.log('🚫 User is not admin, redirecting to dashboard. User:', {
-      email: user.email,
-      role: user.role,
-      isAdmin
-    });
-    navigate('/dashboard');
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-          <div className="text-text-secondary">Redirecționare...</div>
-        </div>
-      </div>
-    );
-  }
-
-  console.log('✅ Admin access confirmed for:', user.email, 'with role:', user.role);
   
   const tabs = [
     { id: 'products', label: 'Produse', icon: Package },
@@ -213,6 +166,37 @@ function AdminPanel() {
         return null;
     }
   };
+
+  // Ieșirile timpurii stau după toate hook-urile (regula hook-urilor React).
+  // Show loading only briefly during initial session check
+  if (loading && !sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <div className="text-text-secondary">Verificare sesiune...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // If session is checked but no user, redirect to login
+  if (!user) {
+    console.log('❌ No user found in AdminPanel, redirecting to login...');
+    const currentPath = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(currentPath)}`} replace />;
+  }
+
+  // If user exists but is not admin, redirect to dashboard
+  if (!isAdmin) {
+    console.log('🚫 User is not admin, redirecting to dashboard. User:', {
+      email: user.email,
+      role: user.role,
+      isAdmin
+    });
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">

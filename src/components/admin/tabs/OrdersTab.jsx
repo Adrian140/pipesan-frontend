@@ -24,6 +24,9 @@ export default function OrdersTab() {
     try {
       const data = await apiClient.admin.getOrders({ q, status, limit: 100 });
       setOrders(data);
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || 'Eroare la încărcarea comenzilor');
     } finally {
       setLoading(false);
     }
