@@ -13,6 +13,7 @@ import { RouteSeo, NotFound } from './seo/RouteSeo';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
+import AnalyticsTracker from './components/AnalyticsTracker';
 
 // Pages
 import Home from './pages/Home';
@@ -139,6 +140,7 @@ function AppContent() {
       </main>
       <Footer />
       <CookieBanner />
+      <AnalyticsTracker />
     </>
   );
 }

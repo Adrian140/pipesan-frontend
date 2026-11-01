@@ -1,6 +1,7 @@
 import React from 'react';
 import { Wrench, Phone, Mail, MapPin, Award, Truck, Shield } from 'lucide-react';
 import PipeSanWordmark from './brand/PipeSanWordmark';
+import { openConsentSettings } from '../consent/consent';
 
 function Footer() {
   return (
@@ -76,6 +77,9 @@ function Footer() {
               <a href="/privacy-policy" className="block text-gray-400 hover:text-white transition-colors">
                 Privacy Policy
               </a>
+              <button type="button" onClick={openConsentSettings} className="block text-left text-gray-400 hover:text-white transition-colors">
+                Cookie settings
+              </button>
             </div>
           </div>
         </div>

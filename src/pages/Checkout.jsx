@@ -5,6 +5,7 @@ import {useCart} from '../contexts/CartContext';
 import {useAuth} from '../contexts/AuthContext';
 import {useLanguage} from '../contexts/LanguageContext';
 import {apiClient} from '../config/api';
+import { analyticsApi } from '../config/api/analytics';
 import {checkoutText,countryName} from '../translations/checkout';
 import {useShippingCountry} from '../domain/shippingCountry';
 import OrderEstimate from '../components/cart/OrderEstimate';
@@ -62,6 +63,7 @@ export default function Checkout(){
    const fingerprint=JSON.stringify(payload);
    let stored;try{stored=JSON.parse(sessionStorage.getItem('pipesan-checkout')||'null');}catch{/* Invalid saved request is replaced. */}
    if(!stored || stored.fingerprint!==fingerprint){stored={requestId:crypto.randomUUID(),fingerprint};sessionStorage.setItem('pipesan-checkout',JSON.stringify(stored));}
+   analyticsApi.track('begin_checkout',{items:payload.items.length,country});
    const response=await apiClient.orders.create({...payload,requestId:stored.requestId});
    const url=new URL(response.url);
    if(url.protocol!=='https:'||url.hostname!=='checkout.stripe.com')throw new Error(t.unexpected);

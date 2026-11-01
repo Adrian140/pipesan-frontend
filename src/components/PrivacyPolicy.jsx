@@ -192,13 +192,18 @@ function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold text-text-primary mb-4">8. Cookie-uri</h2>
             <p className="text-text-secondary mb-4">
-              Folosim cookie-uri pentru a îmbunătăți experiența dumneavoastră pe site:
+              Folosim două categorii de cookie-uri și stocare locală. Nu folosim cookie-uri de publicitate și nu
+              transmitem aceste date către terți (Google, Meta etc.).
             </p>
-            <ul className="list-disc list-inside text-text-secondary space-y-1">
-              <li><strong>Cookie-uri esențiale:</strong> Necesare pentru funcționarea site-ului</li>
-              <li><strong>Cookie-uri de performanță:</strong> Pentru analiza traficului (Google Analytics)</li>
-              <li><strong>Cookie-uri de marketing:</strong> Pentru publicitate personalizată (cu consimțământul dumneavoastră)</li>
+            <ul className="list-disc list-inside text-text-secondary space-y-1 mb-4">
+              <li><strong>Necesare</strong> (fără consimțământ, conform art. 5(3) din Directiva ePrivacy): coșul de cumpărături, sesiunea de autentificare și memorarea alegerii tale privind cookie-urile (<code>ps_consent</code>, 6 luni).</li>
+              <li><strong>Măsurarea audienței</strong> (doar cu consimțământul tău): un identificator de vizitator (<code>ps_vid</code>) și unul de sesiune (<code>ps_sid</code>), cu care înregistrăm paginile vizitate, sursa vizitei, tipul de dispozitiv și acțiunile din magazin (adăugare în coș, începerea comenzii). Datele sunt stocate de PipeSan în UE și păstrate cel mult 13 luni. Temei legal: consimțământul (art. 6(1)(a) GDPR).</li>
             </ul>
+            <p className="text-text-secondary">
+              Poți schimba sau retrage oricând consimțământul din linkul „Cookie settings” din subsolul paginii.
+              Retragerea șterge identificatorii de vizitator din browser. Păstrăm o evidență a alegerii tale (data,
+              versiunea bannerului și alegerea făcută), pentru a putea dovedi consimțământul.
+            </p>
           </section>
 
           {/* Contact */}

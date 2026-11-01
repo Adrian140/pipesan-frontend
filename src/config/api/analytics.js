@@ -1,70 +1,49 @@
 import { supabase } from '../supabase';
 import { getVisitorId, getSessionId } from '../../utils/visitor';
 
-async function ensureVisitor(visitorId, meta = {}) {
-  // best-effort: inserare "upsert light" (insert; dacă e duplicat, ignoră)
-  await supabase.from('analytics_visitors').insert({
-    id: visitorId,
-    first_source: meta.source || null,
-    first_medium: meta.medium || null,
-    device: meta.device || null,
-    country: meta.country || null,
-  }).then(()=>{}).catch(()=>{});
+function deviceType() {
+  const ua = navigator.userAgent || '';
+  if (/iPad|Tablet/i.test(ua)) return 'tablet';
+  if (/Mobi|Android|iPhone/i.test(ua)) return 'mobile';
+  return 'desktop';
 }
 
-async function ensureSession(sessionId, visitorId, landing) {
-  await supabase.from('analytics_sessions').insert({
-    id: sessionId, visitor_id: visitorId,
-    landing_path: landing?.path || window.location.pathname,
-    landing_utm_source: landing?.utm_source || null,
-    landing_utm_medium: landing?.utm_medium || null,
-    device: landing?.device || null,
-    country: landing?.country || null
-  }).then(()=>{}).catch(()=>{});
+// Sursa: utm_source, altfel domeniul de referință extern (fără căi/parametri).
+export function trafficSource(search = window.location.search, referrer = document.referrer) {
+  const params = new URLSearchParams(search);
+  let source = params.get('utm_source');
+  if (!source && referrer) {
+    try {
+      const host = new URL(referrer).hostname;
+      if (host && host !== window.location.hostname) source = host;
+    } catch { /* referrer invalid */ }
+  }
+  return { source: source || null, medium: params.get('utm_medium') || (source ? 'referral' : null) };
 }
 
+// Totul e best-effort: analytics nu are voie să strice navigarea sau coșul.
 export const analyticsApi = {
-  async pageview(extra = {}) {
-    const visitor_id = getVisitorId();
-    const session_id = getSessionId();
-
-    // inițializează best-effort
-    const params = new URLSearchParams(window.location.search);
-    const utm_source = params.get('utm_source') || document.referrer ? new URL(document.referrer).hostname : null;
-    const utm_medium = params.get('utm_medium') || null;
-
-    await ensureVisitor(visitor_id, {
-      source: utm_source, medium: utm_medium,
-      device: navigator.userAgent,
-    });
-    await ensureSession(session_id, visitor_id, {
-      path: window.location.pathname,
-      utm_source, utm_medium,
-      device: navigator.userAgent
-    });
-
-    // 1) pageviews
-    await supabase.from('analytics_pageviews').insert({
-      session_id, visitor_id,
-      path: window.location.pathname + window.location.search,
-      referrer: document.referrer || null,
-      duration_ms: null
-    });
-
-    // 2) event mirror (opțional util pt. funnel)
-    await supabase.from('analytics_events').insert({
-      session_id, visitor_id,
-      name: 'page_view',
-      props: extra || {}
-    });
+  async pageview(path = window.location.pathname + window.location.search) {
+    const visitor = getVisitorId();
+    const session = getSessionId();
+    if (!visitor || !session) return;
+    const { source, medium } = trafficSource();
+    let referrer = null;
+    try { referrer = document.referrer ? new URL(document.referrer).origin : null; } catch { /* referrer invalid */ }
+    await supabase
+      .rpc('pipesan_track_pageview', {
+        p_visitor: visitor, p_session: session, p_path: path, p_referrer: referrer,
+        p_source: source, p_medium: medium, p_device: deviceType(),
+      })
+      .then(() => {}, () => {});
   },
 
   async track(name, props = {}) {
-    const visitor_id = getVisitorId();
-    const session_id = getSessionId();
-    await supabase.from('analytics_events').insert({
-      session_id, visitor_id,
-      name, props
-    });
-  }
+    const visitor = getVisitorId();
+    const session = getSessionId();
+    if (!visitor || !session) return;
+    await supabase
+      .rpc('pipesan_track_event', { p_visitor: visitor, p_session: session, p_name: name, p_props: props })
+      .then(() => {}, () => {});
+  },
 };

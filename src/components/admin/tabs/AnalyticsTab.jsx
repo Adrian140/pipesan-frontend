@@ -22,6 +22,9 @@ export default function AnalyticsTab() {
     revenue7d: 0
   });
   const [visitorBreakdown, setVisitorBreakdown] = useState(() => ({ ...emptyVisitorBreakdown }));
+  const [recentVisits, setRecentVisits] = useState([]);
+  const [topPages, setTopPages] = useState([]);
+  const [consents, setConsents] = useState({ accepted: 0, rejected: 0 });
 
   useEffect(() => {
     const load = async () => {
@@ -43,8 +46,8 @@ export default function AnalyticsTab() {
           supabase
             .from('analytics_sessions')
             .select('visitor_id', { count: 'exact' })
-            .gte('created_at', sinceIso)
-            .order('created_at', { ascending: false })
+            .gte('started_at', sinceIso)
+            .order('started_at', { ascending: false })
             .limit(1000)
         ]);
 
@@ -58,6 +61,25 @@ export default function AnalyticsTab() {
         });
 
         await hydrateVisitorBreakdown(sinceDate, sessionsRes);
+
+        const [recentRes, pagesRes, consentRes] = await Promise.all([
+          supabase
+            .from('analytics_pageviews')
+            .select('id, ts, path, visitor_id, analytics_sessions(landing_utm_source, device)')
+            .order('ts', { ascending: false })
+            .limit(25),
+          supabase.from('analytics_pageviews').select('path').gte('ts', sinceIso).limit(5000),
+          supabase.from('pipesan_cookie_consents').select('analytics').gte('created_at', sinceIso).limit(5000),
+        ]);
+        setRecentVisits(recentRes?.data || []);
+        const counts = {};
+        for (const { path } of pagesRes?.data || []) {
+          const clean = String(path || '').split('?')[0] || '/';
+          counts[clean] = (counts[clean] || 0) + 1;
+        }
+        setTopPages(Object.entries(counts).sort((x, y) => y[1] - x[1]).slice(0, 8));
+        const rows = consentRes?.data || [];
+        setConsents({ accepted: rows.filter((r) => r.analytics).length, rejected: rows.filter((r) => !r.analytics).length });
       } catch (error) {
         console.error('[analytics] failed to load stats', error);
       } finally {
@@ -86,7 +108,7 @@ export default function AnalyticsTab() {
           try {
             const { data } = await supabase
               .from('analytics_visitors')
-              .select('id, created_at')
+              .select('id, first_seen_at')
               .in('id', chunk);
             if (data?.length) {
               visitorRecords.push(...data);
@@ -97,7 +119,7 @@ export default function AnalyticsTab() {
         }
 
         const sinceTime = sinceDate.getTime();
-        newVisitors = visitorRecords.filter((r) => new Date(r.created_at).getTime() >= sinceTime)
+        newVisitors = visitorRecords.filter((r) => new Date(r.first_seen_at).getTime() >= sinceTime)
           .length;
       }
 
@@ -178,25 +200,76 @@ export default function AnalyticsTab() {
         </div>
 
         <div className="bg-white border rounded-xl p-6 space-y-3 shadow-sm">
-          <h3 className="text-lg font-semibold">Observații</h3>
+          <h3 className="text-lg font-semibold">Consimțământ cookie-uri ({DAYS_WINDOW} zile)</h3>
           <p className="text-sm text-gray-600">
-            Vizualizezi visitorii care au activat sesiuni în ultimele {DAYS_WINDOW} zile. Următorul pas este integrarea funnel-urilor, surselor UTM și segmentelor B2B/B2C pentru a evalua conversiile clienților noi versus cei vechi.
+            Vizitele se măsoară doar pentru cei care acceptă „Măsurarea audienței” în bannerul de cookie-uri.
+            Cei care refuză nu apar în statistici.
           </p>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>
-              <span className="font-semibold">{visitorBreakdown.totalVisitors7d || '0'}</span> vizitatori unici
-            </li>
-            <li>
-              <span className="font-semibold">{visitorBreakdown.sessionCount7d || '0'}</span> sesiuni monitorizate
-            </li>
-            <li>
-              {visitorBreakdown.newVisitors7d === 0 && visitorBreakdown.returningVisitors7d === 0
-                ? 'Încă nu există date suficiente'
-                : `${visitorBreakdown.newVisitors7d} + ${visitorBreakdown.returningVisitors7d} = ${
-                    visitorBreakdown.totalVisitors7d
-                  } vizitatori` }
-            </li>
-          </ul>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-400">au acceptat</div>
+              <div className="text-2xl font-semibold text-emerald-700">{loading ? '…' : consents.accepted}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-400">au refuzat</div>
+              <div className="text-2xl font-semibold text-gray-500">{loading ? '…' : consents.rejected}</div>
+            </div>
+          </div>
+          {consents.accepted + consents.rejected > 0 && (
+            <div className="text-xs text-gray-500">
+              Rată de acceptare: {Math.round((consents.accepted / (consents.accepted + consents.rejected)) * 100)}%
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 bg-white border rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-3">Ultimele vizite</h3>
+          {recentVisits.length === 0 ? (
+            <p className="text-sm text-gray-500">{loading ? '…' : 'Nicio vizită înregistrată încă.'}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-gray-500 text-xs">
+                  <tr>
+                    <th className="py-1 pr-4">Când</th>
+                    <th className="py-1 pr-4">Pagina</th>
+                    <th className="py-1 pr-4">Sursa</th>
+                    <th className="py-1 pr-4">Dispozitiv</th>
+                    <th className="py-1">Vizitator</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {recentVisits.map((v) => (
+                    <tr key={v.id}>
+                      <td className="py-1.5 pr-4 whitespace-nowrap">{new Date(v.ts).toLocaleString('ro-RO')}</td>
+                      <td className="py-1.5 pr-4 font-mono text-xs break-all">{v.path}</td>
+                      <td className="py-1.5 pr-4">{v.analytics_sessions?.landing_utm_source || 'direct'}</td>
+                      <td className="py-1.5 pr-4">{v.analytics_sessions?.device || '—'}</td>
+                      <td className="py-1.5 font-mono text-xs text-gray-400">{String(v.visitor_id || '').slice(0, 8)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-3">Pagini populare ({DAYS_WINDOW} zile)</h3>
+          {topPages.length === 0 ? (
+            <p className="text-sm text-gray-500">{loading ? '…' : 'Încă nu există date.'}</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {topPages.map(([path, count]) => (
+                <li key={path} className="flex justify-between gap-3">
+                  <span className="font-mono text-xs break-all">{path}</span>
+                  <span className="font-semibold">{count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

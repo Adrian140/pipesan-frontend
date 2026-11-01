@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { useAuth } from './AuthContext';
 import { apiClient } from '../config/api';
 import { supabase } from '../config/supabase';
+import { analyticsApi } from '../config/api/analytics';
 
 const CartContext = createContext();
 
@@ -253,6 +254,7 @@ const CartProviderComponent = ({ children }) => {
       const existingQuantity=items.find(i=>i.productId===product.id)?.quantity||0;
       const max=enrichedProduct.manage_stock===false?99:Math.min(99,enrichedProduct.stockCount??0);
       if(existingQuantity+safeQty>max)throw new Error('Requested quantity exceeds available stock.');
+      analyticsApi.track('add_to_cart',{product_id:enrichedProduct.id,sku:enrichedProduct.sku,quantity:safeQty,price:Number(enrichedProduct.price)||0});
       if (user) {
         // Database flow with improved duplicate handling
         try {
