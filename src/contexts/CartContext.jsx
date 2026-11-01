@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { apiClient } from '../config/api';
 import { supabase } from '../config/supabase';
 import { analyticsApi } from '../config/api/analytics';
+import { cartError } from '../domain/cartErrors';
 
 const CartContext = createContext();
 
@@ -130,7 +131,7 @@ const CartProviderComponent = ({ children }) => {
                 weightGrams: product.weight_grams || 500,
                 weight_grams: product.weight_grams || 500,
                 // Update price if it changed
-                price: product.sale_price || product.price || item.price,
+                price: (Number(product.sale_price) > 0 && Number(product.sale_price) < Number(product.price)) ? Number(product.sale_price) : (Number(product.price) || item.price),
                 // Update images if they changed
                 image: Array.isArray(product.images) && product.images.length > 0 
                   ? product.images[0] 
@@ -235,7 +236,7 @@ const CartProviderComponent = ({ children }) => {
             ...product,...normalizeProduct(freshProduct),
             weight_grams: freshProduct.weight_grams || 500,
             weightGrams: freshProduct.weight_grams || 500,
-            price: freshProduct.sale_price || freshProduct.price || product.price,
+            price: (Number(freshProduct.sale_price) > 0 && Number(freshProduct.sale_price) < Number(freshProduct.price)) ? Number(freshProduct.sale_price) : (Number(freshProduct.price) || product.price),
             images: freshProduct.images || product.images,
             name: freshProduct.name || product.name,
             sku: freshProduct.sku || product.sku
@@ -250,10 +251,10 @@ const CartProviderComponent = ({ children }) => {
         console.warn('Could not fetch fresh product data, using provided data:', err);
       }
 
-      if(!enrichedProduct.inStock)throw new Error('Product is unavailable.');
+      if(!enrichedProduct.inStock)throw cartError('unavailable','Product is unavailable.');
       const existingQuantity=items.find(i=>i.productId===product.id)?.quantity||0;
       const max=enrichedProduct.manage_stock===false?99:Math.min(99,enrichedProduct.stockCount??0);
-      if(existingQuantity+safeQty>max)throw new Error('Requested quantity exceeds available stock.');
+      if(existingQuantity+safeQty>max)throw cartError('stock','Requested quantity exceeds available stock.');
       analyticsApi.track('add_to_cart',{product_id:enrichedProduct.id,sku:enrichedProduct.sku,quantity:safeQty,price:Number(enrichedProduct.price)||0});
       if (user) {
         // Database flow with improved duplicate handling
@@ -264,11 +265,10 @@ const CartProviderComponent = ({ children }) => {
           setIsOpen(true);
           console.log('✅ Successfully added to database cart');
         } catch (error) {
+          // Nu mai simulăm local: coșul contului ar arăta un produs care nu s-a salvat.
           console.error('❌ Error adding to database cart:', error);
-          // Fallback to localStorage for immediate user feedback
-          console.log('⚠️ Falling back to localStorage');
-          addItemToLocalStorage(enrichedProduct, safeQty, variant);
-          setIsOpen(true);
+          await loadCartFromDatabase();
+          throw cartError('generic', error?.message);
         }
       } else {
         // Guest flow with duplicate handling
@@ -303,8 +303,7 @@ const CartProviderComponent = ({ children }) => {
         console.log('✅ Successfully updated quantity in database');
       } catch (error) {
         console.error('❌ Error updating quantity in database:', error);
-        // Fallback to local update
-        updateQuantityInLocalStorage(itemId, qty);
+        await loadCartFromDatabase();
       }
     } else {
       updateQuantityInLocalStorage(itemId, qty);
@@ -328,7 +327,7 @@ const CartProviderComponent = ({ children }) => {
         console.log('✅ Successfully removed item from database');
       } catch (error) {
         console.error('❌ Error removing item from database:', error);
-        removeItemFromLocalStorage(itemId);
+        await loadCartFromDatabase();
       }
     } else {
       removeItemFromLocalStorage(itemId);

@@ -108,7 +108,7 @@ function About() {
                 Get Started Today
               </button>
               <a
-                href="https://wa.me/33675111618"
+                href="https://wa.me/33675116218"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-accent text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-accent-dark transition-colors"

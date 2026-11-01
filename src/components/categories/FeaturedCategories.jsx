@@ -11,7 +11,7 @@ function FeaturedCategories() {
       color: 'from-blue-50 to-white',
       iconColor: 'text-primary',
       linkColor: 'text-primary hover:text-primary-dark',
-      href: '/products?category=valves'
+      href: '/products?category=vannes'
     },
     {
       title: 'Pipe Fittings',
@@ -20,7 +20,7 @@ function FeaturedCategories() {
       color: 'from-copper/10 to-white',
       iconColor: 'text-copper',
       linkColor: 'text-copper hover:text-copper-dark',
-      href: '/products?category=fittings'
+      href: '/products'
     },
     {
       title: 'Flexible Hoses',
@@ -29,7 +29,7 @@ function FeaturedCategories() {
       color: 'from-steel/10 to-white',
       iconColor: 'text-steel',
       linkColor: 'text-steel hover:text-steel-dark',
-      href: '/products?category=hoses'
+      href: '/products?category=raccords-rapides-geka'
     }
   ];
 

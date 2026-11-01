@@ -3,7 +3,17 @@ import React from "react";
 export class ErrorBoundary extends React.Component {
   constructor(props){ super(props); this.state = { hasError:false }; }
   static getDerivedStateFromError(){ return { hasError:true }; }
-  componentDidCatch(err, info){ console.error("Boundary:", err, info); }
+  componentDidCatch(err, info){
+    console.error("Boundary:", err, info);
+    // După un deploy, un tab vechi cere fișiere JS care nu mai există: reîncărcăm o singură dată.
+    const chunk = /dynamically imported module|Failed to fetch|Loading chunk|Importing a module script failed/i.test(String(err?.message || err));
+    try {
+      if (chunk && !sessionStorage.getItem("pipesan-chunk-reload")) {
+        sessionStorage.setItem("pipesan-chunk-reload", "1");
+        window.location.reload();
+      }
+    } catch { /* fără sessionStorage, rămâne ecranul de eroare */ }
+  }
   render(){
     if (this.state.hasError) {
       return (

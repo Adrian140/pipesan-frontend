@@ -30,7 +30,7 @@ export const cartApi = {
           .from('cart_items')
           .select(`
             id, product_id, variant_id, quantity, created_at, updated_at,
-            products(name, sku, price, sale_price, images, weight_grams),
+            products(name, sku, price, sale_price, images, weight_grams, stock_quantity, manage_stock),
             product_variants(name, sku, price)
           `)
           .eq('user_id', userProfile.id) // ✅ PRIVACY: Only current user's items
@@ -46,9 +46,14 @@ export const cartApi = {
         }
 
         // Transform data for frontend
-        return (data || []).map((item) => {
+        // Un produs ascuns/dezactivat nu mai e vizibil (RLS) și vine ca null: îl sărim, nu golim tot coșul.
+        return (data || []).filter((item) => item.products).map((item) => {
           const productImages = Array.isArray(item.products.images) ? item.products.images : [];
-          const primaryImage = productImages[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400';
+          const primaryImage = productImages[0] || '/product-placeholder.svg';
+          const base = Number(item.products.price);
+          const sale = Number(item.products.sale_price);
+          // Același preț ca la plată: reducerea se aplică doar dacă e mai mică decât prețul de bază.
+          const unitPrice = sale > 0 && sale < base ? sale : base;
           
           return {
             id: item.id,
@@ -57,7 +62,8 @@ export const cartApi = {
               ? `${item.products.name} - ${item.product_variants.name}`
               : item.products.name,
             sku: item.product_variants?.sku || item.products.sku,
-            price: item.product_variants?.price || item.products.sale_price || item.products.price,
+            price: item.product_variants?.price || unitPrice,
+            maxQuantity: item.products.manage_stock === false ? 99 : Math.min(99, Math.max(0, Number(item.products.stock_quantity) || 0)),
             image: primaryImage,
             quantity: item.quantity,
             weightGrams: item.products.weight_grams || 500,

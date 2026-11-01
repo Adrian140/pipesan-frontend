@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 
 function Blog() {
@@ -99,10 +100,10 @@ function Blog() {
                 {/* Read More */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-text-light">{article.readTime}</span>
-                  <button className="text-primary font-medium hover:text-primary-dark transition-colors inline-flex items-center">
-                    Read More
+                  <Link to="/contact" className="text-primary font-medium hover:text-primary-dark transition-colors inline-flex items-center">
+                    Ask our team
                     <ArrowRight className="w-4 h-4 ml-1" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -117,15 +118,14 @@ function Blog() {
           <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
             Subscribe to our newsletter for the latest technical guides, product updates, and exclusive insights for European professionals.
           </p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-            <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors">
+          {/* Fără serviciu de newsletter: abonarea se cere pe email. */}
+          <div className="max-w-md mx-auto flex justify-center">
+            <a
+              href="mailto:contact@pipesan.eu?subject=Newsletter%20PipeSan"
+              className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors"
+            >
               Subscribe
-            </button>
+            </a>
           </div>
         </section>
       </div>

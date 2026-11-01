@@ -23,6 +23,17 @@ import { useAuth } from "../contexts/AuthContext";
 import { apiClient } from "../config/api";
 import { normalizeProduct } from "../utils/normalizeProduct";
 import { extractSpecs } from "../utils/productSpecs";
+import { useLanguage } from "../contexts/LanguageContext";
+import { cartErrorMessage } from "../domain/cartErrors";
+
+const PD = {
+  fr: { home: 'Accueil', products: 'Produits', specs: 'Caractéristiques', reviews: (n) => `${n} avis`, noReviews: 'Pas encore d’avis', priceIncl: 'Prix TTC, TVA incluse', features: 'Points clés', inStock: 'En stock', added: (n) => `${n} article(s) ajouté(s) au panier`, adding: 'Ajout…', outOfStock: 'Rupture de stock', add: (n) => `Ajouter ${n} au panier`, buyAmazon: 'Acheter sur Amazon', notAvailable: 'Pas encore disponible', favorites: 'Favoris', shipping: 'Expédié depuis notre entrepôt en France', returns: '14 jours pour changer d’avis', warranty: 'Garantie légale de 2 ans', description: 'Description du produit', customerReviews: 'Avis clients', verified: 'Achat vérifié', purchased: 'Acheté le', beFirst: 'Soyez le premier à donner votre avis sur ce produit.', outOf5: (r, n) => `${r} sur 5 (${n} avis)`, copied: 'Lien copié', notFound: 'Produit introuvable', locale: 'fr-FR' },
+  en: { home: 'Home', products: 'Products', specs: 'Specifications', reviews: (n) => `${n} reviews`, noReviews: 'No reviews yet', priceIncl: 'Price incl. VAT', features: 'Key features', inStock: 'In stock', added: (n) => `${n} item(s) added to cart`, adding: 'Adding…', outOfStock: 'Out of stock', add: (n) => `Add ${n} to cart`, buyAmazon: 'Buy on Amazon', notAvailable: 'Not available yet', favorites: 'Add to favorites', shipping: 'Ships from our warehouse in France', returns: '14 days to change your mind', warranty: '2-year legal warranty', description: 'Product description', customerReviews: 'Customer reviews', verified: 'Verified purchase', purchased: 'Purchased', beFirst: 'Be the first to share your experience with this product.', outOf5: (r, n) => `${r} out of 5 (${n} reviews)`, copied: 'Link copied', notFound: 'Product not found', locale: 'en-GB' },
+  it: { home: 'Home', products: 'Prodotti', specs: 'Specifiche', reviews: (n) => `${n} recensioni`, noReviews: 'Ancora nessuna recensione', priceIncl: 'Prezzo IVA inclusa', features: 'Caratteristiche principali', inStock: 'Disponibile', added: (n) => `${n} articolo/i aggiunto/i al carrello`, adding: 'Aggiunta…', outOfStock: 'Esaurito', add: (n) => `Aggiungi ${n} al carrello`, buyAmazon: 'Compra su Amazon', notAvailable: 'Non ancora disponibile', favorites: 'Preferiti', shipping: 'Spedito dal nostro magazzino in Francia', returns: '14 giorni per ripensarci', warranty: 'Garanzia legale di 2 anni', description: 'Descrizione del prodotto', customerReviews: 'Recensioni dei clienti', verified: 'Acquisto verificato', purchased: 'Acquistato il', beFirst: 'Sii il primo a recensire questo prodotto.', outOf5: (r, n) => `${r} su 5 (${n} recensioni)`, copied: 'Link copiato', notFound: 'Prodotto non trovato', locale: 'it-IT' },
+  de: { home: 'Start', products: 'Produkte', specs: 'Technische Daten', reviews: (n) => `${n} Bewertungen`, noReviews: 'Noch keine Bewertungen', priceIncl: 'Preis inkl. MwSt.', features: 'Wichtigste Merkmale', inStock: 'Auf Lager', added: (n) => `${n} Artikel zum Warenkorb hinzugefügt`, adding: 'Wird hinzugefügt…', outOfStock: 'Nicht auf Lager', add: (n) => `${n} in den Warenkorb`, buyAmazon: 'Bei Amazon kaufen', notAvailable: 'Noch nicht verfügbar', favorites: 'Merken', shipping: 'Versand aus unserem Lager in Frankreich', returns: '14 Tage Widerrufsrecht', warranty: '2 Jahre gesetzliche Gewährleistung', description: 'Produktbeschreibung', customerReviews: 'Kundenbewertungen', verified: 'Verifizierter Kauf', purchased: 'Gekauft am', beFirst: 'Bewerten Sie dieses Produkt als Erste(r).', outOf5: (r, n) => `${r} von 5 (${n} Bewertungen)`, copied: 'Link kopiert', notFound: 'Produkt nicht gefunden', locale: 'de-DE' },
+  es: { home: 'Inicio', products: 'Productos', specs: 'Especificaciones', reviews: (n) => `${n} opiniones`, noReviews: 'Aún no hay opiniones', priceIncl: 'Precio con IVA incluido', features: 'Características clave', inStock: 'En stock', added: (n) => `${n} artículo(s) añadido(s) al carrito`, adding: 'Añadiendo…', outOfStock: 'Agotado', add: (n) => `Añadir ${n} al carrito`, buyAmazon: 'Comprar en Amazon', notAvailable: 'Aún no disponible', favorites: 'Favoritos', shipping: 'Enviado desde nuestro almacén en Francia', returns: '14 días para cambiar de opinión', warranty: 'Garantía legal de 2 años', description: 'Descripción del producto', customerReviews: 'Opiniones de clientes', verified: 'Compra verificada', purchased: 'Comprado el', beFirst: 'Sé el primero en opinar sobre este producto.', outOf5: (r, n) => `${r} de 5 (${n} opiniones)`, copied: 'Enlace copiado', notFound: 'Producto no encontrado', locale: 'es-ES' },
+  ro: { home: 'Acasă', products: 'Produse', specs: 'Specificații', reviews: (n) => `${n} recenzii`, noReviews: 'Nicio recenzie încă', priceIncl: 'Preț cu TVA inclus', features: 'Caracteristici principale', inStock: 'În stoc', added: (n) => `${n} produs(e) adăugat(e) în coș`, adding: 'Se adaugă…', outOfStock: 'Stoc epuizat', add: (n) => `Adaugă ${n} în coș`, buyAmazon: 'Cumpără pe Amazon', notAvailable: 'Încă indisponibil', favorites: 'Favorite', shipping: 'Expediat din depozitul nostru din Franța', returns: '14 zile pentru retur', warranty: 'Garanție legală 2 ani', description: 'Descrierea produsului', customerReviews: 'Recenziile clienților', verified: 'Cumpărare verificată', purchased: 'Cumpărat pe', beFirst: 'Fii primul care lasă o recenzie pentru acest produs.', outOf5: (r, n) => `${r} din 5 (${n} recenzii)`, copied: 'Link copiat', notFound: 'Produs negăsit', locale: 'ro-RO' },
+};
 
 const COUNTRY_ORDER = ["FR", "DE", "IT", "ES", "BE", "NL", "PL", "SE", "UK", "OTHER"];
 const PH =
@@ -36,6 +47,8 @@ export default function ProductDetail() {
  const navPrefill = location.state?.prefill || null;
   const { addItem, isAddingItem } = useCart();
   const { user } = useAuth();
+  const { currentLanguage } = useLanguage();
+  const t = PD[currentLanguage] || PD.fr;
 
 const [product, setProduct] = useState(navPrefill || null);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -185,7 +198,7 @@ const writeCache = (p) => {
   }
   if (!product) {
     return (
-      <NotFound title="Product not found" />
+      <NotFound title={t.notFound} />
     );
   }
 
@@ -214,6 +227,7 @@ const writeCache = (p) => {
   } = product || {};
 
   const sku = skuRaw || "—";
+  const reviewCount = Number(product?.reviewCount ?? product?.total_reviews ?? review_count ?? 0);
   const hasDiscount =
     typeof sale_price === "number" &&
     sale_price > 0 &&
@@ -250,7 +264,7 @@ const writeCache = (p) => {
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Failed to add to cart. Please try again.');
+      alert(cartErrorMessage(error, currentLanguage));
     }
   };
 
@@ -270,7 +284,7 @@ const writeCache = (p) => {
       if (navigator.share) await navigator.share({ title: name, url });
       else {
         await navigator.clipboard.writeText(url);
-        alert("Link copied to clipboard");
+        alert(t.copied);
       }
     } catch {}
   };
@@ -303,7 +317,7 @@ const writeCache = (p) => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(t.locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -314,9 +328,9 @@ const writeCache = (p) => {
     <div className="min-h-screen bg-paper pt-8 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="mb-8 font-mono text-[11px] uppercase tracking-wider text-text-light truncate">
-          <Link to="/" className="hover:text-text-primary">Home</Link>
+          <Link to="/" className="hover:text-text-primary">{t.home}</Link>
           <span className="mx-2">/</span>
-          <Link to="/products" className="hover:text-text-primary">Products</Link>
+          <Link to="/products" className="hover:text-text-primary">{t.products}</Link>
           <span className="mx-2">/</span>
           <span className="text-text-secondary">{sku}</span>
         </nav>
@@ -359,7 +373,7 @@ const writeCache = (p) => {
 
             {specList.length > 0 && (
               <section aria-labelledby="specs-title" className="bg-white rounded-2xl border border-gray-200 p-6">
-                <h2 id="specs-title" className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">Specifications</h2>
+                <h2 id="specs-title" className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">{t.specs}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                   {specList.map(([k, v]) => (
                     <div key={k} className="flex justify-between gap-4 py-3 border-b border-gray-100 text-sm">
@@ -389,7 +403,7 @@ const writeCache = (p) => {
             <div className="flex items-center gap-2 mb-4">
               {renderStars(rating)}
               <span className="text-sm text-text-secondary">
-                {rating > 0 ? `${rating.toFixed(1)} (${review_count} reviews)` : "No reviews yet"}
+                {rating > 0 ? `${rating.toFixed(1)} (${t.reviews(reviewCount)})` : t.noReviews}
               </span>
             </div>
 
@@ -404,14 +418,14 @@ const writeCache = (p) => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-text-secondary">Price incl. VAT</p>
+              <p className="text-sm text-text-secondary">{t.priceIncl}</p>
             </div>
 
             {/* Key Features Section */}
             {bullet_points.length > 0 && (
               <section aria-labelledby="features-title" className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
                 <h2 id="features-title" className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary mb-4">
-                  Key Features
+                  {t.features}
                 </h2>
                 <div className="space-y-3">
                   {bullet_points.slice(0, 5).map((bp, i) => (
@@ -428,7 +442,7 @@ const writeCache = (p) => {
             <div className="mb-4">
               {inStock ? (
                 <span className="inline-flex items-center gap-2 text-emerald-700 text-sm font-semibold"><span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  In stock{manage_stock ? ` (${stock_quantity})` : ""}
+                  {t.inStock}{manage_stock ? ` (${stock_quantity})` : ""}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 text-text-secondary text-sm font-semibold"><span className="w-2 h-2 rounded-full bg-gray-400" />Out of stock</span>
@@ -440,7 +454,7 @@ const writeCache = (p) => {
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
                 <Check className="w-5 h-5 text-green-600 mr-2" />
                 <span className="text-green-800 font-medium">
-                  {quantity} {quantity === 1 ? 'item added' : 'items added'} to cart!
+                  {t.added(quantity)}
                 </span>
               </div>
             )}
@@ -489,14 +503,14 @@ const writeCache = (p) => {
                     {isAdding ? (
                       <>
                         <div className="w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        Adding to cart...
+                        {t.adding}
                       </>
                     ) : !inStock ? (
-                      'Out of stock'
+                      t.outOfStock
                     ) : (
                       <>
                         <ShoppingCart className="w-5 h-5" />
-                        Add {quantity} to cart
+                        {t.add(quantity)}
                       </>
                     )}
                   </div>
@@ -524,7 +538,7 @@ const writeCache = (p) => {
                       ? "bg-white border border-graphite-900 text-text-primary hover:bg-graphite-900 hover:text-white"
                       : "bg-gray-100 text-text-light cursor-not-allowed"
                   }`}
-                  title={selectedAmazonUrl ? "Buy on Amazon" : "Not available yet"}
+                  title={selectedAmazonUrl ? t.buyAmazon : t.notAvailable}
                 >
                   {selectedAmazonUrl ? "Amazon" : "N/A"}
                 </button>
@@ -534,7 +548,7 @@ const writeCache = (p) => {
                   className={`p-2.5 border rounded-lg transition-colors ${
                     isFav ? "bg-white border-red-300 text-red-500" : "bg-white border-gray-300 text-text-secondary hover:border-gray-400"
                   }`}
-                  title="Add to favorites"
+                  title={t.favorites}
                 >
                   <Heart className={`w-5 h-5 ${isFav ? "fill-red-500" : ""}`} />
                 </button>
@@ -553,15 +567,15 @@ const writeCache = (p) => {
             <div className="grid sm:grid-cols-3 gap-3 mb-8">
               <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
                 <Truck className="w-5 h-5 text-primary flex-shrink-0" />
-                <span>Free shipping for orders over €100</span>
+                <span>{t.shipping}</span>
               </div>
               <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
                 <RotateCcw className="w-5 h-5 text-primary flex-shrink-0" />
-                <span>30-day return policy</span>
+                <span>{t.returns}</span>
               </div>
               <div className="flex items-center gap-3 text-sm bg-white border border-gray-200 rounded-xl p-3">
                 <Shield className="w-5 h-5 text-primary flex-shrink-0" />
-                <span>2-year warranty included</span>
+                <span>{t.warranty}</span>
               </div>
             </div>
           </div>
@@ -571,7 +585,7 @@ const writeCache = (p) => {
         {!!(description && String(description).trim()) && (
           <section aria-labelledby="desc-title" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 mb-8">
             <h2 id="desc-title" className="text-2xl font-extrabold text-text-primary mb-6">
-              Product Description
+              {t.description}
             </h2>
             <div className="text-text-secondary leading-relaxed max-w-4xl">
               <p className="whitespace-pre-line">{String(description)}</p>
@@ -583,13 +597,13 @@ const writeCache = (p) => {
         <section aria-labelledby="reviews-title" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h2 id="reviews-title" className="text-2xl font-extrabold text-text-primary">
-              Customer Reviews
+              {t.customerReviews}
             </h2>
             {reviews.length > 0 && (
               <div className="flex items-center gap-2">
                 {renderStars(rating)}
                 <span className="text-sm text-gray-600 ml-2">
-                  {rating.toFixed(1)} out of 5 ({review_count} reviews)
+                  {t.outOf5(rating.toFixed(1), reviewCount)}
                 </span>
               </div>
             )}
@@ -613,7 +627,7 @@ const writeCache = (p) => {
                           <h4 className="font-semibold text-text-primary">{review.customer_name}</h4>
                           {review.is_verified_purchase && (
                             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                              Verified Purchase
+                              {t.verified}
                             </span>
                           )}
                         </div>
@@ -622,7 +636,7 @@ const writeCache = (p) => {
                           <span className="text-sm text-gray-500 flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {review.purchase_date ? 
-                              `Purchased ${formatDate(review.purchase_date)}` : 
+                              `${t.purchased} ${formatDate(review.purchase_date)}` : 
                               formatDate(review.created_at)
                             }
                           </span>
@@ -642,10 +656,10 @@ const writeCache = (p) => {
                 <Star className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-500 mb-2">
-                No reviews yet
+                {t.noReviews}
               </h3>
               <p className="text-gray-400">
-                Be the first to share your experience with this product.
+                {t.beFirst}
               </p>
             </div>
           )}

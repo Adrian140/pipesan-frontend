@@ -340,7 +340,8 @@ const [showFilters, setShowFilters] = useState(false);
     fetchProducts();
   }, 250); // puțin mai scurt
   return () => clearTimeout(timeoutId);
-}, [filters.search, filters.category, filters.sortBy]);
+  // Căutarea se face local (pe cuvinte, inclusiv în descriere); serverul primește doar categoria.
+}, [filters.category, filters.sortBy]);
 
 const latestRequest = useRef(0);
 const fetchProducts = async () => {
@@ -352,7 +353,7 @@ const fetchProducts = async () => {
     const categorySlug = filters.category === ALL ? '' : filters.category;
 
     const data = await apiClient.products.getAll({
-      search: filters.search,
+      search: '',
       category: categorySlug,
       sortBy: filters.sortBy,
     });

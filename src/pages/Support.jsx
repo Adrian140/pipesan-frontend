@@ -643,7 +643,7 @@ function Support() {
               </h3>
               <p className="text-text-secondary mb-4">{t.liveChatDesc}</p>
               <a
-                href="https://wa.me/33675111618"
+                href="https://wa.me/33675116218"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors"
@@ -730,7 +730,7 @@ function Support() {
                 {t.contactTeam}
               </a>
               <a
-                href="https://wa.me/33675111618"
+                href="https://wa.me/33675116218"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-accent text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-accent-dark transition-colors"

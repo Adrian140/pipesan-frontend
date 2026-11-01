@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FileText, Download, Settings, Wrench, Info, CheckCircle } from 'lucide-react';
 import TechnicalDocuments from '../components/TechnicalDocuments';
 
@@ -171,9 +172,9 @@ function TechnicalSpecs() {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <button className="text-primary hover:text-primary-dark font-medium text-sm">
-                    Download PDF
-                  </button>
+                  <Link to="/contact" className="text-primary hover:text-primary-dark font-medium text-sm">
+                    Request the datasheet
+                  </Link>
                 </div>
             </div>
           ))}

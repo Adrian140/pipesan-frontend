@@ -100,6 +100,7 @@ function PasswordRecoveryRedirect() {
 }
 
 function AppContent() {
+  const routeKey = useLocation().pathname;
   return (
     <>
       <PasswordRecoveryRedirect />
@@ -107,6 +108,8 @@ function AppContent() {
       <Header />
       <SafeShoppingCart />
       <main>
+        {/* O pagină care cade nu mai strică tot site-ul; schimbarea paginii resetează eroarea. */}
+        <ErrorBoundary key={routeKey}>
         <React.Suspense fallback={<div className="min-h-[60vh]" />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -137,6 +140,7 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         </React.Suspense>
+        </ErrorBoundary>
       </main>
       <Footer />
       <CookieBanner />

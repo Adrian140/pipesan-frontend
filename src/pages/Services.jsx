@@ -4,7 +4,7 @@ import ServicesGrid from '../components/services/ServicesGrid';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import { useTranslation } from '../translations/index';
-import { apiClient } from '../config/api';
+import { supabase } from '../config/supabase';
 
 function Services() {
   const { t } = useTranslation();
@@ -17,8 +17,10 @@ function Services() {
 
   const fetchServices = async () => {
     try {
-      const data = await apiClient.admin.getServices();
-      setServices(data);
+      // Citire publică (RLS: doar serviciile active); API-ul de admin refuza vizitatorii.
+      const { data, error } = await supabase.from('services').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      setServices(data || []);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
@@ -51,7 +53,7 @@ function Services() {
               Contact Technical Team
             </button>
             <a
-              href="https://wa.me/33675111618"
+              href="https://wa.me/33675116218"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-accent text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-accent-dark transition-colors"

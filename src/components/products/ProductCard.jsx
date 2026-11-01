@@ -8,6 +8,7 @@ import { useCart } from "../../contexts/CartContext";
 import { apiClient } from "../../config/api";              // ⬅️ nou
 import { useLanguage } from "../../contexts/LanguageContext";
 import { extractSpecs } from "../../utils/productSpecs";
+import { cartErrorMessage } from "../../domain/cartErrors";
 
 const PH_400 =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='%23e5e7eb'/></svg>";
@@ -86,7 +87,7 @@ export default function ProductCard({ product }) {
       setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add item to cart. Please try again.");
+      alert(cartErrorMessage(error, currentLanguage));
     }
   };
 
@@ -114,6 +115,9 @@ export default function ProductCard({ product }) {
     stock_quantity: p.stock_quantity,
     amazon_links: p.amazon_links,
     description: p.description, // opțional
+    inStock: p.inStock,
+    slug: p.slug,
+    reviewCount: p.reviewCount,
   };
 
   const specs = extractSpecs(p.name);

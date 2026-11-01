@@ -243,7 +243,7 @@ function LoginForm() {
               </Link>{' '}
               or{' '}
               <a 
-                href="https://wa.me/33675111618" 
+                href="https://wa.me/33675116218" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-primary hover:text-primary-dark"

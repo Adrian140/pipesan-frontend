@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Package, CheckCircle, Euro, Clock, ArrowRight } from 'lucide-react';
 import { apiClient } from '../../config/api';
 
@@ -14,7 +15,7 @@ function ServicesGrid({ services: propServices, loading: propLoading }) {
     } else {
       fetchServices();
     }
-  }, []);
+  }, [propServices, propLoading]);
 
   const fetchServices = async () => {
     try {
@@ -91,9 +92,9 @@ function ServicesGrid({ services: propServices, loading: propLoading }) {
               <span className="text-sm text-text-light">{service.unit || ''}</span>
           </div>
           
-          <button className="w-full mt-4 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors">
+          <Link to="/contact" className="block text-center w-full mt-4 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors">
             Request Quote
-          </button>
+          </Link>
         </div>
       ))}
       

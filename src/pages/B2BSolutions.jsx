@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Building, Users, Truck, Calculator, FileText, Award, CheckCircle, ArrowRight } from 'lucide-react';
 
 function B2BSolutions() {
@@ -198,9 +199,9 @@ function B2BSolutions() {
                     <p className="text-2xl font-bold text-accent">€{totalSavings.toFixed(2)}</p>
                   </div>
                 </div>
-                <button className="bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors">
+                <Link to="/contact" className="inline-block bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors">
                   Request Official Quote
-                </button>
+                </Link>
               </div>
             </div>
           </div>

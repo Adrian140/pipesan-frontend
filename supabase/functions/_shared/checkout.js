@@ -8,9 +8,11 @@ export function formEncode(value,prefix='',out=new URLSearchParams()) {
   return out;
 }
 const STRIPE_LOCALES=['fr','en','it','de','es','ro'];
-export function stripeSessionPayload({checkout,order},customer,origin,locale,createAccount=false) {
+// Stripe's minimum is 30 min; the default 24h kept abandoned checkouts holding stock for a day.
+const CHECKOUT_TTL_SECONDS=30*60+60;
+export function stripeSessionPayload({checkout,order},customer,origin,locale,createAccount=false,now=Date.now()) {
   return {
-    mode:'payment',customer,client_reference_id:order.id,locale:STRIPE_LOCALES.includes(locale)?locale:'auto',
+    mode:'payment',expires_at:Math.floor(now/1000)+CHECKOUT_TTL_SECONDS,customer,client_reference_id:order.id,locale:STRIPE_LOCALES.includes(locale)?locale:'auto',
     payment_method_types:['card'],automatic_tax:{enabled:true},billing_address_collection:'required',
     customer_update:{address:'auto',name:'auto'},tax_id_collection:{enabled:true},
     line_items:checkout.items.map(item=>({quantity:item.quantity,price_data:{currency:'eur',unit_amount:Math.round(item.unitPrice*100),tax_behavior:'inclusive',product_data:{name:item.name.slice(0,250),metadata:{sku:item.sku}}}})),
@@ -60,13 +62,15 @@ export function backend(env,request=fetch){
 }
 
 // Creates the account a guest asked for, moves the paid order and its address onto it,
-// and emails a link to choose a password. An existing account with that email just gets the order.
+// and emails a link to choose a password. An email that already has an account is not linked:
+// the guest never proved they own it, so the order must not appear in someone else's account.
 export async function createGuestAccount({db,auth,orderId,siteUrl}){
  const [order]=await db(`orders?id=eq.${encodeURIComponent(orderId)}&select=customer_email,shipping_first_name,shipping_last_name,shipping_company,shipping_country,customer_phone`,null,'GET');
  if(!order?.customer_email)return {created:false};
  const created=await auth('admin/users',{email:order.customer_email,email_confirm:false,user_metadata:{first_name:order.shipping_first_name,last_name:order.shipping_last_name,company_name:order.shipping_company||'',phone:order.customer_phone||'',country:order.shipping_country}});
  if(!created.ok&&created.status!==422)throw new Error('Account could not be created');
+ if(!created.ok)return {created:false};
  await db('rpc/pipesan_link_guest_order',{target:orderId});
- if(created.ok)await auth(`recover?redirect_to=${encodeURIComponent(`${siteUrl}/reset-password`)}`,{email:order.customer_email});
+ await auth(`recover?redirect_to=${encodeURIComponent(`${siteUrl}/reset-password`)}`,{email:order.customer_email});
  return {created:created.ok};
 }

@@ -44,8 +44,15 @@ function Contact() {
     setBannerText('');
 
     try {
-      await apiClient.contact.send(formData);
-      setBannerOk(true);setBannerText(t('sentOk'));
+      if (import.meta.env.VITE_CONTACT_ENDPOINT) {
+        await apiClient.contact.send(formData);
+        setBannerOk(true);setBannerText(t('sentOk'));
+      } else {
+        // Fără serviciu de trimitere configurat, deschidem emailul vizitatorului cu mesajul completat.
+        const body = `${formData.message}\n\n—\n${formData.name}${formData.company ? ` · ${formData.company}` : ''}\n${formData.email}`;
+        window.location.href = `mailto:contact@pipesan.eu?subject=${encodeURIComponent(`[PipeSan] ${formData.subject || 'Contact'}`)}&body=${encodeURIComponent(body)}`;
+        setBannerOk(true);setBannerText(t('mailOpened'));
+      }
       setFormData({name:'',email:'',company:'',subject:'',message:''});
     } catch(error){
       setBannerOk(false);setBannerText(error.message || t('sentErr'));
@@ -205,7 +212,7 @@ function Contact() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <a
-                  href="https://wa.me/33675111618"
+                  href="https://wa.me/33675116218"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full bg-accent text-white py-4 px-6 rounded-lg font-semibold hover:bg-accent-dark transition-colors"
